@@ -1,0 +1,9 @@
+Flask==2.3.3
+Flask-SQLAlchemy==3.1.1
+Flask-Mail==0.9.1
+APScheduler==3.10.4
+pandas==3.0.1
+openpyxl==3.1.2
+xlsxwriter==3.1.2
+reportlab==4.2.2
+pywebview==5.1

@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+venv/
+
+# Local database and runtime data
+database.db
+uploads/
+backups/
+
+# Build and release artifacts
+artifacts/
+build/
+dist/
+dist-installer/
+*.spec.bak
+
+# Temporary files
+.tmp-pip/
+*.log
+
+# IDE
+.vscode/

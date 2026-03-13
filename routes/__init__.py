@@ -1,0 +1,28 @@
+# ===========================================
+# routes/__init__.py - Centralizador de Rotas
+# ===========================================
+
+from .clientes_routes import clientes_bp
+from .ordens_routes import ordens_bp
+from .fluxo_routes import fluxo_bp
+from .profissionais_routes import profissionais_bp
+from .config_routes import config_bp
+from .export_routes import export_bp
+from .relatorios_routes import relatorios_bp
+from .paginas_routes import paginas_bp
+
+# Lista de todos os blueprints para registrar no app.py
+blueprints = [
+    clientes_bp,
+    ordens_bp,
+    fluxo_bp,
+    profissionais_bp,
+    config_bp,
+    export_bp,
+    relatorios_bp,
+    paginas_bp
+]
+
+print(f"Blueprints carregados: {len(blueprints)}")
+for bp in blueprints:
+    print(f"   - {bp.name}")

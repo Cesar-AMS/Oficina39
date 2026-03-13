@@ -1,0 +1,545 @@
+/* =========================================== */
+/* ===== VISUALIZAR ORDEM DE SERVIÇO ========= */
+/* ===== pages/visualizar-os.css ============= */
+/* =========================================== */
+
+/* =========================================== */
+/* ===== LAYOUT GERAL ======================== */
+/* =========================================== */
+
+.pagina-visualizar-os {
+    background: var(--bg-body);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.visualizar-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* =========================================== */
+/* ===== CABEÇALHO DUPLO (PADRÃO) ============ */
+/* =========================================== */
+
+.cabecalho-duplo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+    background: var(--bg-card);
+    padding: 20px 25px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+}
+
+.titulo-visualizar {
+    font-size: 2rem;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.subtitulo-visualizar {
+    margin: 5px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.acoes-visualizar {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* =========================================== */
+/* ===== BOTÕES PADRÃO ======================= */
+/* =========================================== */
+
+.btn-editar {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.btn-editar:hover {
+    background: var(--success-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+}
+
+/* =========================================== */
+/* ===== CARDS DE INFORMAÇÃO ================= */
+/* =========================================== */
+
+.info-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+}
+
+.info-card h3 {
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.info-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    background: var(--bg-hover);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+/* =========================================== */
+/* ===== TABELAS PADRÃO ====================== */
+/* =========================================== */
+
+.tabela-section {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid var(--border);
+}
+
+.tabela-titulo {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 15px;
+}
+
+.tabela-visualizar {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabela-visualizar th {
+    background: var(--secondary);
+    color: white;
+    padding: 12px 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.tabela-visualizar td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.tabela-visualizar tbody tr:nth-child(even) {
+    background: var(--bg-hover);
+}
+
+.tabela-visualizar tbody tr:hover {
+    background: rgba(196,69,54,0.05);
+}
+
+.tabela-visualizar td:last-child {
+    text-align: right;
+    font-weight: 600;
+    color: var(--success);
+}
+
+/* =========================================== */
+/* ===== RESUMO DE VALORES =================== */
+/* =========================================== */
+
+.resumo-card {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    padding: 20px;
+    border-radius: var(--radius-lg);
+    margin: 20px 0;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.resumo-card,
+.resumo-card * {
+    color: white;
+}
+
+.resumo-item {
+    text-align: center;
+    min-width: 150px;
+}
+
+.resumo-item .label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.resumo-item .valor {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+/* =========================================== */
+/* ===== ASSINATURA ========================== */
+/* =========================================== */
+
+.assinatura-section {
+    margin-top: 40px;
+    padding: 20px;
+    border-top: 2px dashed var(--border);
+    text-align: center;
+}
+
+.linha-assinatura {
+    width: 80%;
+    height: 2px;
+    border-bottom: 2px solid var(--border);
+    margin: 0 auto 15px;
+}
+
+.texto-assinatura {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* =========================================== */
+/* ===== IMPRESSÃO OTIMIZADA ================= */
+/* =========================================== */
+
+@media print {
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    /* Elementos ocultos */
+    .cabecalho-duplo,
+    .acoes-visualizar,
+    .btn,
+    .btn-editar,
+    .toggle-switch,
+    .info-card h3 {
+        display: none !important;
+    }
+    
+    .visualizar-container {
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    
+    /* Cabeçalho impressão */
+    .print-header {
+        display: block;
+        background: #0a3147;
+        color: white;
+        padding: 15px;
+        border-radius: 8px 8px 0 0;
+        margin-bottom: 20px;
+    }
+    
+    .print-header h1 {
+        margin: 0 0 10px;
+        font-size: 24px;
+        color: white;
+    }
+    
+    .print-header p {
+        margin: 5px 0;
+        font-size: 12px;
+        color: #e9ecef;
+    }
+    
+    .print-header strong {
+        color: #c44536;
+    }
+    
+    .print-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 15px 0;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #c44536;
+        color: #0a3147;
+    }
+    
+    /* Cards impressão */
+    .info-card {
+        border: 1px solid #ddd;
+        margin-bottom: 15px;
+        padding: 10px;
+        page-break-inside: avoid;
+    }
+    
+    .info-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .info-item {
+        flex: 1 1 200px;
+    }
+    
+    .info-label {
+        font-size: 10px;
+        color: #666;
+    }
+    
+    .info-value {
+        background: #f5f5f5;
+        border: 1px solid #eee;
+        color: #333;
+        font-size: 12px;
+        padding: 5px 8px;
+    }
+    
+    /* Tabelas impressão */
+    .tabela-visualizar {
+        font-size: 11px;
+    }
+    
+    .tabela-visualizar th {
+        background: #0a3147 !important;
+        color: white !important;
+        padding: 6px;
+    }
+    
+    .tabela-visualizar td {
+        padding: 4px;
+        color: #333;
+    }
+    
+    /* Resumo impressão */
+    .resumo-card {
+        background: linear-gradient(135deg, #0a3147, #1a2e3f);
+        padding: 15px;
+        margin: 15px 0;
+        page-break-inside: avoid;
+    }
+    
+    .resumo-item .valor {
+        font-size: 1.5rem;
+    }
+    
+    /* Assinatura impressão */
+    .assinatura-section {
+        margin-top: 30px;
+        padding-top: 10px;
+    }
+    
+    .linha-assinatura {
+        border-bottom: 2px dashed #999;
+    }
+    
+    .texto-assinatura {
+        color: #666;
+    }
+    
+    .print-footer {
+        margin-top: 20px;
+        padding: 10px;
+        border-top: 2px solid #c44536;
+        text-align: center;
+        font-size: 10px;
+        color: #999;
+    }
+}
+
+/* =========================================== */
+/* ===== RESPONSIVIDADE ====================== */
+/* =========================================== */
+
+@media (max-width: 768px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .resumo-card {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .resumo-item {
+        width: 100%;
+    }
+    
+    .cabecalho-duplo {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .acoes-visualizar {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* =========================================== */
+/* ===== QR CODES PARA IMPRESSÃO ============= */
+/* =========================================== */
+
+/* Container dos QR codes */
+.qrcode-container-print {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    align-items: center;
+    margin-left: 20px;
+}
+
+/* Estilo das imagens QR code */
+.qrcode-img-print {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    background: white;
+    padding: 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* =========================================== */
+/* ===== IMPRESSÃO =========================== */
+/* =========================================== */
+
+@media print {
+    /* Mostrar o cabeçalho de impressão */
+    .cabecalho-oficina-print {
+        display: flex !important;
+        background: #0a3147;
+        color: white;
+        padding: 15px;
+        border-radius: 8px 8px 0 0;
+        margin-bottom: 20px;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    /* Logo na impressão */
+    .logo-container-print {
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+    }
+    
+    .logo-oficina-print {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    
+    /* Dados da empresa na impressão */
+    .dados-empresa-print {
+        flex: 1;
+    }
+    
+    .nome-empresa-print {
+        margin: 0 0 5px 0;
+        font-size: 18px;
+    }
+    
+    .info-item-print {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10px;
+        margin: 2px 0;
+    }
+    
+    .info-icon-print {
+        font-size: 10px;
+        min-width: 16px;
+    }
+    
+    /* QR codes na impressão - APARECEM AQUI! */
+    .qrcode-container-print {
+        display: flex !important;
+        gap: 5px;
+    }
+    
+    .qrcode-img-print {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+.timeline-status {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.timeline-item {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    background: var(--bg-hover);
+}
+
+.timeline-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.timeline-cabecalho span {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.timeline-detalhes {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.timeline-vazio {
+    color: var(--text-muted);
+    font-style: italic;
+}

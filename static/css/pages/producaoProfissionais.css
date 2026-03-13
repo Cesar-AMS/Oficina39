@@ -1,0 +1,240 @@
+.pagina-producao-profissionais {
+    --font-header-title: 1.75rem;
+    --font-header-subtitle: 0.98rem;
+    --font-section-title: 1.2rem;
+    --font-section-subtitle: 0.95rem;
+    --font-chip: 0.88rem;
+    --font-card-label: 0.86rem;
+    --font-card-value: 1.08rem;
+    --font-table-head: 0.9rem;
+    --font-table-body: 0.92rem;
+    background: var(--bg-body);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.producao-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.cabecalho-duplo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 25px;
+}
+
+.topo-relatorios-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 20px;
+}
+
+.titulo-relatorios-topo {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.titulo-pagina {
+    margin: 0;
+    font-size: var(--font-header-title);
+}
+
+.etiqueta-tela {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: var(--font-chip);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.45px;
+    margin-bottom: 10px;
+}
+
+.subtitulo-pagina {
+    margin: 5px 0 0;
+    color: var(--text-secondary);
+    font-size: var(--font-header-subtitle);
+}
+
+.acoes-cabecalho {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.filtros-card,
+.resumo-profissional-card,
+.periodo-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 18px;
+}
+
+.identificacao-relatorio-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 12px 16px;
+    margin-bottom: 18px;
+}
+
+.identificacao-texto {
+    color: var(--text-secondary);
+    font-size: var(--font-section-subtitle);
+}
+
+.filtros-grid {
+    display: flex;
+    gap: 15px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 220px;
+}
+
+.form-group-botao {
+    flex: 0;
+    min-width: 180px;
+}
+
+.resumo-profissional-card {
+    font-size: var(--font-section-subtitle);
+    margin: 12px 0;
+}
+
+.secao-titulo {
+    margin: 0 0 12px;
+    font-size: var(--font-section-title);
+}
+
+.secao-subtitulo {
+    margin: -4px 0 12px;
+    color: var(--text-secondary);
+    font-size: var(--font-section-subtitle);
+}
+
+.resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.resumo-grid > div {
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.resumo-grid span {
+    color: var(--text-secondary);
+    font-size: var(--font-card-label);
+}
+
+.resumo-grid strong {
+    color: var(--text-primary);
+    font-size: var(--font-card-value);
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.secao-etiqueta {
+    padding: 8px 12px;
+    font-weight: 700;
+    font-size: var(--font-section-subtitle);
+    color: var(--text-primary);
+    background: var(--bg-hover);
+    border-bottom: 1px solid var(--border);
+}
+
+.grid-operacional {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.tabela-servicos-periodo {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 860px;
+}
+
+.tabela-servicos-periodo th {
+    background: var(--secondary);
+    color: #fff;
+    padding: 10px;
+    text-align: left;
+    font-size: var(--font-table-head);
+}
+
+.tabela-servicos-periodo td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: var(--font-table-body);
+}
+
+.tabela-servicos-periodo th:last-child,
+.tabela-servicos-periodo td:last-child {
+    text-align: right;
+}
+
+.sem-dados {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 22px !important;
+}
+
+@media (max-width: 900px) {
+    .resumo-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .resumo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .acoes-cabecalho {
+        width: 100%;
+        justify-content: space-between;
+    }
+}

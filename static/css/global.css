@@ -1,0 +1,450 @@
+/* =========================================== */
+/* ===== GLOBAL.CSS - PADRÃO OFICINA 39 ====== */
+/* =========================================== */
+
+/* =========================================== */
+/* ===== VARIÁVEIS DO TEMA =================== */
+/* =========================================== */
+
+:root {
+    /* CORES PRINCIPAIS */
+    --primary: #c44536;
+    --primary-dark: #a33529;
+    --primary-light: #d65a4a;
+    --secondary: #0a3147;
+    --secondary-dark: #1a4a6f;
+    
+    /* CORES DE STATUS */
+    --success: #27ae60;
+    --success-dark: #1e7e34;
+    --danger: #e74c3c;
+    --danger-dark: #a71d2a;
+    --danger-hover: #c0392b;
+    --warning: #f39c12;
+    --info: #3498db;
+    
+    /* TEXTOS - CLARO */
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+    --text-light: #ffffff;
+    
+    /* FUNDOS - CLARO */
+    --bg-body: #f5f5f5;
+    --bg-card: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-hover: #f0f0f0;
+    --bg-overlay: rgba(0, 0, 0, 0.5);
+    
+    /* BORDAS E RAIOS */
+    --border: #dddddd;
+    --radius-sm: 4px;
+    --radius-lg: 8px;
+    
+    /* ESPAÇAMENTOS */
+    --space-xs: 5px;
+    --space-sm: 10px;
+    --space-md: 15px;
+    --space-lg: 20px;
+    --space-xl: 30px;
+}
+
+/* =========================================== */
+/* ===== TEMA ESCURO ========================= */
+/* =========================================== */
+
+[data-theme="dark"] {
+    /* TEXTOS - ESCURO */
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-muted: #999999;
+    --text-light: #ffffff;
+    
+    /* FUNDOS - ESCURO */
+    --bg-body: #1a1a1a;
+    --bg-card: #2d2d2d;
+    --bg-secondary: #3d3d3d;
+    --bg-hover: #4d4d4d;
+    --bg-overlay: rgba(0, 0, 0, 0.7);
+    
+    /* BORDAS */
+    --border: #444444;
+}
+
+/* =========================================== */
+/* ===== RESET GERAL ========================= */
+/* =========================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: var(--bg-body);
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* =========================================== */
+/* ===== TOGGLE SWITCH (TEMA) ================ */
+/* =========================================== */
+
+.toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle-switch input {
+    display: none;
+}
+
+.toggle-label {
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    background: #ccc;
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.toggle-label::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+.toggle-switch input:checked + .toggle-label {
+    background: var(--primary);
+}
+
+.toggle-switch input:checked + .toggle-label::after {
+    transform: translateX(26px);
+}
+
+.tema-status {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* =========================================== */
+/* ===== BOTÕES PADRÃO ======================= */
+/* =========================================== */
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(196,69,54,0.3);
+}
+
+.btn-secondary {
+    background: var(--secondary);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: var(--secondary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(10,49,71,0.3);
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-voltar {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-voltar:hover {
+    background: var(--primary-dark);
+}
+
+/* =========================================== */
+/* ===== CARDS PADRÃO ======================== */
+/* =========================================== */
+
+.card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* =========================================== */
+/* ===== TABELAS PADRÃO ====================== */
+/* =========================================== */
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: var(--secondary);
+    color: white;
+    padding: 12px 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+tr:nth-child(even) {
+    background: var(--bg-hover);
+}
+
+tr:hover {
+    background: rgba(196,69,54,0.05);
+}
+
+/* =========================================== */
+/* ===== FORMULÁRIOS PADRÃO ================== */
+/* =========================================== */
+
+.form-group {
+    margin-bottom: var(--space-md);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+/* =========================================== */
+/* ===== CABEÇALHO DUPLO ===================== */
+/* =========================================== */
+
+.cabecalho-duplo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+    background: var(--bg-card);
+    padding: 20px 25px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* =========================================== */
+/* ===== BADGES ============================== */
+/* =========================================== */
+
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.badge-success {
+    background: var(--success);
+    color: white;
+}
+
+.badge-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.badge-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.badge-secondary {
+    background: var(--secondary);
+    color: white;
+}
+
+/* =========================================== */
+/* ===== LOADING ============================= */
+/* =========================================== */
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-overlay);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    background: var(--bg-card);
+    padding: 30px 40px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(196,69,54,0.2);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+/* =========================================== */
+/* ===== NOTIFICAÇÃO ========================= */
+/* =========================================== */
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.notificacao {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: var(--radius-sm);
+    color: white;
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 350px;
+}
+
+.notificacao.sucesso { background: var(--success); }
+.notificacao.erro { background: var(--danger); }
+
+.notificacao button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    margin-left: 10px;
+}
+
+/* =========================================== */
+/* ===== UTILITÁRIOS ========================= */
+/* =========================================== */
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.mt-1 { margin-top: var(--space-xs); }
+.mt-2 { margin-top: var(--space-sm); }
+.mt-3 { margin-top: var(--space-md); }
+.mt-4 { margin-top: var(--space-lg); }
+.mt-5 { margin-top: var(--space-xl); }
+
+.mb-1 { margin-bottom: var(--space-xs); }
+.mb-2 { margin-bottom: var(--space-sm); }
+.mb-3 { margin-bottom: var(--space-md); }
+.mb-4 { margin-bottom: var(--space-lg); }
+.mb-5 { margin-bottom: var(--space-xl); }
+
+/* =========================================== */
+/* ===== RESPONSIVIDADE ====================== */
+/* =========================================== */
+
+@media (max-width: 768px) {
+    .cabecalho-duplo {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .table-container {
+        font-size: 0.85rem;
+    }
+    
+    th, td {
+        padding: 8px 5px;
+    }
+}

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Oficina 39 - Configurações do Sistema</title>
+
+    <link rel="stylesheet" href="/static/css/global.css">
+    <link rel="stylesheet" href="./static/css/components/buttons.css">
+    <link rel="stylesheet" href="./static/css/components/forms.css">
+    <link rel="stylesheet" href="./static/css/components/tables.css">
+    <link rel="stylesheet" href="/static/css/pages/config.css">
+</head>
+<body class="pagina-config">
+    <div class="container config-container">
+        <header class="cabecalho-duplo">
+            <h1 class="titulo-config">⚙️ Configurações do Sistema</h1>
+            <div class="acoes-config">
+                <button class="btn btn-voltar" onclick="window.location.href='/'">↩ Voltar</button>
+            </div>
+        </header>
+
+        <section class="info-box">
+            <h3>🎨 Aparência Global</h3>
+            <p>Use um único botão para alternar o tema em todo o sistema.</p>
+            <button id="btnTemaGlobal" class="btn btn-salvar btn-compact" onclick="alternarTemaGlobal()">🎨 Tema Global</button>
+        </section>
+
+        <section class="info-box">
+            <h3>📧 Sistema de Envio Automático</h3>
+            <p>Configure os e-mails para envio automático de relatórios financeiros.</p>
+            <p><strong>Frequências:</strong> Diário (18h), Semanal (segunda às 8h), Mensal (dia 1 às 8h).</p>
+        </section>
+
+        <section class="form-section config-section" id="secao-profissionais">
+            <h3 class="section-titulo">👷 Cadastro de Profissionais</h3>
+            <div class="config-row">
+                <div class="form-group">
+                    <label for="nomeProfissionalCadastro">Nome do profissional</label>
+                    <input type="text" id="nomeProfissionalCadastro" class="filtro-input" placeholder="Ex: João Silva">
+                </div>
+                <div class="form-group">
+                    <label for="cnpjProfissionalCadastro">CNPJ</label>
+                    <input type="text" id="cnpjProfissionalCadastro" class="filtro-input" placeholder="00.000.000/0001-00" maxlength="18" inputmode="numeric">
+                </div>
+                <div class="form-group botao-exportar">
+                    <button class="btn btn-salvar" onclick="cadastrarProfissional()">➕ Cadastrar Profissional</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="tabela-historico">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>CNPJ</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaProfissionaisCadastro">
+                        <tr>
+                            <td colspan="3" class="text-center mensagem-carregando">Carregando profissionais...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="form-section config-section" id="secao-config-email">
+            <h3 class="section-titulo">📧 Configuração de E-mails</h3>
+            <div class="form-group">
+                <label for="emailCliente">E-mail do Cliente (remetente) *</label>
+                <input type="email" id="emailCliente" placeholder="contato@oficina.com.br" required>
+            </div>
+            <div class="form-group">
+                <label for="senhaApp">Senha de App (16 dígitos) *</label>
+                <input type="password" id="senhaApp" placeholder="abcdefghijklmnop" required>
+                <small class="texto-ajuda">Gerada no Google com verificação em duas etapas.</small>
+            </div>
+            <div class="form-group">
+                <label for="emailContador">E-mail do Contador (destinatário) *</label>
+                <input type="email" id="emailContador" placeholder="contador@escritorio.com.br" required>
+            </div>
+            <div class="form-group">
+                <label for="profissionalEnvioAuto">Profissional para envio automático ao contador</label>
+                <select id="profissionalEnvioAuto" class="filtro-input">
+                    <option value="">Todos os profissionais</option>
+                </select>
+            </div>
+            <div class="config-row">
+                <div class="form-group">
+                    <label for="frequenciaEnvio">Frequência de envio</label>
+                    <select id="frequenciaEnvio">
+                        <option value="">Selecione...</option>
+                        <option value="diario">📅 Diário (18h)</option>
+                        <option value="semanal">📆 Semanal (segunda 8h)</option>
+                        <option value="mensal">📊 Mensal (dia 1, 8h)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="diaEnvio">Dia do mês (mensal)</label>
+                    <input type="number" id="diaEnvio" min="1" max="28" value="1">
+                </div>
+            </div>
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="envioAtivo" checked>
+                <label for="envioAtivo">Ativar envio automático de relatórios</label>
+            </div>
+            <div class="button-group alinhar-esquerda">
+                <button class="btn btn-salvar" onclick="salvarConfig()">💾 Salvar Configurações</button>
+            </div>
+        </section>
+
+
+        <section class="form-section config-section" id="secao-backup">
+            <h3 class="section-titulo">💾 Backup e Exportação de Dados</h3>
+            <div class="config-row">
+                <div class="form-group">
+                    <label for="tipoExportacao">Tipo de exportação</label>
+                    <select id="tipoExportacao">
+                        <option value="completo">📦 Banco completo (.db)</option>
+                        <option value="clientes">👤 Apenas clientes</option>
+                        <option value="ordens">🔧 Apenas ordens</option>
+                        <option value="financeiro">💰 Apenas financeiro (entradas/saídas)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="formatoExportacao">Formato</label>
+                    <select id="formatoExportacao">
+                        <option value="db">🗄️ SQLite (.db)</option>
+                        <option value="csv">📊 CSV</option>
+                        <option value="xlsx">📗 Excel</option>
+                        <option value="json">📋 JSON</option>
+                    </select>
+                </div>
+                <div class="form-group botao-exportar">
+                    <button class="btn btn-salvar" onclick="exportarDados()">⬇️ Exportar</button>
+                </div>
+            </div>
+            <p class="texto-aviso"><small>⚠️ O backup completo (.db) contém todos os dados do sistema.</small></p>
+        </section>
+
+        <section class="form-section config-section" id="secao-importacao">
+            <h3 class="section-titulo">📂 Importação de Dados</h3>
+            <div class="config-row">
+                <div class="form-group">
+                    <label for="tipoImportacao">Tipo de importação</label>
+                    <select id="tipoImportacao">
+                        <option value="clientes">👤 Importar clientes</option>
+                        <option value="ordens">🔧 Importar ordens</option>
+                        <option value="saidas">💰 Importar saídas</option>
+                        <option value="completo">📦 Importar tudo (restaurar backup)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="formatoImportacao">Formato do arquivo</label>
+                    <select id="formatoImportacao">
+                        <option value="csv">📊 CSV</option>
+                        <option value="xlsx">📗 Excel</option>
+                        <option value="json">📋 JSON</option>
+                    </select>
+                </div>
+            </div>
+            <div class="file-upload">
+                <input type="file" id="arquivoImportar" accept=".csv,.xlsx,.json">
+                <button class="btn btn-salvar botao-importar" onclick="importarDados()">⬆️ Importar Dados</button>
+            </div>
+            <div id="resultadoImportacao" class="resultado-mensagem"></div>
+        </section>
+
+        <section class="form-section config-section" id="secao-historico">
+            <h3 class="section-titulo">📋 Últimos Relatórios Enviados</h3>
+            <div class="table-container">
+                <table class="tabela-historico">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Período</th>
+                            <th>Formato</th>
+                            <th>Remetente</th>
+                            <th>Destinatário</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaEnvios">
+                        <tr>
+                            <td colspan="6" class="text-center mensagem-carregando">Carregando histórico...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="info-box info-tecnica">
+            <h3>🔧 Informações Técnicas</h3>
+            <p><strong>Servidor SMTP:</strong> smtp.gmail.com (porta 587)</p>
+            <p><strong>Horário de envio:</strong> Diário 18h / Semanal 8h / Mensal 8h</p>
+            <p><strong>Banco de dados:</strong> SQLite</p>
+            <p><strong>Versão:</strong> 2.0.0</p>
+        </section>
+    </div>
+
+    <script src="/static/js/ui.js"></script>
+    <script src="/static/js/config.js"></script>
+    <script src="/static/js/tema.js"></script>
+</body>
+</html>

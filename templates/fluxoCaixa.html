@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Oficina 39 - PDV / Caixa do Dia</title>
+    
+    <!-- CSS GLOBAL -->
+    <link rel="stylesheet" href="/static/css/global.css">
+    
+    <!-- COMPONENTS -->
+    <link rel="stylesheet" href="/static/css/components/buttons.css">
+    <link rel="stylesheet" href="/static/css/components/forms.css">
+    <link rel="stylesheet" href="/static/css/components/tables.css">
+    <link rel="stylesheet" href="/static/css/components/filters.css">
+    <link rel="stylesheet" href="/static/css/components/modals.css">
+    
+    <!-- CSS ESPECÍFICO DA PÁGINA -->
+    <link rel="stylesheet" href="/static/css/pages/fluxoCaixa.css">
+    
+</head>
+
+<body class="pagina-fluxo-caixa">
+
+    <div class="container fluxo-container">
+
+        <!-- CABEÇALHO COM BOTÃO VOLTAR -->
+        <div class="cabecalho-duplo">
+            <div>
+                <h1 class="titulo-fluxo">🧾 PDV / Caixa do Dia</h1>
+                <p class="subtitulo-fluxo">Movimentação operacional diária (entradas e saídas)</p>
+            </div>
+            <div class="acoes-fluxo">
+                <button class="btn btn-voltar" onclick="window.location.href='/'">↩ Voltar</button>
+            </div>
+        </div>
+
+        <!-- CARD DE RESUMO -->
+        <div class="resumo-card">
+            <div class="resumo-item">
+                <div class="label">Entradas (OS)</div>
+                <div class="valor" id="totalEntradas">R$ 0,00</div>
+            </div>
+            <div class="resumo-item">
+                <div class="label">Saídas</div>
+                <div class="valor" id="totalSaidas">R$ 0,00</div>
+            </div>
+            <div class="resumo-item">
+                <div class="label">Saldo</div>
+                <div class="valor" id="saldo">R$ 0,00</div>
+            </div>
+        </div>
+
+        <!-- BOTÃO NOVA SAÍDA -->
+        <div class="nova-saida-container">
+            <div class="acoes-caixa-botoes">
+                <button class="btn btn-nova-saida" onclick="abrirModalSaida()">
+                    ➕ Nova Saída
+                </button>
+                <button class="btn btn-calculadora" onclick="abrirModalCalculadora()">
+                    🧮 Calculadora
+                </button>
+            </div>
+        </div>
+
+        <!-- TABELA DE SAÍDAS -->
+        <h3 class="tabela-titulo">📤 Saídas do Dia</h3>
+        <div class="table-container">
+            <table class="tabela-saidas">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Categoria</th>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaSaidas">
+                    <tr>
+                        <td colspan="5" class="text-center mensagem-carregando">Carregando...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TABELA DE ENTRADAS -->
+        <h3 class="tabela-titulo">📥 Entradas do Dia (Ordens Concluídas)</h3>
+        <div class="table-container">
+            <table class="tabela-entradas">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Cliente</th>
+                        <th>Serviço</th>
+                        <th>Valor</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaEntradas">
+                    <tr>
+                        <td colspan="5" class="text-center mensagem-carregando">Carregando...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- MODAL CALCULADORA -->
+    <div class="modal" id="modalCalculadora">
+        <div class="modal-content modal-calculadora">
+            <h2 class="modal-titulo">🧮 Calculadora</h2>
+
+            <div class="calculadora-display-wrap">
+                <input type="text" id="calcDisplay" class="calculadora-display" value="0" readonly>
+            </div>
+
+            <div class="calculadora-grid">
+                <button class="calc-btn calc-btn-func" onclick="limparCalculadora()">C</button>
+                <button class="calc-btn calc-btn-func" onclick="apagarUltimoCalculadora()">⌫</button>
+                <button class="calc-btn calc-btn-op" onclick="adicionarCalculadora('%')">%</button>
+                <button class="calc-btn calc-btn-op" onclick="adicionarCalculadora('/')">÷</button>
+
+                <button class="calc-btn" onclick="adicionarCalculadora('7')">7</button>
+                <button class="calc-btn" onclick="adicionarCalculadora('8')">8</button>
+                <button class="calc-btn" onclick="adicionarCalculadora('9')">9</button>
+                <button class="calc-btn calc-btn-op" onclick="adicionarCalculadora('*')">×</button>
+
+                <button class="calc-btn" onclick="adicionarCalculadora('4')">4</button>
+                <button class="calc-btn" onclick="adicionarCalculadora('5')">5</button>
+                <button class="calc-btn" onclick="adicionarCalculadora('6')">6</button>
+                <button class="calc-btn calc-btn-op" onclick="adicionarCalculadora('-')">−</button>
+
+                <button class="calc-btn" onclick="adicionarCalculadora('1')">1</button>
+                <button class="calc-btn" onclick="adicionarCalculadora('2')">2</button>
+                <button class="calc-btn" onclick="adicionarCalculadora('3')">3</button>
+                <button class="calc-btn calc-btn-op" onclick="adicionarCalculadora('+')">+</button>
+
+                <button class="calc-btn calc-btn-zero" onclick="adicionarCalculadora('0')">0</button>
+                <button class="calc-btn" onclick="adicionarCalculadora('.')">,</button>
+                <button class="calc-btn calc-btn-igual" onclick="calcularExpressao()">=</button>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-cancelar" onclick="fecharModalCalculadora()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NOVA SAÍDA (APENAS) -->
+    <div class="modal" id="modalSaida">
+        <div class="modal-content modal-saida">
+            <h2 class="modal-titulo">📤 Registrar Saída</h2>
+
+            <div class="form-group">
+                <label for="saidaDescricao">Descrição *</label>
+                <input type="text" id="saidaDescricao" placeholder="Ex: Compra de peças, pagamento fornecedor">
+            </div>
+
+            <div class="form-row modal-row">
+                <div class="form-group">
+                    <label for="saidaValor">Valor (R$) *</label>
+                    <input type="number" id="saidaValor" placeholder="0,00" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="saidaData">Data</label>
+                    <input type="date" id="saidaData">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="saidaCategoria">Categoria</label>
+                <select id="saidaCategoria">
+                    <option value="">Selecione...</option>
+                    <option value="Peças">🔧 Peças</option>
+                    <option value="Fornecedor">📦 Fornecedor</option>
+                    <option value="Aluguel">🏢 Aluguel</option>
+                    <option value="Salários">👥 Salários</option>
+                    <option value="Impostos">📄 Impostos</option>
+                    <option value="Ferramentas">🛠️ Ferramentas</option>
+                    <option value="Marketing">📢 Marketing</option>
+                    <option value="Dispesa casa">🏠 Dispesa casa</option>
+                    <option value="Outros">❓ Outros</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-cancelar" onclick="fecharModalSaida()">Cancelar</button>
+                <button class="btn btn-salvar" onclick="salvarSaida()">Salvar Saída</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="/static/js/ui.js"></script>
+    <script src="/static/js/fluxoCaixa.js"></script>
+    <script src="/static/js/tema.js"></script>
+</body>
+
+</html>

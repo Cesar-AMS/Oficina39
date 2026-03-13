@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Oficina 39 - Visualizar Ordem de Serviço</title>
+
+    <!-- CSS GLOBAL -->
+    <link rel="stylesheet" href="/static/css/global.css">
+
+    <!-- COMPONENTS -->
+    <link rel="stylesheet" href="/static/css/components/buttons.css">
+    <link rel="stylesheet" href="/static/css/components/forms.css">
+    <link rel="stylesheet" href="/static/css/components/tables.css">
+
+    <!-- CSS ESPECÍFICO DA PÁGINA -->
+    <link rel="stylesheet" href="/static/css/pages/visualizarOS.css">
+</head>
+
+<body class="pagina-visualizar-os">
+
+    <div class="container visualizar-container">
+
+        <!-- CABEÇALHO DA TELA -->
+        <div class="cabecalho-duplo">
+            <h1 class="titulo-visualizar">👁️ Visualizar Ordem de Serviço</h1>
+            <div class="acoes-visualizar">
+                <button class="btn btn-voltar" onclick="window.location.href='/consultarOS.html'">↩ Voltar</button>
+            </div>
+        </div>
+
+        <!-- CARD DE IDENTIFICAÇÃO -->
+        <div class="info-card">
+            <div class="info-id">
+                📌 Ordem de Serviço #<span id="ordemId"></span>
+            </div>
+            <div class="status-container">
+                Status: <span id="statusDisplay" class="status-badge"></span>
+            </div>
+        </div>
+
+        <!-- PROFISSIONAL RESPONSÁVEL -->
+        <div class="form-section">
+            <h3 class="section-titulo">👨‍🔧 Profissional Responsável</h3>
+            <input type="text" id="profissional_responsavel" readonly disabled class="campo-readonly">
+        </div>
+
+        <!-- DADOS DO CLIENTE -->
+        <div class="form-section">
+            <h3 class="section-titulo">👤 Dados do Cliente</h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="nome_cliente" readonly disabled class="campo-readonly">
+                </div>
+                <div class="form-group">
+                    <label>CPF</label>
+                    <input type="text" id="cpf" readonly disabled class="campo-readonly">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group endereco-full">
+                    <label>Endereço</label>
+                    <input type="text" id="endereco" readonly disabled class="campo-readonly">
+                </div>
+            </div>
+        </div>
+
+        <!-- DADOS DO VEÍCULO -->
+        <div class="form-section">
+            <h3 class="section-titulo">🚗 Dados do Veículo</h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Placa</label>
+                    <input type="text" id="placa" readonly disabled class="campo-readonly">
+                </div>
+                <div class="form-group">
+                    <label>Fabricante</label>
+                    <input type="text" id="fabricante" readonly disabled class="campo-readonly">
+                </div>
+                <div class="form-group">
+                    <label>Modelo</label>
+                    <input type="text" id="modelo" readonly disabled class="campo-readonly">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ano</label>
+                    <input type="text" id="ano" readonly disabled class="campo-readonly">
+                </div>
+                <div class="form-group">
+                    <label>Motor</label>
+                    <input type="text" id="motor" readonly disabled class="campo-readonly">
+                </div>
+                <div class="form-group">
+                    <label>Combustível</label>
+                    <input type="text" id="combustivel" readonly disabled class="campo-readonly">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Cor</label>
+                    <input type="text" id="cor" readonly disabled class="campo-readonly">
+                </div>
+                <div class="form-group">
+                    <label>Tanque (%)</label>
+                    <input type="text" id="tanque" readonly disabled class="campo-readonly">
+                </div>
+                <div class="form-group">
+                    <label>KM</label>
+                    <input type="text" id="km" readonly disabled class="campo-readonly">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Direção</label>
+                    <input type="text" id="direcao" readonly disabled class="campo-readonly">
+                </div>
+                <div class="form-group">
+                    <label>Ar Condicionado</label>
+                    <input type="text" id="ar" readonly disabled class="campo-readonly">
+                </div>
+            </div>
+        </div>
+
+        <!-- DIAGNÓSTICO -->
+        <div class="form-section">
+            <h3 class="section-titulo">🔬 Diagnóstico</h3>
+            <textarea id="diagnostico" rows="3" readonly disabled class="campo-diagnostico"></textarea>
+        </div>
+
+        <!-- SERVIÇOS -->
+        <div class="form-section">
+            <h3 class="section-titulo">🔧 Serviços Realizados</h3>
+            <div class="table-container">
+                <table class="tabela-visualizar">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-servicos">
+                        <tr>
+                            <td colspan="3" class="text-center mensagem-vazia">Nenhum serviço registrado</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PEÇAS -->
+        <div class="form-section">
+            <h3 class="section-titulo">⚙️ Peças Utilizadas</h3>
+            <div class="table-container">
+                <table class="tabela-visualizar">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descrição</th>
+                            <th>Qtd</th>
+                            <th>Valor Unit.</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-pecas">
+                        <tr>
+                            <td colspan="5" class="text-center mensagem-vazia">Nenhuma peça registrada</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RESUMO -->
+        <div class="resumo-card resumo-visualizar">
+            <div class="resumo-item">
+                <div class="label">Total Serviços</div>
+                <div class="valor" id="total-servicos">R$ 0,00</div>
+            </div>
+            <div class="resumo-item">
+                <div class="label">Total Peças</div>
+                <div class="valor" id="total-pecas">R$ 0,00</div>
+            </div>
+            <div class="resumo-item">
+                <div class="label">TOTAL GERAL</div>
+                <div class="valor total-destaque" id="total-geral">R$ 0,00</div>
+            </div>
+        </div>
+
+        <!-- ASSINATURA -->
+        <div class="form-section">
+            <h3 class="section-titulo">✍️ Assinatura do Consumidor</h3>
+            <input type="text" id="assinatura_cliente" readonly disabled class="campo-assinatura">
+        </div>
+
+        <!-- DATAS -->
+        <div class="form-section">
+            <h3 class="section-titulo">📅 Datas</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Data de Entrada</label>
+                    <input type="text" id="data_entrada" readonly disabled class="campo-readonly">
+                </div>
+                <div class="form-group">
+                    <label>Data de Emissão</label>
+                    <input type="text" id="data_emissao" readonly disabled class="campo-readonly">
+                </div>
+                <div class="form-group">
+                    <label>Data de Retirada</label>
+                    <input type="text" id="data_retirada" readonly disabled class="campo-readonly">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Forma de Pagamento</label>
+                    <input type="text" id="forma_pagamento" readonly disabled class="campo-readonly">
+                </div>
+            </div>
+        </div>
+
+        <!-- LINHA DO TEMPO DE STATUS -->
+        <div class="form-section">
+            <h3 class="section-titulo">🕒 Histórico de Status</h3>
+            <div id="timelineStatusOS" class="timeline-status">
+                Carregando histórico...
+            </div>
+        </div>
+
+        <!-- BOTÕES -->
+        <div class="button-group botoes-visualizar button-group-final">
+            <button class="btn btn-voltar btn-final" onclick="voltar()">↩ Voltar</button>
+            <button class="btn btn-salvar btn-final" id="botaoImprimirOS" onclick="imprimirOrdem()">🖨️ Imprimir</button>
+            <button class="btn btn-editar btn-final" onclick="editarOrdem()">✏️ Editar</button>
+        </div>
+
+    </div>
+
+    <script src="/static/js/ui.js"></script>
+    <script src="/static/js/tema.js"></script>
+    <script src="/static/js/visualizarOS.js"></script>
+</body>
+
+</html>

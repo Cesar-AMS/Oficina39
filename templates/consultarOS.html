@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Oficina 39 - Consultar Ordens de Serviço</title>
+    
+    <!-- CSS GLOBAL -->
+    <link rel="stylesheet" href="/static/css/global.css">
+    
+    <!-- COMPONENTS -->
+    <link rel="stylesheet" href="./static/css/components/buttons.css">
+    <link rel="stylesheet" href="./static/css/components/forms.css">
+    <link rel="stylesheet" href="./static/css/components/tables.css">
+    <link rel="stylesheet" href="./static/css/components/filters.css">
+    
+    <!-- CSS ESPECÍFICO DA PÁGINA -->
+    <link rel="stylesheet" href="/static/css/pages/consultarOS.css">
+</head>
+<body class="pagina-consultar-os">
+
+    <div class="container consultar-container">
+
+        <!-- CABEÇALHO COM BOTÃO VOLTAR -->
+        <div class="cabecalho-duplo">
+            <h1 class="titulo-consultar">🔍 Consultar Ordens de Serviço</h1>
+            <div class="acoes-consultar">
+                <button class="btn btn-voltar" onclick="window.location.href='/'">↩ Voltar</button>
+            </div>
+        </div>
+
+        <!-- SEÇÃO DE PESQUISA -->
+        <div class="form-section pesquisa-section">
+            <div class="filtros-os-grid filtros-os-grid-unico linha-busca-unica">
+                <div class="form-group campo-busca-principal">
+                    <label for="buscaCliente">Nome ou CPF</label>
+                    <div class="busca-inline">
+                        <input type="text" id="buscaCliente" class="filtro-input" placeholder="Digite o nome ou CPF do cliente">
+                        <button class="btn btn-buscar btn-filtro-acao btn-buscar-destaque btn-compact" onclick="buscarCliente()">🔎 Buscar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILTROS RÁPIDOS -->
+        <div class="resumo-os fila-diaria">
+            <div class="resumo-card-small">
+                <div class="numero" id="filaAbertas">0</div>
+                <div class="rotulo">Abertas (hoje)</div>
+            </div>
+            <div class="resumo-card-small">
+                <div class="numero" id="filaExecucao">0</div>
+                <div class="rotulo">Em execução (hoje)</div>
+            </div>
+            <div class="resumo-card-small">
+                <div class="numero" id="filaConcluidas">0</div>
+                <div class="rotulo">Concluídas (hoje)</div>
+            </div>
+            <div class="resumo-card-small">
+                <div class="numero" id="filaTotalDia">0</div>
+                <div class="rotulo">Total do dia</div>
+            </div>
+            <div class="resumo-card-small">
+                <div class="numero" id="filaSemProfissional">0</div>
+                <div class="rotulo">Sem profissional</div>
+            </div>
+        </div>
+
+        <div class="filtros-container">
+            <button class="btn-filtro ativo" onclick="filtrarPorStatus('todas')">📋 Todas</button>
+            <button class="btn-filtro" onclick="filtrarPorStatus('aguardando')">⏳ Aguardando</button>
+            <button class="btn-filtro" onclick="filtrarPorStatus('andamento')">🔄 Em Andamento</button>
+            <button class="btn-filtro" onclick="filtrarPorStatus('concluido')">✅ Concluídos</button>
+            <button class="btn-filtro" onclick="filtrarPorStatus('garantia')">🔧 Garantia</button>
+        </div>
+
+        <!-- TABELA DE ORDENS -->
+        <div class="table-container">
+            <table class="tabela-orcens">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Veículo</th>
+                        <th>Placa</th>
+                        <th>Profissional</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaOrdens">
+                    <tr>
+                        <td colspan="8" class="text-center mensagem-carregando">
+                            Carregando ordens...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- BOTÕES -->
+        <div class="button-group botoes-rodape">
+            <button class="btn btn-voltar" onclick="voltarInicio()">↩ Voltar ao Início</button>
+        </div>
+
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="/static/js/ui.js"></script>
+    <script src="/static/js/consultarOS.js"></script>
+    <script src="/static/js/tema.js"></script>
+</body>
+</html>

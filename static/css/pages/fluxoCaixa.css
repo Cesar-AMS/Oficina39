@@ -1,0 +1,679 @@
+/* =========================================== */
+/* ===== FLUXO DE CAIXA - VERSÃO OTIMIZADA === */
+/* ===== pages/fluxo-caixa.css =============== */
+/* =========================================== */
+
+/* =========================================== */
+/* ===== VARIÁVEIS LOCAIS ==================== */
+/* =========================================== */
+
+:root {
+    --cor-entrada: #27ae60;
+    --cor-saida: #e74c3c;
+    --cor-saida-hover: #c0392b;
+    --cor-destaque: #c44536;
+    --cor-modal-header: #0a3147;
+}
+
+/* =========================================== */
+/* ===== LAYOUT GERAL ======================== */
+/* =========================================== */
+
+.pagina-fluxo-caixa {
+    background: var(--bg-body);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.fluxo-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.titulo-fluxo {
+    font-size: 2rem;
+}
+
+.subtitulo-fluxo {
+    margin-top: 4px;
+    color: var(--text-secondary);
+}
+
+.acoes-fluxo {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.tema-status-fluxo {
+    margin-left: 10px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.btn-download {
+    background: var(--primary);
+    padding: 12px 24px;
+    font-size: 1rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-download:hover {
+    background: var(--primary-light);
+}
+
+.atalhos-caixa {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 18px;
+}
+
+/* =========================================== */
+/* ===== CARD DE RESUMO ====================== */
+/* =========================================== */
+
+.resumo-card {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    margin: var(--space-lg) 0;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.resumo-card,
+.resumo-card * {
+    color: white;
+}
+
+.resumo-item {
+    text-align: center;
+    min-width: 150px;
+}
+
+.resumo-item .valor {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-top: var(--space-xs);
+}
+
+.resumo-item .label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.valor-positivo {
+    color: #b5e0b5 !important;
+}
+
+.valor-negativo {
+    color: #ffb5a0 !important;
+}
+
+/* =========================================== */
+/* ===== BOTÃO NOVA SAÍDA ==================== */
+/* =========================================== */
+
+.nova-saida-container {
+    margin: 20px 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.acoes-caixa-botoes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    justify-content: flex-end;
+    width: 180px;
+}
+
+.btn-calculadora {
+    background: #6c5ce7;
+    border: none;
+    width: 100%;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white !important;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.btn-calculadora:hover {
+    background: #5a4ad1;
+    transform: translateY(-1px);
+}
+
+.btn-nova-saida {
+    background: var(--danger);
+    border: none;
+    width: 100%;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: var(--space-md);
+    color: white !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.btn-nova-saida:hover {
+    background: #7d2626;
+    transform: translateY(-1px);
+}
+
+/* =========================================== */
+/* ===== MODAL CALCULADORA =================== */
+/* =========================================== */
+
+.modal-calculadora {
+    max-width: 380px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+}
+
+.calculadora-display-wrap {
+    margin-bottom: 14px;
+}
+
+.calculadora-display {
+    width: 100%;
+    height: 52px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #f7f4ef;
+    color: #102a43;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: right;
+    padding: 0 12px;
+}
+
+.calculadora-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.calc-btn {
+    border: 1px solid #cfd8e3;
+    border-radius: var(--radius-sm);
+    height: 44px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #102a43 !important;
+    background: #f7f4ef;
+}
+
+.calc-btn:hover {
+    border-color: var(--primary);
+}
+
+.calc-btn-op {
+    background: #dce9f5;
+    color: #0a3147 !important;
+}
+
+.calc-btn-func {
+    background: #fde3df;
+    color: #8a2d21 !important;
+}
+
+.calc-btn-igual {
+    background: var(--success);
+    color: #fff !important;
+}
+
+.calc-btn-zero {
+    grid-column: span 2;
+}
+
+/* =========================================== */
+/* ===== TABELAS - VERSÃO PROPORCIONAL ======= */
+/* =========================================== */
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 20px 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.tabela-saidas,
+.tabela-entradas {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+}
+
+/* Cabeçalhos */
+.tabela-saidas th,
+.tabela-entradas th {
+    background-color: var(--cor-modal-header) !important;
+    color: white !important;
+    padding: 12px 8px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+}
+
+/* Células */
+.tabela-saidas td,
+.tabela-entradas td {
+    padding: 10px 8px !important;
+    border-bottom: 1px solid var(--border) !important;
+    vertical-align: middle !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* ===== LARGURAS PROPORCIONAIS ===== */
+
+/* Coluna 1 - Data (pequena) */
+.tabela-saidas th:nth-child(1),
+.tabela-saidas td:nth-child(1),
+.tabela-entradas th:nth-child(1),
+.tabela-entradas td:nth-child(1) { width: 9% !important; }
+
+/* Coluna 2 - Informação curta (Categoria/Cliente) */
+.tabela-saidas th:nth-child(2),
+.tabela-saidas td:nth-child(2),
+.tabela-entradas th:nth-child(2),
+.tabela-entradas td:nth-child(2) { width: 14% !important; }
+
+/* Coluna 3 - Descrição/Serviço (maior espaço) */
+.tabela-saidas th:nth-child(3),
+.tabela-saidas td:nth-child(3),
+.tabela-entradas th:nth-child(3),
+.tabela-entradas td:nth-child(3) { width: 32% !important; }
+
+/* Coluna 4 - Valor (médio) */
+.tabela-saidas th:nth-child(4),
+.tabela-saidas td:nth-child(4),
+.tabela-entradas th:nth-child(4),
+.tabela-entradas td:nth-child(4) { 
+    width: 12% !important;
+    text-align: right !important;
+    padding-right: 15px !important;
+}
+
+/* Coluna 5 - Ações/Pagamento (médio) */
+.tabela-saidas th:nth-child(5),
+.tabela-saidas td:nth-child(5),
+.tabela-entradas th:nth-child(5),
+.tabela-entradas td:nth-child(5) { width: 15% !important; }
+
+/* ===== CORES DOS VALORES ===== */
+.tabela-saidas td:nth-child(4) {
+    color: var(--cor-saida) !important;
+    font-weight: 700 !important;
+}
+
+.tabela-entradas td:nth-child(4) {
+    color: var(--cor-entrada) !important;
+    font-weight: 700 !important;
+}
+
+/* Alinhamento dos valores */
+.tabela-saidas th:nth-child(4),
+.tabela-entradas th:nth-child(4) {
+    text-align: right !important;
+    padding-right: 15px !important;
+}
+
+/* ===== LINHAS ALTERNADAS ===== */
+.tabela-saidas tbody tr:nth-child(even),
+.tabela-entradas tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+.tabela-saidas tbody tr:hover,
+.tabela-entradas tbody tr:hover {
+    background-color: rgba(196, 69, 54, 0.05) !important;
+}
+
+/* =========================================== */
+/* ===== AJUSTE DA ÚLTIMA COLUNA ============= */
+/* =========================================== */
+
+/* Centralizar o cabeçalho "Ações" */
+.tabela-saidas th:last-child {
+    text-align: center !important;
+}
+
+/* Centralizar o conteúdo da coluna de ações */
+.tabela-saidas td:last-child {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* Ajustar o botão excluir */
+.tabela-saidas .btn-excluir {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto !important;
+    width: auto !important;
+    min-width: 80px !important;
+    padding: 8px 16px !important;
+    font-size: 0.9rem !important;
+    border-radius: 20px !important;  /* Botão mais arredondado */
+    background-color: var(--cor-saida) !important;
+    color: white !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.tabela-saidas .btn-excluir:hover {
+    background-color: var(--cor-saida-hover) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+}
+
+.tabela-saidas .btn-excluir:active {
+    transform: translateY(0) !important;
+}
+
+/* Alinhar a coluna "Pagamento" das entradas */
+.tabela-entradas th:last-child,
+.tabela-entradas td:last-child {
+    text-align: center !important;
+}
+
+/* =========================================== */
+/* ===== TÍTULOS DAS TABELAS ================= */
+/* =========================================== */
+
+.tabela-titulo {
+    margin: 30px 0 15px 0;
+    color: var(--text-primary);
+}
+
+/* =========================================== */
+/* ===== MENSAGEM DE CARREGAMENTO ============ */
+/* =========================================== */
+
+.mensagem-carregando {
+    padding: 40px !important;
+    text-align: center !important;
+    color: var(--text-muted) !important;
+    font-style: italic !important;
+}
+
+/* =========================================== */
+/* ===== MODAL NOVA SAÍDA ==================== */
+/* =========================================== */
+
+.modal-saida {
+    max-width: 550px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 25px;
+}
+
+.modal-titulo {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-titulo::before {
+    content: '📤';
+    font-size: 1.5rem;
+}
+
+/* Campos do formulário */
+.modal-saida .form-group {
+    margin-bottom: 20px;
+}
+
+.modal-saida label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modal-saida input,
+.modal-saida select {
+    width: 100%;
+    height: 44px;
+    padding: 0 15px;
+    line-height: 1.2;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.modal-saida select {
+    padding-right: 36px;
+}
+
+.modal-saida input:focus,
+.modal-saida select:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(196, 69, 54, 0.1);
+}
+
+.modal-saida input:hover,
+.modal-saida select:hover {
+    border-color: var(--primary-light);
+}
+
+/* Linha com dois campos */
+.modal-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.modal-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Botões */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.modal-saida .btn-cancelar {
+    background: var(--danger);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+}
+
+.modal-saida .btn-salvar {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+}
+
+.modal-saida .btn-cancelar:hover {
+    background: var(--danger-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
+
+.modal-saida .btn-salvar:hover {
+    background: var(--success-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+}
+
+/* Tema escuro */
+[data-theme="dark"] .modal-saida {
+    background: #2d2d2d;
+}
+
+[data-theme="dark"] .modal-saida input,
+[data-theme="dark"] .modal-saida select {
+    background: #3d3d3d;
+    border-color: #555;
+    color: #fff;
+}
+
+[data-theme="dark"] .modal-saida label {
+    color: #ccc;
+}
+
+[data-theme="dark"] .modal-titulo {
+    color: #fff;
+}
+
+[data-theme="dark"] .calculadora-display {
+    background: #111821;
+    border-color: #3b4958;
+    color: #f5f7fa;
+}
+
+[data-theme="dark"] .calc-btn {
+    background: #1b2633;
+    border-color: #3b4958;
+    color: #f5f7fa !important;
+}
+
+[data-theme="dark"] .calc-btn-op {
+    background: #19354c;
+    color: #d7ecff !important;
+}
+
+[data-theme="dark"] .calc-btn-func {
+    background: #4a2523;
+    color: #ffd9d4 !important;
+}
+
+[data-theme="dark"] .calc-btn-igual {
+    background: #1d8a52;
+    color: #ffffff !important;
+}
+
+/* =========================================== */
+/* ===== RESPONSIVIDADE ====================== */
+/* =========================================== */
+
+@media (max-width: 768px) {
+    .btn-download {
+        width: 100%;
+    }
+
+    .atalhos-caixa {
+        justify-content: stretch;
+    }
+    
+    /* Cards de resumo */
+    .resumo-card {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .resumo-item {
+        width: 100%;
+    }
+    
+    /* Botões */
+    .nova-saida-container {
+        justify-content: center;
+    }
+
+    .acoes-caixa-botoes {
+        width: 100%;
+    }
+
+    .btn-calculadora,
+    .btn-nova-saida {
+        width: 100%;
+        float: none;
+    }
+    
+    /* Modais */
+    .modal-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .modal-saida .btn-cancelar,
+    .modal-saida .btn-salvar {
+        width: 100%;
+    }
+    
+    /* Tabelas */
+    .tabela-saidas,
+    .tabela-entradas {
+        font-size: 0.85rem;
+    }
+    
+    .tabela-saidas th,
+    .tabela-saidas td,
+    .tabela-entradas th,
+    .tabela-entradas td {
+        padding: 8px 5px !important;
+    }
+    
+    .btn-excluir {
+        padding: 4px 8px !important;
+        font-size: 0.75rem !important;
+        min-width: 50px !important;
+    }
+}

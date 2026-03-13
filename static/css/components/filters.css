@@ -1,0 +1,97 @@
+/* =========================================== */
+/* ===== FILTROS (TABS) ====================== */
+/* ===== components/filters.css ============== */
+/* =========================================== */
+
+.filtros-container {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+}
+
+.btn-filtro {
+    padding: var(--space-xs) var(--space-md);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--filtro-bg);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    color: var(--filtro-text) !important;
+    min-width: 100px;
+    text-align: center;
+}
+
+.btn-filtro:hover {
+    background: var(--filtro-hover-bg);
+    border-color: var(--accent);
+    color: var(--filtro-hover-text) !important;
+    transform: translateY(-2px);
+}
+
+.btn-filtro.ativo {
+    background: var(--filtro-ativo-bg);
+    border-color: var(--filtro-ativo-bg);
+    color: var(--filtro-ativo-text) !important;
+    font-weight: 600;
+}
+
+/* =========================================== */
+/* ===== PERÍODO SELECTOR (Fluxo Caixa) ====== */
+/* =========================================== */
+
+.periodo-selector {
+    display: flex;
+    gap: var(--space-sm);
+    margin: var(--space-lg) 0;
+    flex-wrap: wrap;
+}
+
+.btn-periodo {
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    flex: 1;
+    min-width: 80px;
+    color: var(--text-secondary) !important;
+}
+
+.btn-periodo:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    color: var(--text-primary) !important;
+}
+
+.btn-periodo.ativo {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white !important;
+}
+
+/* =========================================== */
+/* ===== RESPONSIVIDADE ====================== */
+/* =========================================== */
+
+@media (max-width: 768px) {
+    .filtros-container {
+        justify-content: center;
+    }
+    
+    .btn-filtro {
+        flex: 1;
+        min-width: auto;
+    }
+    
+    .periodo-selector {
+        flex-direction: column;
+    }
+    
+    .btn-periodo {
+        width: 100%;
+    }
+}

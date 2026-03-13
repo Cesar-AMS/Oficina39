@@ -1,0 +1,69 @@
+/* =========================================== */
+/* ===== TOGGLE SWITCH (TEMA CLARO/ESCURO) === */
+/* ===== components/toggle.css =============== */
+/* =========================================== */
+
+.toggle-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    height: 30px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.toggle-label {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    cursor: pointer;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    transition: .4s;
+}
+
+.toggle-label:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 3px;
+    bottom: 2px;
+    background-color: var(--accent);
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked + .toggle-label {
+    background-color: var(--bg-hover);
+}
+
+input:checked + .toggle-label:before {
+    transform: translateX(28px);
+}
+
+/* LABEL DO TOGGLE - CORRIGIDA */
+#temaAtual {
+    color: var(--text-primary) !important;
+    font-weight: 500;
+    min-width: 50px;
+    transition: color 0.3s;
+}
+
+/* Garantir visibilidade em ambos os temas */
+body.light-theme #temaAtual {
+    color: var(--text-primary) !important;  /* Texto escuro no tema claro */
+}
+
+body:not(.light-theme) #temaAtual {
+    color: var(--text-primary) !important;  /* Texto claro no tema escuro */
+}

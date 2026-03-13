@@ -1,0 +1,102 @@
+/* =========================================== */
+/* ===== TABELAS ============================= */
+/* ===== components/tables.css =============== */
+/* =========================================== */
+
+.table-container {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin: var(--space-lg) 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+th {
+    background: var(--primary-dark);
+    color: white;
+    font-weight: 500;
+    padding: var(--space-sm) var(--space-md);
+    text-align: left;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+td {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background: var(--bg-hover);
+}
+
+/* =========================================== */
+/* ===== STATUS BADGES ======================= */
+/* =========================================== */
+
+.status-badge {
+    padding: var(--space-xs) var(--space-md);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+    text-align: center;
+    min-width: 100px;
+    border: 1px solid transparent;
+}
+
+.status-aguardando {
+    background: #4a2a2a;
+    color: #ffb5a0 !important;
+    border-color: #8b3a3a;
+}
+
+.status-andamento {
+    background: #2a3a4a;
+    color: #b5d0ff !important;
+    border-color: #3a5a7a;
+}
+
+.status-concluido {
+    background: #1a3a2a;
+    color: #b5e0b5 !important;
+    border-color: #2a5a3a;
+}
+
+.status-garantia {
+    background: #3a2a4a;
+    color: #d5b5f0 !important;
+    border-color: #5a3a7a;
+}
+
+/* Tema claro - badges (ajustes automáticos via variáveis) */
+body.light-theme .status-aguardando {
+    background: #ffe0e0;
+    color: #a03232 !important;
+}
+
+body.light-theme .status-andamento {
+    background: #e0f0ff;
+    color: #1a4a7a !important;
+}
+
+body.light-theme .status-concluido {
+    background: #e0ffe0;
+    color: #1e5f3a !important;
+}
+
+body.light-theme .status-garantia {
+    background: #f0e0ff;
+    color: #5a3e6b !important;
+}

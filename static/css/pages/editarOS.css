@@ -1,0 +1,427 @@
+/* =========================================== */
+/* ===== EDITAR ORDEM DE SERVIÇO ============= */
+/* ===== pages/editar-os.css ================= */
+/* =========================================== */
+
+/* =========================================== */
+/* ===== LAYOUT GERAL ======================== */
+/* =========================================== */
+
+.pagina-editar-os {
+    background: var(--bg-body);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.editar-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* =========================================== */
+/* ===== CABEÇALHO DUPLO (PADRÃO) ============ */
+/* =========================================== */
+
+.cabecalho-duplo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+    background: var(--bg-card);
+    padding: 20px 25px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+}
+
+.titulo-editar {
+    font-size: 2rem;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.acoes-editar {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.tema-status-editar {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* =========================================== */
+/* ===== CARD DE IDENTIFICAÇÃO =============== */
+/* =========================================== */
+
+.info-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+}
+
+.info-id {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.info-id span {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* =========================================== */
+/* ===== SEÇÕES DO FORMULÁRIO ================ */
+/* =========================================== */
+
+.form-section {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+}
+
+.section-titulo {
+    font-size: 1.2rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 15px 0;
+}
+
+/* =========================================== */
+/* ===== CAMPOS DO FORMULÁRIO ================ */
+/* =========================================== */
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.campo-readonly {
+    width: 100%;
+    padding: 0 12px;
+    height: 36px;
+    background: var(--bg-hover);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: default;
+}
+
+.campo-diagnostico {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 1rem;
+    resize: vertical;
+}
+
+.campo-assinatura {
+    width: 100%;
+    padding: 0 12px;
+    height: 36px;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.campo-data {
+    width: 100%;
+    padding: 0 12px;
+    height: 36px;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.select-status {
+    width: 100%;
+    max-width: 300px;
+    padding: 0 12px;
+    height: 36px;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.endereco-full {
+    flex: 2;
+}
+
+/* =========================================== */
+/* ===== TABELAS ============================= */
+/* =========================================== */
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 15px;
+}
+
+.tabela-itens {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.tabela-itens th {
+    background: var(--secondary);
+    color: white;
+    padding: 12px 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.tabela-itens td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.tabela-itens tbody tr:nth-child(even) {
+    background: var(--bg-hover);
+}
+
+.tabela-itens tbody tr:hover {
+    background: rgba(196,69,54,0.05);
+}
+
+.tabela-itens input {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+/* =========================================== */
+/* ===== BOTÃO ADICIONAR ITEM ================ */
+/* =========================================== */
+
+.btn-adicionar-item {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.btn-adicionar-item:hover {
+    background: var(--success-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+}
+
+/* =========================================== */
+/* ===== RESUMO DE VALORES (PADRÃO) ========== */
+/* =========================================== */
+
+.resumo-card {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    padding: 20px;
+    border-radius: var(--radius-lg);
+    margin: 20px 0;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.resumo-card,
+.resumo-card * {
+    color: white !important;
+}
+
+.resumo-item {
+    text-align: center;
+    min-width: 150px;
+}
+
+.resumo-item .label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.resumo-item .valor {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.resumo-item .total-destaque {
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.resumo-editar {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+/* =========================================== */
+/* ===== BOTÕES DE AÇÃO ====================== */
+/* =========================================== */
+
+.button-group {
+    display: flex;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.botoes-editar {
+    justify-content: flex-end;
+}
+
+.btn-cancelar {
+    background: var(--danger);
+    color: white;
+    border: none;
+    padding: 0 14px;
+    height: 36px;
+    min-width: 150px;
+    border-radius: var(--radius-sm);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.btn-cancelar:hover {
+    background: var(--danger-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
+
+.btn-salvar {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 0 14px;
+    height: 36px;
+    min-width: 150px;
+    border-radius: var(--radius-sm);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.btn-salvar:hover {
+    background: var(--success-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+}
+
+/* =========================================== */
+/* ===== RESPONSIVIDADE ====================== */
+/* =========================================== */
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .form-group {
+        width: 100%;
+    }
+    
+    .resumo-card {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .resumo-item {
+        width: 100%;
+    }
+    
+    .cabecalho-duplo {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .acoes-editar {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .btn-cancelar,
+    .btn-salvar {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .select-status {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .titulo-editar {
+        font-size: 1.5rem;
+    }
+    
+    .info-id {
+        font-size: 1rem;
+    }
+}

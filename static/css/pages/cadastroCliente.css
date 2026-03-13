@@ -1,0 +1,178 @@
+/* =========================================== */
+/* ===== CADASTRO DE CLIENTE ================= */
+/* ===== pages/cadastro-cliente.css ========== */
+/* =========================================== */
+
+/* Estilos específicos para cadastro de clientes */
+.cliente-info {
+    background: var(--bg-hover);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    border: 1px solid var(--border);
+}
+
+.cliente-info h3 {
+    color: var(--accent);
+    margin-bottom: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+/* Grupo de campos específicos */
+.cliente-cpf,
+.cliente-telefone,
+.cliente-email {
+    position: relative;
+}
+
+/* Ícones nos campos (se houver) */
+.campo-icon {
+    position: relative;
+}
+
+.campo-icon i {
+    position: absolute;
+    left: var(--space-sm);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+.campo-icon input {
+    padding-left: 35px;
+}
+
+/* Endereço - agrupamento específico */
+.endereco-group {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-top: var(--space-md);
+    border: 1px solid var(--border);
+}
+
+.endereco-group h4 {
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* CEP com busca */
+.cep-container {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+.cep-container input {
+    flex: 1;
+}
+
+.btn-buscar-cep {
+    background: var(--primary-light);
+    border: none;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: white;
+    font-weight: 500;
+    white-space: nowrap;
+    height: 38px;
+}
+
+.btn-buscar-cep:hover {
+    background: var(--primary);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .cep-container {
+        flex-direction: column;
+    }
+    
+    .btn-buscar-cep {
+        width: 100%;
+    }
+    
+    .endereco-group {
+        padding: var(--space-sm);
+    }
+}
+/* Adicione ao final do pages/cadastro-cliente.css */
+
+.pagina-cadastro-cliente {
+    padding: 20px;
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg-body);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cliente-container {
+    width: 95%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 40px;
+}
+
+.titulo-pagina {
+    font-size: 2.5rem;
+}
+
+.acoes-cabecalho {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.tema-status {
+    margin-left: 10px;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.btn-voltar {
+    font-size: 0.84rem;
+    padding: 0 14px;
+    height: 36px;
+    min-width: 130px;
+}
+
+.section-titulo {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+}
+
+.form-row {
+    gap: 25px;
+}
+
+.form-group input {
+    font-size: 0.9rem;
+    padding: 0 12px;
+    height: 36px;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+}
+
+.endereco-full {
+    flex: 2;
+}
+
+.button-group:not(.button-group-final) {
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.button-group:not(.button-group-final) .btn {
+    font-size: 1.3rem;
+    padding: 15px 30px;
+}

@@ -1,0 +1,236 @@
+.pagina-config {
+    background: var(--bg-body);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.config-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.titulo-config {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.acoes-config {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.tema-status-config {
+    margin-left: 10px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.config-section,
+.info-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 18px;
+}
+
+.section-titulo {
+    margin: 0 0 14px;
+    font-size: 1.15rem;
+}
+
+.info-box h3 {
+    margin: 0 0 10px;
+    font-size: 1.05rem;
+}
+
+.info-box p {
+    margin: 0 0 8px;
+    color: var(--text-secondary);
+}
+
+.info-box p:last-child {
+    margin-bottom: 0;
+}
+
+.config-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.config-row:last-child {
+    margin-bottom: 0;
+}
+
+.config-row .form-group {
+    flex: 1;
+    min-width: 240px;
+}
+
+.botao-exportar {
+    flex: 0 0 auto;
+    min-width: 220px;
+}
+
+.botao-exportar .btn {
+    width: 100%;
+    min-height: 36px;
+}
+
+.filtro-input,
+.config-section input[type="email"],
+.config-section input[type="password"],
+.config-section input[type="number"],
+.config-section input[type="text"],
+.config-section input[type="date"],
+.config-section input[type="month"],
+.config-section select {
+    width: 100%;
+    min-height: 36px;
+    box-sizing: border-box;
+}
+
+.texto-ajuda {
+    display: block;
+    margin-top: 6px;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+.checkbox-wrapper {
+    margin: 10px 0 0;
+}
+
+.checkbox-wrapper label {
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 0.92rem;
+}
+
+.alinhar-esquerda {
+    justify-content: flex-start;
+    border-top: 0;
+    margin-top: 14px;
+    padding-top: 0;
+}
+
+.table-container {
+    border-radius: var(--radius-md);
+}
+
+.tabela-historico td,
+.tabela-historico th {
+    white-space: nowrap;
+}
+
+.tabela-historico td:nth-child(1),
+.tabela-historico th:nth-child(1) {
+    white-space: normal;
+}
+
+.mensagem-carregando {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.resultado-mensagem {
+    display: none;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    line-height: 1.35;
+}
+
+.success-message {
+    display: block;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    background: #1f8f50;
+    color: #fff;
+}
+
+.error-message {
+    display: block;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    background: #c0392b;
+    color: #fff;
+}
+
+.texto-aviso {
+    margin: 10px 0 0;
+    color: var(--text-muted);
+}
+
+.file-upload {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.file-upload input[type="file"] {
+    flex: 1;
+    min-width: 260px;
+}
+
+.botao-importar {
+    min-width: 170px;
+}
+
+.status-envio {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-sucesso {
+    background: #1a3a2a;
+    color: #b5e0b5;
+    border: 1px solid #2a5a3a;
+}
+
+.status-erro {
+    background: #4a2a2a;
+    color: #ffb5a0;
+    border: 1px solid #8b3a3a;
+}
+
+@media (max-width: 900px) {
+    .botao-exportar {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .config-row .form-group {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .file-upload {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .botao-importar {
+        width: 100%;
+    }
+}
+
+@media (max-width: 650px) {
+    .acoes-config {
+        width: 100%;
+        justify-content: space-between;
+    }
+}

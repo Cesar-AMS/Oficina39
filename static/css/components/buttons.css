@@ -1,0 +1,207 @@
+/* =========================================== */
+/* ===== BOTÕES GERAIS ======================= */
+/* ===== components/buttons.css ============== */
+/* =========================================== */
+
+.btn {
+    height: 36px;
+    padding: 0 14px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    border: 1px solid transparent;
+    min-width: 130px;
+    color: white !important;
+}
+
+.btn-salvar,
+.btn-criar-ordem,
+.btn-ordem-primary {
+    background: var(--success);
+}
+
+.btn-salvar:hover,
+.btn-criar-ordem:hover,
+.btn-ordem-primary:hover {
+    background: #154f30;
+}
+
+.btn-cancelar,
+.btn-ordem-secondary {
+    background: var(--danger);
+}
+
+.btn-cancelar:hover,
+.btn-ordem-secondary:hover {
+    background: #7d2626;
+}
+
+.btn-voltar {
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    color: white !important;
+}
+
+.btn-voltar:hover {
+    background: var(--primary);
+    border-color: var(--accent);
+}
+
+.btn-mostrar-todas {
+    background: var(--primary-light) !important;
+    color: white !important;
+    border: 1px solid var(--border);
+}
+
+.btn-mostrar-todas:hover {
+    background: var(--primary) !important;
+    border-color: var(--accent);
+}
+
+.btn-buscar {
+    background: var(--accent);
+    border: none;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.84rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: white !important;
+    min-width: 130px;
+}
+
+.btn-buscar:hover {
+    background: var(--accent-light);
+}
+
+button, .btn, a.btn, input[type="button"], input[type="submit"] {
+    color: white !important;
+}
+
+.button-group,
+.ordem-buttons {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border);
+}
+
+/* Padrão global para botões finais (Salvar/Cancelar/Imprimir etc.) */
+.button-group.button-group-final {
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 12px;
+}
+
+.button-group.button-group-final .btn.btn-final {
+    min-width: 150px;
+    height: 36px;
+    padding: 0 14px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+}
+
+/* Padrão compacto para botões de busca/ação rápida */
+.btn.btn-compact {
+    min-width: 150px;
+    height: 36px;
+    padding: 0 14px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+}
+
+/* =========================================== */
+/* ===== BOTÕES DE AÇÃO NA TABELA ============ */
+/* =========================================== */
+
+.acao-buttons {
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+}
+
+.btn-visualizar,
+.btn-editar,
+.btn-iniciar,
+.btn-finalizar,
+.btn-garantia {
+    padding: var(--space-xs) var(--space-sm);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white !important;
+}
+
+.btn-visualizar { background: var(--primary-light); }
+.btn-editar { background: var(--secondary); }
+.btn-iniciar { background: var(--warning); }
+.btn-finalizar { background: var(--success); }
+.btn-garantia { background: #5a3e6b; }
+
+.btn-visualizar:hover { background: var(--primary); }
+.btn-editar:hover { background: var(--primary-light); }
+.btn-iniciar:hover { background: #9a5a1a; }
+.btn-finalizar:hover { background: #154f30; }
+.btn-garantia:hover { background: #4a3158; }
+
+/* =========================================== */
+/* ===== RESPONSIVIDADE ====================== */
+/* =========================================== */
+
+@media (max-width: 768px) {
+    .button-group,
+    .ordem-buttons {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+
+    .button-group.button-group-final {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .button-group.button-group-final .btn.btn-final {
+        width: auto;
+        min-width: 130px;
+    }
+
+    .btn.btn-compact {
+        width: auto;
+        min-width: 130px;
+    }
+    
+    .acao-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-visualizar,
+    .btn-editar,
+    .btn-iniciar,
+    .btn-finalizar,
+    .btn-garantia {
+        width: 100%;
+        text-align: center;
+    }
+}

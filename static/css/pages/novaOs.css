@@ -1,0 +1,533 @@
+/* =========================================== */
+/* ===== NOVA ORDEM DE SERVIÇO =============== */
+/* ===== pages/nova-os.css =================== */
+/* =========================================== */
+
+/* =========================================== */
+/* ===== LAYOUT PRINCIPAL ==================== */
+/* =========================================== */
+
+.pagina-nova-os {
+    padding: 20px;
+    min-height: 100vh;
+    background: var(--bg-body);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nova-os-container {
+    width: 95%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 40px;
+}
+
+/* =========================================== */
+/* ===== CABEÇALHO DA PÁGINA ================= */
+/* =========================================== */
+
+/* Reutiliza o padrão de outras páginas */
+.titulo-nova-os {
+    font-size: 2.5rem;
+}
+
+.acoes-nova-os {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.tema-status-nova-os {
+    margin-left: 10px;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* =========================================== */
+/* ===== SEÇÃO DE EQUIPAMENTO ================ */
+/* =========================================== */
+
+.equipamento-section {
+    background: var(--bg-hover);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+}
+
+.equipamento-section h3 {
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+/* =========================================== */
+/* ===== BUSCA DE CLIENTE ==================== */
+/* =========================================== */
+
+.busca-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: var(--space-lg);
+}
+
+.campo-busca-cliente {
+    flex: 1;
+    position: relative;
+}
+
+.campo-busca-cliente input {
+    font-size: 0.9rem;
+    padding: 0 12px;
+    height: 36px;
+    width: 100%;
+}
+
+.sugestoes-cliente {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    z-index: 20;
+    max-height: 260px;
+    overflow-y: auto;
+    display: none;
+}
+
+.sugestao-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.sugestao-item:last-child {
+    border-bottom: none;
+}
+
+.sugestao-item:hover {
+    background: var(--bg-hover);
+}
+
+.sugestao-item .sugestao-cpf {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.botao-busca {
+    flex: 0;
+}
+
+.btn-buscar {
+    font-size: 0.84rem;
+    padding: 0 14px;
+    height: 36px;
+    min-width: 130px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.btn-buscar:hover {
+    background: var(--primary-dark);
+}
+
+/* =========================================== */
+/* ===== CAMPOS DO FORMULÁRIO ================ */
+/* =========================================== */
+
+.campo-cliente,
+.campo-veiculo {
+    font-size: 1.2rem;
+    padding: 15px;
+    background: var(--bg-hover);
+    width: 100%;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.endereco-full {
+    flex: 2;
+}
+
+/* =========================================== */
+/* ===== LISTA DE SERVIÇOS =================== */
+/* =========================================== */
+
+.servicos-lista {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin: var(--space-lg) 0;
+}
+
+/* Item da lista (serviço adicionado) */
+.servico-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+}
+
+.servico-item:last-child {
+    border-bottom: none;
+}
+
+.servico-item .descricao {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.servico-item .valor {
+    color: var(--success);
+    font-weight: 600;
+    text-align: right;
+}
+
+/* Botão remover */
+.servico-item .remover {
+    background: var(--danger);
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.servico-item .remover:hover {
+    background: #7d2626;
+    transform: scale(1.1);
+}
+
+/* Área para adicionar novo serviço */
+.adicionar-servico {
+    display: grid;
+    grid-template-columns: 3fr 1fr auto;
+    gap: var(--space-sm);
+    margin: var(--space-lg) 0;
+    padding: var(--space-md);
+    background: var(--bg-hover);
+    border-radius: var(--radius-md);
+}
+
+.btn-adicionar {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+    font-size: 1.2rem;
+}
+
+.btn-adicionar:hover {
+    background: #154f30;
+}
+
+/* =========================================== */
+/* ===== TABELAS ============================= */
+/* =========================================== */
+
+.tabela-servicos,
+.tabela-pecas {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.tabela-servicos th,
+.tabela-pecas th {
+    background: var(--secondary);
+    color: white;
+    padding: 12px;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.tabela-servicos td,
+.tabela-pecas td {
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.tabela-servicos input,
+.tabela-pecas input {
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 0 12px;
+    height: 36px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+/* Botão remover das tabelas */
+.btn-remover {
+    background: var(--danger);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.btn-remover:hover {
+    background: #7d2626;
+}
+
+.total-peca {
+    font-size: 1.1rem;
+    padding: 12px;
+    display: block;
+    font-weight: 600;
+    color: var(--success);
+    text-align: right;
+}
+
+/* =========================================== */
+/* ===== TOTAIS ============================== */
+/* =========================================== */
+
+.totais-container {
+    background: var(--bg-hover);
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    margin: var(--space-lg) 0;
+    border: 1px solid var(--border);
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) 0;
+    border-bottom: 1px dashed var(--border);
+}
+
+.total-row:last-child {
+    border-bottom: none;
+}
+
+.total-row .label {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.total-row .value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.total-final {
+    font-size: 1.5rem;
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* Resumo de valores (versão alternativa) */
+.resumo-valores {
+    background: var(--primary-dark);
+    padding: 25px;
+    border-radius: var(--radius-lg);
+    color: white;
+    font-size: 1.3rem;
+}
+
+.resumo-linha {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.valor-resumo {
+    font-weight: bold;
+    font-size: 1.4rem;
+}
+
+.total-geral {
+    font-size: 1.6rem;
+    border-top: 2px solid var(--border);
+    padding-top: 15px;
+    margin-top: 15px;
+}
+
+.valor-total {
+    font-weight: bold;
+}
+
+/* =========================================== */
+/* ===== OBSERVAÇÕES ========================= */
+/* =========================================== */
+
+.observacoes-area {
+    background: var(--bg-hover);
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    margin: var(--space-lg) 0;
+}
+
+.observacoes-area textarea {
+    min-height: 100px;
+    width: 100%;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+/* =========================================== */
+/* ===== BOTÕES FINAIS ======================= */
+/* =========================================== */
+
+.botoes-nova-os {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.botoes-nova-os .btn-acao-final {
+    height: 46px;
+    min-width: 190px;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0 20px;
+    border-radius: var(--radius-sm);
+    flex: 1;
+    text-align: center;
+}
+
+.botoes-nova-os .btn-imprimir {
+    white-space: nowrap;
+}
+
+/* =========================================== */
+/* ===== RODAPÉ ASSINATURA =================== */
+/* =========================================== */
+
+.rodape-assinatura {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 2px dashed var(--border);
+    text-align: center;
+}
+
+.linha-assinatura {
+    width: 80%;
+    height: 2px;
+    border-bottom: 2px solid var(--border);
+    margin: 0 auto 15px;
+}
+
+.texto-assinatura {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+/* =========================================== */
+/* ===== UTILITÁRIOS ========================= */
+/* =========================================== */
+
+.section-titulo {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* =========================================== */
+/* ===== RESPONSIVIDADE ====================== */
+/* =========================================== */
+
+@media (max-width: 992px) {
+    .titulo-nova-os {
+        font-size: 2.1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .busca-row {
+        flex-direction: column;
+    }
+    
+    .botao-busca {
+        width: 100%;
+    }
+    
+    .btn-buscar {
+        width: 100%;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .tabela-servicos,
+    .tabela-pecas {
+        font-size: 0.9rem;
+    }
+    
+    .tabela-servicos input,
+    .tabela-pecas input {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+    
+    .botoes-nova-os {
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+    
+    .adicionar-servico {
+        grid-template-columns: 1fr;
+    }
+    
+    .servico-item {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nova-os-container {
+        padding: 20px;
+    }
+}
