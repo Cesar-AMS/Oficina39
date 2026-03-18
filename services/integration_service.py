@@ -1,23 +1,9 @@
-import json
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote
-from urllib.request import Request, urlopen
 
+from integrations.cep_adapters import CEP_ADAPTERS
 from integrations.consulta_placa import normalizar_placa
-from integrations.viacep import endpoint_por_cep
+from integrations.placa_adapters import PLACA_ADAPTERS
 from repositories import cliente_repository, config_repository
-
-
-def _http_json(url, headers=None, method='GET', data=None, timeout=8):
-    request = Request(url, headers=headers or {}, method=method)
-    if data is not None:
-        payload = json.dumps(data).encode('utf-8')
-        request.add_header('Content-Type', 'application/json')
-    else:
-        payload = None
-    with urlopen(request, data=payload, timeout=timeout) as response:
-        charset = response.headers.get_content_charset() or 'utf-8'
-        return json.loads(response.read().decode(charset))
 
 
 def _config():
@@ -83,88 +69,23 @@ def consultar_cep(cep):
     erros = []
     for provedor in _ordem_provedores('cep'):
         try:
-            if provedor == 'viacep':
-                dados = _http_json(endpoint_por_cep(cep_limpo))
-                if dados.get('erro'):
-                    raise ValueError('CEP não encontrado.')
-                return {
-                    'fonte': 'viacep',
-                    'cep': dados.get('cep') or cep_limpo,
-                    'logradouro': dados.get('logradouro') or '',
-                    'bairro': dados.get('bairro') or '',
-                    'cidade': dados.get('localidade') or '',
-                    'estado': dados.get('uf') or '',
-                    'complemento': dados.get('complemento') or ''
-                }
-            if provedor == 'brasilapi':
-                dados = _http_json(f'https://brasilapi.com.br/api/cep/v1/{quote(cep_limpo)}')
-                return {
-                    'fonte': 'brasilapi',
-                    'cep': dados.get('cep') or cep_limpo,
-                    'logradouro': dados.get('street') or '',
-                    'bairro': dados.get('neighborhood') or '',
-                    'cidade': dados.get('city') or '',
-                    'estado': dados.get('state') or '',
-                    'complemento': ''
-                }
-            raise ValueError(f'Provedor de CEP "{provedor}" não implementado.')
+            adapter_cls = CEP_ADAPTERS.get(provedor)
+            if not adapter_cls:
+                raise ValueError(f'Provedor de CEP "{provedor}" não implementado.')
+            adapter = adapter_cls(api_key=_api_key_por_provedor('cep', provedor))
+            return adapter.normalize(adapter.fetch(cep_limpo))
         except (HTTPError, URLError, TimeoutError, ValueError) as exc:
             erros.append(f'{provedor}: {exc}')
 
     raise RuntimeError('Falha ao consultar CEP. ' + ' | '.join(erros))
 
 
-def _normalizar_placa_payload(provedor, dados):
-    if provedor == 'placafipe':
-        return {
-            'fonte': 'placafipe',
-            'placa': dados.get('placa') or dados.get('plate') or '',
-            'fabricante': dados.get('marca') or dados.get('manufacturer') or '',
-            'modelo': dados.get('modelo') or '',
-            'ano': str(dados.get('ano_modelo') or dados.get('ano') or ''),
-            'cor': dados.get('cor') or '',
-            'combustivel': dados.get('combustivel') or '',
-            'motor': dados.get('motor') or '',
-            'observacao': dados.get('mensagem') or ''
-        }
-    if provedor == 'fipeapi':
-        return {
-            'fonte': 'fipeapi',
-            'placa': dados.get('placa') or '',
-            'fabricante': dados.get('marca') or '',
-            'modelo': dados.get('modelo') or '',
-            'ano': str(dados.get('ano') or dados.get('ano_modelo') or ''),
-            'cor': dados.get('cor') or '',
-            'combustivel': dados.get('combustivel') or '',
-            'motor': dados.get('motor') or '',
-            'observacao': dados.get('mensagem') or ''
-        }
-    return dados
-
-
 def _consultar_placa_externa(placa, provedor):
-    api_key = _api_key_por_provedor('placa', provedor)
-    headers = {}
-    if api_key:
-        headers['Authorization'] = f'Bearer {api_key}'
-        headers['X-API-Key'] = api_key
-
-    placa_normalizada = normalizar_placa(placa)
-    if provedor == 'placafipe':
-        dados = _http_json(
-            'https://api.placafipe.com.br/v1/consulta',
-            headers=headers,
-            method='POST',
-            data={'placa': placa_normalizada}
-        )
-        return _normalizar_placa_payload(provedor, dados)
-    if provedor == 'fipeapi':
-        dados = _http_json(
-            f'https://fipeapi.com.br/api/placa/{quote(placa_normalizada)}',
-            headers=headers
-        )
-        return _normalizar_placa_payload(provedor, dados)
-    raise ValueError(f'Provedor de placa "{provedor}" não implementado.')
+    adapter_cls = PLACA_ADAPTERS.get(provedor)
+    if not adapter_cls:
+        raise ValueError(f'Provedor de placa "{provedor}" não implementado.')
+    adapter = adapter_cls(api_key=_api_key_por_provedor('placa', provedor))
+    return adapter.normalize(adapter.fetch(placa))
 
 
 def consultar_placa(placa):
