@@ -1,5 +1,5 @@
 # ===========================================
-# routes/__init__.py - Centralizador de Rotas
+# controllers/__init__.py - Centralizador de Controllers
 # ===========================================
 
 from .clientes_routes import clientes_bp
@@ -10,6 +10,7 @@ from .config_routes import config_bp
 from .export_routes import export_bp
 from .relatorios_routes import relatorios_bp
 from .paginas_routes import paginas_bp
+from .integracoes_routes import integracoes_bp
 
 # Lista de todos os blueprints para registrar no app.py
 blueprints = [
@@ -20,7 +21,8 @@ blueprints = [
     config_bp,
     export_bp,
     relatorios_bp,
-    paginas_bp
+    paginas_bp,
+    integracoes_bp
 ]
 
 print(f"Blueprints carregados: {len(blueprints)}")

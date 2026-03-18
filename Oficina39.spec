@@ -6,7 +6,7 @@ hiddenimports = []
 hiddenimports += collect_submodules('webview')
 
 datas = [
-    ('templates', 'templates'),
+    ('views', 'views'),
     ('static', 'static'),
     ('database.db', '.'),
 ]

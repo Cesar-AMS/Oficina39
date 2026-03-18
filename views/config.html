@@ -31,6 +31,77 @@
             <p><strong>Frequências:</strong> Diário (18h), Semanal (segunda às 8h), Mensal (dia 1 às 8h).</p>
         </section>
 
+        <section class="form-section config-section" id="secao-integracoes">
+            <h3 class="section-titulo">🔌 APIs de CEP e Consulta de Placa</h3>
+            <p class="texto-ajuda">Defina provedores primário e secundário para cada integração e troque o provedor ativo quando quiser.</p>
+
+            <div class="integracao-bloco">
+                <h4 class="subtitulo-config">CEP</h4>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label for="cepProviderAtivo">Provedor ativo</label>
+                        <select id="cepProviderAtivo">
+                            <option value="">Selecione...</option>
+                            <option value="viacep">ViaCEP</option>
+                            <option value="brasilapi">BrasilAPI</option>
+                            <option value="custom">Customizado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cepProviderPrimario">Primário</label>
+                        <input type="text" id="cepProviderPrimario" placeholder="Ex: viacep">
+                    </div>
+                    <div class="form-group">
+                        <label for="cepApiKeyPrimaria">Chave primária</label>
+                        <input type="text" id="cepApiKeyPrimaria" placeholder="Opcional">
+                    </div>
+                </div>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label for="cepProviderSecundario">Secundário</label>
+                        <input type="text" id="cepProviderSecundario" placeholder="Ex: brasilapi">
+                    </div>
+                    <div class="form-group">
+                        <label for="cepApiKeySecundaria">Chave secundária</label>
+                        <input type="text" id="cepApiKeySecundaria" placeholder="Opcional">
+                    </div>
+                </div>
+            </div>
+
+            <div class="integracao-bloco">
+                <h4 class="subtitulo-config">Consulta de Placa</h4>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label for="placaProviderAtivo">Provedor ativo</label>
+                        <select id="placaProviderAtivo">
+                            <option value="">Selecione...</option>
+                            <option value="placafipe">PlacaFipe</option>
+                            <option value="fipeapi">FIPE API</option>
+                            <option value="custom">Customizado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="placaProviderPrimario">Primário</label>
+                        <input type="text" id="placaProviderPrimario" placeholder="Ex: placafipe">
+                    </div>
+                    <div class="form-group">
+                        <label for="placaApiKeyPrimaria">Chave primária</label>
+                        <input type="text" id="placaApiKeyPrimaria" placeholder="Informe a chave da API">
+                    </div>
+                </div>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label for="placaProviderSecundario">Secundário</label>
+                        <input type="text" id="placaProviderSecundario" placeholder="Ex: fipeapi">
+                    </div>
+                    <div class="form-group">
+                        <label for="placaApiKeySecundaria">Chave secundária</label>
+                        <input type="text" id="placaApiKeySecundaria" placeholder="Opcional">
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="form-section config-section" id="secao-profissionais">
             <h3 class="section-titulo">👷 Cadastro de Profissionais</h3>
             <div class="config-row">

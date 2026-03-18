@@ -1,10 +1,11 @@
 # ===========================================
-# routes/clientes_routes.py - Rotas de Clientes
+# controllers/clientes_routes.py - Controller de Clientes
 # ===========================================
 
 from flask import Blueprint, request, jsonify
 from extensions import db
-from sqlalchemy import or_, func
+from repositories import cliente_repository
+from utils.formatters import texto_limpo
 
 clientes_bp = Blueprint('clientes', __name__, url_prefix='/api/clientes')
 
@@ -14,8 +15,7 @@ clientes_bp = Blueprint('clientes', __name__, url_prefix='/api/clientes')
 @clientes_bp.route('/', methods=['GET'])
 def listar_clientes():
     try:
-        from models import Cliente
-        clientes = Cliente.query.all()
+        clientes = cliente_repository.listar_todos()
         return jsonify([c.to_dict() for c in clientes])
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
@@ -26,8 +26,7 @@ def listar_clientes():
 @clientes_bp.route('/<int:id>', methods=['GET'])
 def buscar_cliente(id):
     try:
-        from models import Cliente
-        cliente = Cliente.query.get(id)
+        cliente = cliente_repository.buscar_por_id(id)
         if not cliente:
             return jsonify({'erro': 'Cliente não encontrado'}), 404
         return jsonify(cliente.to_dict())
@@ -41,19 +40,19 @@ def buscar_cliente(id):
 def criar_cliente():
     try:
         from models import Cliente
-        dados = request.json
+        dados = request.json or {}
         
-        if not dados.get('nome_cliente'):
+        if not texto_limpo(dados.get('nome_cliente')):
             return jsonify({'erro': 'Nome é obrigatório'}), 400
-        if not dados.get('cpf'):
+        if not texto_limpo(dados.get('cpf')):
             return jsonify({'erro': 'CPF é obrigatório'}), 400
         
-        if Cliente.query.filter_by(cpf=dados['cpf']).first():
+        if cliente_repository.buscar_por_cpf(dados['cpf']):
             return jsonify({'erro': 'CPF já cadastrado'}), 400
         
         cliente = Cliente(
-            nome_cliente=dados['nome_cliente'],
-            cpf=dados['cpf'],
+            nome_cliente=texto_limpo(dados['nome_cliente']),
+            cpf=texto_limpo(dados['cpf']),
             
             # ===== NOVOS CAMPOS =====
             telefone=dados.get('telefone', ''),
@@ -93,7 +92,7 @@ def criar_cliente():
 def atualizar_cliente(id):
     try:
         from models import Cliente
-        cliente = Cliente.query.get(id)
+        cliente = cliente_repository.buscar_por_id(id)
         if not cliente:
             return jsonify({'erro': 'Cliente não encontrado'}), 404
         
@@ -102,6 +101,14 @@ def atualizar_cliente(id):
         # ===== NOVOS CAMPOS ADICIONADOS =====
         if 'nome_cliente' in dados:
             cliente.nome_cliente = dados['nome_cliente']
+        if 'cpf' in dados:
+            cpf_novo = (dados.get('cpf') or '').strip()
+            if not cpf_novo:
+                return jsonify({'erro': 'CPF é obrigatório'}), 400
+            outro_cliente = Cliente.query.filter(Cliente.cpf == cpf_novo, Cliente.id != id).first()
+            if outro_cliente:
+                return jsonify({'erro': 'CPF já cadastrado'}), 400
+            cliente.cpf = cpf_novo
         if 'telefone' in dados:
             cliente.telefone = dados['telefone']
         if 'email' in dados:
@@ -150,8 +157,7 @@ def atualizar_cliente(id):
 @clientes_bp.route('/<int:id>', methods=['DELETE'])
 def deletar_cliente(id):
     try:
-        from models import Cliente
-        cliente = Cliente.query.get(id)
+        cliente = cliente_repository.buscar_por_id(id)
         if not cliente:
             return jsonify({'erro': 'Cliente não encontrado'}), 404
         
@@ -168,22 +174,12 @@ def deletar_cliente(id):
 @clientes_bp.route('/busca', methods=['GET'])
 def buscar_clientes():
     try:
-        from models import Cliente
         termo = (request.args.get('termo', '') or '').strip()
         
         if not termo:
             return jsonify([])
 
-        termo_numerico = ''.join(ch for ch in termo if ch.isdigit())
-        cpf_sem_mascara = func.replace(func.replace(func.replace(Cliente.cpf, '.', ''), '-', ''), '/', '')
-        condicoes = [
-            Cliente.nome_cliente.ilike(f'%{termo}%'),
-            Cliente.cpf.ilike(f'%{termo}%')
-        ]
-        if termo_numerico:
-            condicoes.append(cpf_sem_mascara.ilike(f'%{termo_numerico}%'))
-
-        clientes = Cliente.query.filter(or_(*condicoes)).limit(10).all()
+        clientes = cliente_repository.buscar_por_termo(termo)
         
         return jsonify([c.to_dict() for c in clientes])
     except Exception as e:

@@ -9,7 +9,7 @@ from extensions import db
 import io
 import os
 from datetime import datetime, timedelta
-from services.export_service import ExportService
+from infrastructure.export_service import ExportService
 
 # Tentar importar ReportLab
 try:
@@ -25,205 +25,6 @@ except ImportError as e:
     print("Para instalar: pip install reportlab")
 
 export_bp = Blueprint('export', __name__, url_prefix='/api/export')
-
-
-def _parse_datetime(valor):
-    """Converte string em datetime para importação."""
-    if valor in (None, ''):
-        return None
-    if isinstance(valor, datetime):
-        return valor
-    texto = str(valor).strip()
-    formatos = [
-        '%d/%m/%Y %H:%M',
-        '%d/%m/%Y',
-        '%Y-%m-%d %H:%M:%S',
-        '%Y-%m-%d',
-    ]
-    for fmt in formatos:
-        try:
-            return datetime.strptime(texto, fmt)
-        except ValueError:
-            continue
-    return None
-
-
-def _to_float(valor, default=0.0):
-    try:
-        if valor in (None, ''):
-            return float(default)
-        return float(str(valor).replace(',', '.'))
-    except Exception:
-        return float(default)
-
-
-def _to_int(valor, default=0):
-    try:
-        if valor in (None, ''):
-            return int(default)
-        return int(float(valor))
-    except Exception:
-        return int(default)
-
-
-def _importar_json(dados, tipo):
-    from models import Cliente, Ordem, ItemServico, ItemPeca, Saida
-
-    resultados = {'clientes': 0, 'ordens': 0, 'saidas': 0}
-
-    if tipo in ('completo', 'clientes'):
-        for c in dados.get('clientes', []):
-            cpf = (c.get('cpf') or '').strip()
-            if not cpf or Cliente.query.filter_by(cpf=cpf).first():
-                continue
-            cliente = Cliente(
-                nome_cliente=(c.get('nome_cliente') or '').strip() or 'Sem nome',
-                cpf=cpf,
-                telefone=c.get('telefone') or '',
-                email=c.get('email') or '',
-                endereco=c.get('endereco') or '',
-                cidade=c.get('cidade') or '',
-                estado=c.get('estado') or '',
-                cep=c.get('cep') or '',
-                placa=c.get('placa') or '',
-                fabricante=c.get('fabricante') or '',
-                modelo=c.get('modelo') or '',
-                ano=c.get('ano') or '',
-                motor=c.get('motor') or '',
-                combustivel=c.get('combustivel') or '',
-                cor=c.get('cor') or '',
-                tanque=c.get('tanque') or '',
-                km=_to_int(c.get('km'), 0),
-                direcao=c.get('direcao') or '',
-                ar=c.get('ar') or ''
-            )
-            db.session.add(cliente)
-            resultados['clientes'] += 1
-
-    if tipo in ('completo', 'ordens'):
-        for o in dados.get('ordens', []):
-            cliente_id = o.get('cliente_id')
-            if not cliente_id:
-                continue
-            ordem = Ordem(
-                cliente_id=cliente_id,
-                diagnostico=o.get('diagnostico') or '',
-                observacao_interna=o.get('observacao_interna') or '',
-                profissional_responsavel=(o.get('profissional_responsavel') or '').strip(),
-                assinatura_cliente=o.get('assinatura_cliente') or '',
-                status=o.get('status') or 'Aguardando',
-                forma_pagamento=o.get('forma_pagamento') or None,
-                data_entrada=_parse_datetime(o.get('data_entrada')) or datetime.now(),
-                data_emissao=_parse_datetime(o.get('data_emissao')) or datetime.now(),
-                data_retirada=_parse_datetime(o.get('data_retirada')),
-                data_conclusao=_parse_datetime(o.get('data_conclusao')),
-                total_servicos=_to_float(o.get('total_servicos'), 0),
-                total_pecas=_to_float(o.get('total_pecas'), 0),
-                total_geral=_to_float(o.get('total_geral'), 0),
-            )
-            db.session.add(ordem)
-            db.session.flush()
-
-            for s in o.get('servicos', []):
-                db.session.add(ItemServico(
-                    ordem_id=ordem.id,
-                    codigo_servico=s.get('codigo_servico') or '',
-                    descricao_servico=s.get('descricao_servico') or '',
-                    nome_profissional=(s.get('nome_profissional') or ordem.profissional_responsavel or '').strip(),
-                    valor_servico=_to_float(s.get('valor_servico'), 0),
-                ))
-
-            for p in o.get('pecas', []):
-                db.session.add(ItemPeca(
-                    ordem_id=ordem.id,
-                    codigo_peca=p.get('codigo_peca') or '',
-                    descricao_peca=p.get('descricao_peca') or '',
-                    quantidade=_to_float(p.get('quantidade'), 0),
-                    valor_unitario=_to_float(p.get('valor_unitario'), 0),
-                ))
-            resultados['ordens'] += 1
-
-    if tipo in ('completo', 'financeiro', 'saidas'):
-        for s in dados.get('saidas', []):
-            descricao = (s.get('descricao') or '').strip()
-            if not descricao:
-                continue
-            db.session.add(Saida(
-                descricao=descricao,
-                valor=_to_float(s.get('valor'), 0),
-                categoria=s.get('categoria') or 'Outros',
-                data=_parse_datetime(s.get('data')) or datetime.now()
-            ))
-            resultados['saidas'] += 1
-
-    return resultados
-
-
-def _normalizar_linhas(df):
-    df = df.fillna('')
-    linhas = []
-    for row in df.to_dict(orient='records'):
-        normalizado = {str(k).strip().lower(): v for k, v in row.items()}
-        linhas.append(normalizado)
-    return linhas
-
-
-def _importar_tabular(df, tipo):
-    from models import Cliente, Ordem, Saida
-
-    resultados = {'clientes': 0, 'ordens': 0, 'saidas': 0}
-    linhas = _normalizar_linhas(df)
-
-    if tipo == 'clientes':
-        for r in linhas:
-            cpf = str(r.get('cpf') or '').strip()
-            if not cpf or Cliente.query.filter_by(cpf=cpf).first():
-                continue
-            db.session.add(Cliente(
-                nome_cliente=str(r.get('nome') or r.get('nome_cliente') or '').strip() or 'Sem nome',
-                cpf=cpf,
-                endereco=str(r.get('endereco') or '').strip(),
-                placa=str(r.get('placa') or '').strip(),
-                fabricante=str(r.get('fabricante') or '').strip(),
-                modelo=str(r.get('modelo') or '').strip(),
-                ano=str(r.get('ano') or '').strip(),
-                motor=str(r.get('motor') or '').strip(),
-                combustivel=str(r.get('combustivel') or '').strip(),
-                cor=str(r.get('cor') or '').strip(),
-                tanque=str(r.get('tanque') or '').strip(),
-                km=_to_int(r.get('km'), 0)
-            ))
-            resultados['clientes'] += 1
-
-    elif tipo == 'ordens':
-        for r in linhas:
-            cliente_id = _to_int(r.get('cliente_id'), 0)
-            if not cliente_id:
-                continue
-            db.session.add(Ordem(
-                cliente_id=cliente_id,
-                status=str(r.get('status') or 'Aguardando').strip() or 'Aguardando',
-                data_entrada=_parse_datetime(r.get('data_entrada')) or datetime.now(),
-                total_servicos=_to_float(r.get('total_servicos'), 0),
-                total_pecas=_to_float(r.get('total_pecas'), 0),
-                total_geral=_to_float(r.get('total_geral'), 0),
-            ))
-            resultados['ordens'] += 1
-
-    elif tipo in ('financeiro', 'saidas'):
-        for r in linhas:
-            descricao = str(r.get('descricao') or '').strip()
-            if not descricao:
-                continue
-            db.session.add(Saida(
-                descricao=descricao,
-                valor=_to_float(r.get('valor'), 0),
-                categoria=str(r.get('categoria') or 'Outros').strip() or 'Outros',
-                data=_parse_datetime(r.get('data')) or datetime.now()
-            ))
-            resultados['saidas'] += 1
-
-    return resultados
 
 
 @export_bp.route('/gerar-pdf/<int:id>')
@@ -876,8 +677,7 @@ def exportar_dados():
         if formato == 'db':
             if tipo != 'completo':
                 return jsonify({'erro': 'Exportação .db disponível apenas para tipo completo.'}), 400
-            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-            caminho_db = os.path.join(base_dir, 'database.db')
+            caminho_db = ExportService.get_database_path()
             if not os.path.exists(caminho_db):
                 return jsonify({'erro': 'Arquivo database.db não encontrado.'}), 404
             return send_file(caminho_db, as_attachment=True, download_name=nome_arquivo, mimetype='application/octet-stream')
@@ -939,13 +739,13 @@ def importar_dados():
 
         if formato == 'json':
             dados = json.load(arquivo.stream)
-            resultados = _importar_json(dados, tipo)
+            resultados = ExportService.importar_json(dados, tipo)
         elif formato == 'csv':
             df = pd.read_csv(arquivo.stream, sep=None, engine='python')
-            resultados = _importar_tabular(df, tipo)
+            resultados = ExportService.importar_tabular(df, tipo)
         else:
             df = pd.read_excel(arquivo.stream)
-            resultados = _importar_tabular(df, tipo)
+            resultados = ExportService.importar_tabular(df, tipo)
 
         db.session.commit()
         return jsonify(resultados)

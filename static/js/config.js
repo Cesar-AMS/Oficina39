@@ -110,10 +110,21 @@ async function carregarConfig() {
 function preencherCampos(config) {
     if (!config) return;
     if (config.email_cliente) getEl('emailCliente').value = config.email_cliente;
+    if (config.senha_app) getEl('senhaApp').value = config.senha_app;
     if (config.email_contador) getEl('emailContador').value = config.email_contador;
     if (config.frequencia) getEl('frequenciaEnvio').value = config.frequencia;
     if (config.dia_envio) getEl('diaEnvio').value = config.dia_envio;
     if (config.ativo !== undefined) getEl('envioAtivo').checked = config.ativo;
+    if (config.cep_provider_ativo) getEl('cepProviderAtivo').value = config.cep_provider_ativo;
+    if (config.cep_provider_primario) getEl('cepProviderPrimario').value = config.cep_provider_primario;
+    if (config.cep_api_key_primaria) getEl('cepApiKeyPrimaria').value = config.cep_api_key_primaria;
+    if (config.cep_provider_secundario) getEl('cepProviderSecundario').value = config.cep_provider_secundario;
+    if (config.cep_api_key_secundaria) getEl('cepApiKeySecundaria').value = config.cep_api_key_secundaria;
+    if (config.placa_provider_ativo) getEl('placaProviderAtivo').value = config.placa_provider_ativo;
+    if (config.placa_provider_primario) getEl('placaProviderPrimario').value = config.placa_provider_primario;
+    if (config.placa_api_key_primaria) getEl('placaApiKeyPrimaria').value = config.placa_api_key_primaria;
+    if (config.placa_provider_secundario) getEl('placaProviderSecundario').value = config.placa_provider_secundario;
+    if (config.placa_api_key_secundaria) getEl('placaApiKeySecundaria').value = config.placa_api_key_secundaria;
 
     const selectProf = getEl('profissionalEnvioAuto');
     if (selectProf) {
@@ -153,7 +164,17 @@ async function salvarConfig() {
         profissional_envio_auto: (getEl('profissionalEnvioAuto')?.value || '').trim(),
         frequencia: getEl('frequenciaEnvio').value,
         dia_envio: parseInt(getEl('diaEnvio').value, 10) || 1,
-        ativo: getEl('envioAtivo').checked
+        ativo: getEl('envioAtivo').checked,
+        cep_provider_ativo: (getEl('cepProviderAtivo')?.value || '').trim(),
+        cep_provider_primario: (getEl('cepProviderPrimario')?.value || '').trim(),
+        cep_api_key_primaria: (getEl('cepApiKeyPrimaria')?.value || '').trim(),
+        cep_provider_secundario: (getEl('cepProviderSecundario')?.value || '').trim(),
+        cep_api_key_secundaria: (getEl('cepApiKeySecundaria')?.value || '').trim(),
+        placa_provider_ativo: (getEl('placaProviderAtivo')?.value || '').trim(),
+        placa_provider_primario: (getEl('placaProviderPrimario')?.value || '').trim(),
+        placa_api_key_primaria: (getEl('placaApiKeyPrimaria')?.value || '').trim(),
+        placa_provider_secundario: (getEl('placaProviderSecundario')?.value || '').trim(),
+        placa_api_key_secundaria: (getEl('placaApiKeySecundaria')?.value || '').trim()
     };
 
     try {
@@ -164,7 +185,6 @@ async function salvarConfig() {
         });
         const profissionalEnvio = (getEl('profissionalEnvioAuto')?.value || '').trim();
         localStorage.setItem(CHAVE_PROF_ENVIO_AUTO, profissionalEnvio);
-        getEl('senhaApp').value = '';
         alertSucesso('Configurações salvas com sucesso.');
         carregarHistorico();
     } catch (error) {

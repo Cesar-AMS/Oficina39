@@ -10,6 +10,7 @@ import io
 import logging
 from flask import Blueprint, jsonify, request, Response
 from sqlalchemy import func
+from repositories import relatorio_repository
 
 relatorios_bp = Blueprint('relatorios', __name__, url_prefix='/api/relatorios')
 logger = logging.getLogger(__name__)
@@ -176,107 +177,20 @@ def _parse_data_dia(valor):
 
 
 def _resolver_profissional_ativo(nome_informado):
-    from models import Profissional
-
-    nome = (nome_informado or '').strip()
-    if not nome:
-        return None
-    return (
-        Profissional.query
-        .filter(Profissional.ativo.is_(True))
-        .filter(func.lower(Profissional.nome) == nome.lower())
-        .first()
-    )
+    return relatorio_repository.resolver_profissional_ativo(nome_informado)
 
 
 def _base_producao_query(data_inicio=None, data_fim=None):
     """Query base para reaproveitar filtro por periodo e identificacao do profissional."""
-    from models import ItemServico, Ordem
-
-    profissional_expr = func.coalesce(
-        func.nullif(func.trim(ItemServico.nome_profissional), ''),
-        func.nullif(func.trim(Ordem.profissional_responsavel), ''),
-        'Nao informado'
-    )
-
-    data_ref_expr = func.coalesce(
-        Ordem.data_conclusao,
-        Ordem.data_retirada,
-        Ordem.data_emissao,
-        Ordem.data_entrada
-    )
-
-    query = ItemServico.query.join(Ordem, ItemServico.ordem_id == Ordem.id)
-    if data_inicio:
-        query = query.filter(data_ref_expr >= data_inicio)
-    if data_fim:
-        query = query.filter(data_ref_expr <= data_fim)
-
-    return query, profissional_expr, data_ref_expr
+    return relatorio_repository.base_producao_query(data_inicio, data_fim)
 
 
 def _periodo_inicio_fim(data_ref, tipo):
-    base = data_ref.replace(hour=0, minute=0, second=0, microsecond=0)
-    if tipo == 'dia':
-        inicio = base
-        fim = base.replace(hour=23, minute=59, second=59, microsecond=999999)
-    elif tipo == 'semana':
-        inicio_semana = base - timedelta(days=base.weekday())
-        inicio = inicio_semana.replace(hour=0, minute=0, second=0, microsecond=0)
-        fim = inicio + timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999)
-    elif tipo == 'mes':
-        inicio = base.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        if inicio.month == 12:
-            prox = inicio.replace(year=inicio.year + 1, month=1, day=1)
-        else:
-            prox = inicio.replace(month=inicio.month + 1, day=1)
-        fim = prox - timedelta(microseconds=1)
-    else:
-        raise ValueError('Periodo inválido')
-    return inicio, fim
+    return relatorio_repository.periodo_inicio_fim(data_ref, tipo)
 
 
 def _detalhes_resumo_profissional(profissional_nome, data_inicio, data_fim, limite=100):
-    from models import ItemServico, Ordem, Cliente
-
-    query_base, profissional_expr, data_ref_expr = _base_producao_query(data_inicio, data_fim)
-    query_base = query_base.filter(func.lower(profissional_expr) == profissional_nome.lower())
-
-    resumo_row = query_base.with_entities(
-        func.count(ItemServico.id),
-        func.coalesce(func.sum(ItemServico.valor_servico), 0.0),
-        func.coalesce(func.avg(ItemServico.valor_servico), 0.0)
-    ).first()
-
-    detalhes_rows = (
-        query_base
-        .with_entities(
-            Ordem.id.label('ordem_id'),
-            data_ref_expr.label('data_referencia'),
-            Cliente.nome_cliente.label('cliente'),
-            ItemServico.descricao_servico,
-            ItemServico.valor_servico
-        )
-        .join(Cliente, Ordem.cliente_id == Cliente.id)
-        .order_by(data_ref_expr.desc())
-        .limit(limite)
-        .all()
-    )
-
-    return {
-        'resumo': {
-            'quantidade_servicos': int((resumo_row[0] if resumo_row else 0) or 0),
-            'valor_total': float((resumo_row[1] if resumo_row else 0) or 0),
-            'media_por_servico': float((resumo_row[2] if resumo_row else 0) or 0),
-        },
-        'servicos': [{
-            'ordem_id': row.ordem_id,
-            'data_referencia': row.data_referencia.strftime('%d/%m/%Y') if row.data_referencia else '---',
-            'cliente': row.cliente or '---',
-            'descricao_servico': row.descricao_servico or '---',
-            'valor_servico': float(row.valor_servico or 0)
-        } for row in detalhes_rows]
-    }
+    return relatorio_repository.detalhes_resumo_profissional(profissional_nome, data_inicio, data_fim, limite=limite)
 
 
 def _gerar_html_profissional(nome_profissional, cnpj, periodo_label, resumo, detalhes):
@@ -396,13 +310,8 @@ def relatorio_producao_profissionais():
 def listar_profissionais_producao():
     """Lista profissionais cadastrados/ativos para seleção na tela de produção."""
     try:
-        from models import Profissional
-
         termo = (request.args.get('termo') or '').strip()
-        query = Profissional.query.filter(Profissional.ativo.is_(True))
-        if termo:
-            query = query.filter(Profissional.nome.ilike(f'%{termo}%'))
-        rows = query.order_by(Profissional.nome.asc()).limit(100).all()
+        rows = relatorio_repository.listar_profissionais_ativos(termo, limite=100)
 
         return jsonify([{
             'profissional': row.nome,
@@ -418,12 +327,10 @@ def resumo_periodos_profissional():
     Retorna resumo diário, semanal e mensal de um profissional.
     """
     try:
-        from models import Profissional
-
         profissional = (request.args.get('profissional') or '').strip()
         if not profissional:
             return jsonify({'erro': 'Parametro profissional é obrigatório.'}), 400
-        if Profissional.query.filter(Profissional.ativo.is_(True)).count() == 0:
+        if relatorio_repository.total_profissionais_ativos() == 0:
             return jsonify({'erro': 'Não há profissionais cadastrados/ativos para gerar relatório.'}), 400
 
         data_ref = _parse_data_dia((request.args.get('data_ref') or '').strip())
@@ -480,15 +387,13 @@ def resumo_profissional_periodo_personalizado():
     com no máximo 31 dias.
     """
     try:
-        from models import Profissional
-
         profissional = (request.args.get('profissional') or '').strip()
         data_inicio_str = (request.args.get('data_inicio') or '').strip()
         data_fim_str = (request.args.get('data_fim') or '').strip()
 
         if not profissional:
             return jsonify({'erro': 'Parametro profissional é obrigatório.'}), 400
-        if Profissional.query.filter(Profissional.ativo.is_(True)).count() == 0:
+        if relatorio_repository.total_profissionais_ativos() == 0:
             return jsonify({'erro': 'Não há profissionais cadastrados/ativos para gerar relatório.'}), 400
         if not data_inicio_str or not data_fim_str:
             return jsonify({'erro': 'Informe data_inicio e data_fim.'}), 400
@@ -667,7 +572,7 @@ def enviar_relatorios_profissionais_contador():
         data_inicio = _parse_data(dados.get('data_inicio'))
         data_fim = _parse_data(dados.get('data_fim'), fim_do_dia=True)
 
-        from services.email_service import enviar_relatorio_email
+        from infrastructure.email_service import enviar_relatorio_email
 
         periodo_label = f"{dados.get('data_inicio') or 'inicio'} ate {dados.get('data_fim') or 'hoje'}"
         resultados = []
@@ -1173,7 +1078,6 @@ def exportar_excel_profissional_periodo():
     """
     try:
         import pandas as pd
-        from models import Profissional
 
         engine_excel = _excel_engine_disponivel()
         if not engine_excel:
@@ -1185,7 +1089,7 @@ def exportar_excel_profissional_periodo():
 
         if not profissional or not data_inicio_str or not data_fim_str:
             return jsonify({'erro': 'Informe profissional, data_inicio e data_fim.'}), 400
-        if Profissional.query.filter(Profissional.ativo.is_(True)).count() == 0:
+        if relatorio_repository.total_profissionais_ativos() == 0:
             return jsonify({'erro': 'Não há profissionais cadastrados/ativos para gerar relatório.'}), 400
 
         data_inicio = _parse_data(data_inicio_str)

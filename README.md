@@ -32,10 +32,14 @@ O projeto foi pensado para uso prático no dia a dia da oficina:
 app.py                  # Inicialização da aplicação Flask
 desktop_app.py          # Execução em janela própria
 extensions.py           # Extensões e scheduler
+controllers/            # Controllers Flask (APIs e páginas)
 models/                 # Modelos de dados
-routes/                 # Rotas HTML e APIs
-services/               # Regras de negócio e serviços auxiliares
-templates/              # Páginas HTML
+repositories/           # Consultas e filtros reutilizáveis
+services/               # Regras de negócio
+integrations/           # Integrações externas
+utils/                  # Formatação e normalização
+infrastructure/         # Suporte técnico (email, backup, PDF, log)
+views/                  # Páginas HTML
 static/                 # CSS, JS e imagens
 tests/                  # Testes automatizados
 scripts/                # Scripts de build

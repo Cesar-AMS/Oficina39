@@ -54,6 +54,19 @@
     margin-bottom: 0;
 }
 
+.integracao-bloco {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    background: var(--bg-hover);
+    margin-bottom: 14px;
+}
+
+.subtitulo-config {
+    margin: 0 0 12px;
+    font-size: 1rem;
+}
+
 .config-row {
     display: flex;
     gap: 14px;

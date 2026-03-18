@@ -4,11 +4,11 @@
 
 from flask import Flask
 from extensions import db, mail, scheduler
-from routes import blueprints
+from controllers import blueprints
 import os
 import atexit
 from sqlalchemy import inspect, text
-from services.backup_service import criar_backup_database
+from infrastructure.backup_service import criar_backup_database
 
 # ===========================================
 # CRIAR A APLICAÇÃO
@@ -18,8 +18,11 @@ def create_app():
     basedir = os.path.abspath(os.path.dirname(__file__))
     static_dir = os.path.join(basedir, 'static')
     
+    views_dir = os.path.join(basedir, 'views')
+
     # Criar app com pasta estática configurada
     app = Flask(__name__, 
+                template_folder=views_dir,
                 static_folder=static_dir,
                 static_url_path='/static')
     
@@ -101,6 +104,23 @@ def create_app():
                 )
                 db.session.commit()
                 print("Coluna profissional_envio_auto adicionada em config_contador")
+            novas_colunas_config = {
+                'cep_provider_ativo': "ALTER TABLE config_contador ADD COLUMN cep_provider_ativo VARCHAR(60)",
+                'cep_provider_primario': "ALTER TABLE config_contador ADD COLUMN cep_provider_primario VARCHAR(60)",
+                'cep_api_key_primaria': "ALTER TABLE config_contador ADD COLUMN cep_api_key_primaria VARCHAR(255)",
+                'cep_provider_secundario': "ALTER TABLE config_contador ADD COLUMN cep_provider_secundario VARCHAR(60)",
+                'cep_api_key_secundaria': "ALTER TABLE config_contador ADD COLUMN cep_api_key_secundaria VARCHAR(255)",
+                'placa_provider_ativo': "ALTER TABLE config_contador ADD COLUMN placa_provider_ativo VARCHAR(60)",
+                'placa_provider_primario': "ALTER TABLE config_contador ADD COLUMN placa_provider_primario VARCHAR(60)",
+                'placa_api_key_primaria': "ALTER TABLE config_contador ADD COLUMN placa_api_key_primaria VARCHAR(255)",
+                'placa_provider_secundario': "ALTER TABLE config_contador ADD COLUMN placa_provider_secundario VARCHAR(60)",
+                'placa_api_key_secundaria': "ALTER TABLE config_contador ADD COLUMN placa_api_key_secundaria VARCHAR(255)"
+            }
+            for nome_coluna, sql in novas_colunas_config.items():
+                if nome_coluna not in colunas_config:
+                    db.session.execute(text(sql))
+                    db.session.commit()
+                    print(f"Coluna {nome_coluna} adicionada em config_contador")
 
         # Verificar quais tabelas foram criadas
         tabelas = inspector.get_table_names()

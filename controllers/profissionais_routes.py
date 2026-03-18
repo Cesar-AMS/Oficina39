@@ -1,9 +1,11 @@
 # ===========================================
-# routes/profissionais_routes.py
+# controllers/profissionais_routes.py
 # ===========================================
 
 from flask import Blueprint, jsonify, request
 from extensions import db
+from repositories import profissional_repository
+from utils.formatters import cnpj_sem_mascara, texto_limpo
 
 profissionais_bp = Blueprint('profissionais', __name__, url_prefix='/api/profissionais')
 
@@ -11,12 +13,8 @@ profissionais_bp = Blueprint('profissionais', __name__, url_prefix='/api/profiss
 @profissionais_bp.route('/', methods=['GET'])
 def listar_profissionais():
     try:
-        from models import Profissional
         ativos_apenas = request.args.get('ativos', '1') == '1'
-        query = Profissional.query
-        if ativos_apenas:
-            query = query.filter(Profissional.ativo.is_(True))
-        profissionais = query.order_by(Profissional.nome.asc()).all()
+        profissionais = profissional_repository.listar(ativos_apenas=ativos_apenas)
         return jsonify([p.to_dict() for p in profissionais])
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
@@ -27,17 +25,17 @@ def criar_profissional():
     try:
         from models import Profissional
         dados = request.json or {}
-        nome = (dados.get('nome') or '').strip()
-        cnpj = (dados.get('cnpj') or '').strip()
+        nome = texto_limpo(dados.get('nome'))
+        cnpj = cnpj_sem_mascara(dados.get('cnpj'))
 
         if not nome or not cnpj:
             return jsonify({'erro': 'Nome e CNPJ são obrigatórios.'}), 400
 
-        existe_nome = Profissional.query.filter(Profissional.nome == nome).first()
+        existe_nome = profissional_repository.buscar_por_nome(nome)
         if existe_nome:
             return jsonify({'erro': 'Já existe profissional com este nome.'}), 400
 
-        existe_cnpj = Profissional.query.filter(Profissional.cnpj == cnpj).first()
+        existe_cnpj = profissional_repository.buscar_por_cnpj(cnpj)
         if existe_cnpj:
             return jsonify({'erro': 'Já existe profissional com este CNPJ.'}), 400
 
@@ -57,20 +55,19 @@ def criar_profissional():
 @profissionais_bp.route('/<int:id>', methods=['PUT'])
 def atualizar_profissional(id):
     try:
-        from models import Profissional
-        profissional = Profissional.query.get(id)
+        profissional = profissional_repository.buscar_por_id(id)
         if not profissional:
             return jsonify({'erro': 'Profissional não encontrado.'}), 404
 
         dados = request.json or {}
-        nome = (dados.get('nome') or profissional.nome).strip()
-        cnpj = (dados.get('cnpj') or profissional.cnpj).strip()
+        nome = texto_limpo(dados.get('nome') or profissional.nome)
+        cnpj = cnpj_sem_mascara(dados.get('cnpj') or profissional.cnpj)
 
-        outro_nome = Profissional.query.filter(Profissional.nome == nome, Profissional.id != id).first()
+        outro_nome = profissional_repository.buscar_outro_por_nome(nome, id)
         if outro_nome:
             return jsonify({'erro': 'Já existe profissional com este nome.'}), 400
 
-        outro_cnpj = Profissional.query.filter(Profissional.cnpj == cnpj, Profissional.id != id).first()
+        outro_cnpj = profissional_repository.buscar_outro_por_cnpj(cnpj, id)
         if outro_cnpj:
             return jsonify({'erro': 'Já existe profissional com este CNPJ.'}), 400
 
@@ -89,8 +86,7 @@ def atualizar_profissional(id):
 @profissionais_bp.route('/<int:id>', methods=['DELETE'])
 def deletar_profissional(id):
     try:
-        from models import Profissional
-        profissional = Profissional.query.get(id)
+        profissional = profissional_repository.buscar_por_id(id)
         if not profissional:
             return jsonify({'erro': 'Profissional não encontrado.'}), 404
 

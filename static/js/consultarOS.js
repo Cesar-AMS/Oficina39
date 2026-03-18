@@ -429,7 +429,12 @@ function carregarTabela(lista) {
         tabela.innerHTML += `
             <tr>
                 <td><strong>#${ordem.id}</strong></td>
-                <td>${ordem.cliente_nome || ordem.cliente?.nome_cliente || '---'}</td>
+                <td>
+                    <div class="cliente-coluna">
+                        <div class="cliente-nome">${ordem.cliente_nome || ordem.cliente?.nome_cliente || '---'}</div>
+                        <button class="btn-editar-cliente" onclick="editarCliente(${ordem.cliente_id})">✏ Editar Cliente</button>
+                    </div>
+                </td>
                 <td>${ordem.cliente?.fabricante || ''} ${ordem.cliente?.modelo || ''}</td>
                 <td>${ordem.cliente?.placa || '---'}</td>
                 <td>
@@ -560,6 +565,10 @@ function visualizar(id) {
     window.location.href = `/visualizarOS.html?id=${id}`;
 }
 
+function editarCliente(id) {
+    window.location.href = `/cadastroCliente.html?id=${id}`;
+}
+
 // Voltar
 function voltarInicio() {
     window.location.href = "/";
@@ -589,3 +598,5 @@ window.duplicarOrdem = duplicarOrdem;
 window.aplicarFiltrosAvancados = aplicarFiltrosAvancados;
 window.salvarProfissional = salvarProfissional;
 window.excluirOrdem = excluirOrdem;
+
+window.editarCliente = editarCliente;
