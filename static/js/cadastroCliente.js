@@ -68,7 +68,7 @@ function destinoPosEdicao() {
 }
 
 function voltarTelaCliente() {
-    window.location.href = destinoPosEdicao();
+    window.location.assign(destinoPosEdicao());
 }
 
 function executarAoPressionarEnter(campo, callback) {
@@ -236,7 +236,7 @@ async function salvar() {
 
         alertSucesso(clienteEdicaoId ? 'Cliente atualizado com sucesso!' : 'Cliente cadastrado com sucesso!');
         if (clienteEdicaoId) {
-            window.location.href = '/consultarOS.html';
+            window.location.assign('/consultarOS.html');
             return;
         }
         limparFormularioCadastro();

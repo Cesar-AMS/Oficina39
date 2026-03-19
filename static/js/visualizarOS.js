@@ -237,12 +237,12 @@ async function carregarTimelineStatus() {
 // ===========================================
 
 function voltar() {
-    window.location.href = "/consultarOS.html";
+    window.location.assign("/consultarOS.html");
 }
 
 function editarOrdem() {
     if (id) {
-        window.location.href = `/editarOS.html?id=${id}`;
+        window.location.assign(`/editarOS.html?id=${id}`);
     }
 }
 

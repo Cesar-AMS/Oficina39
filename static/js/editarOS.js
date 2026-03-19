@@ -42,7 +42,7 @@ function formatarData(data) {
 async function carregarOrdem() {
     if (!id) {
         alertErro('ID da ordem não informado.');
-        window.location.href = "/consultarOS.html";
+        window.location.assign("/consultarOS.html");
         return;
     }
 
@@ -51,7 +51,7 @@ async function carregarOrdem() {
         
         if (!response.ok) {
             alertErro('Ordem não encontrada.');
-            window.location.href = "/consultarOS.html";
+            window.location.assign("/consultarOS.html");
             return;
         }
 
@@ -61,7 +61,7 @@ async function carregarOrdem() {
     } catch (error) {
         console.error('Erro:', error);
         alertErro('Falha ao carregar ordem.');
-        window.location.href = "/consultarOS.html";
+        window.location.assign("/consultarOS.html");
     }
 }
 
@@ -337,7 +337,7 @@ async function salvar() {
         
         if (response.ok) {
             alertSucesso('Ordem atualizada com sucesso.');
-            window.location.href = `/visualizarOS.html?id=${id}`;
+            window.location.assign(`/visualizarOS.html?id=${id}`);
         } else {
             alertErro(resultado.erro || 'Erro desconhecido.');
         }
@@ -356,7 +356,7 @@ async function cancelar() {
         ? await window.ui.confirmAsync('Confirma cancelar? As alterações não serão salvas.')
         : (window.ui ? window.ui.confirm('Confirma cancelar? As alterações não serão salvas.') : confirm('Confirma cancelar? As alterações não serão salvas.'));
     if (!confirmado) return;
-    window.location.href = `/visualizarOS.html?id=${id}`;
+    window.location.assign(`/visualizarOS.html?id=${id}`);
 }
 
 // ===========================================

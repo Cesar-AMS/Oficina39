@@ -562,16 +562,16 @@ function filtrarPorStatus(status) {
 
 // Visualizar
 function visualizar(id) {
-    window.location.href = `/visualizarOS.html?id=${id}`;
+    window.location.assign(`/visualizarOS.html?id=${id}`);
 }
 
 function editarCliente(id) {
-    window.location.href = `/cadastroCliente.html?id=${id}`;
+    window.location.assign(`/cadastroCliente.html?id=${id}`);
 }
 
 // Voltar
 function voltarInicio() {
-    window.location.href = "/";
+    window.location.assign("/");
 }
 
 // Mostrar todas
