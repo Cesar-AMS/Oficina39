@@ -30,8 +30,8 @@
         </div>
 
         <div class="form-section">
-            <h3 class="section-titulo">⚡ Consulta Inicial por Placa</h3>
-            <p class="subtitulo-secao">A consulta tenta localizar dados do veículo e, se já existir cadastro local para a placa, também sugere os dados do cliente.</p>
+            <h3 class="section-titulo">1️⃣ Consulta Inicial por Placa</h3>
+            <p class="subtitulo-secao">Use a placa como gatilho do cadastro. Se ela já existir no sistema ou for encontrada na API, os campos abaixo serão preenchidos quando houver dados disponíveis.</p>
 
             <div class="form-row">
                 <div class="form-group">
@@ -45,15 +45,78 @@
                 <div class="form-group">
                     <label>&nbsp;</label>
                     <div class="ajuda-consulta-placa">
-                        Se a consulta falhar, siga com o cadastro manual logo abaixo.
+                        Se a consulta falhar, siga normalmente com o preenchimento manual nas seções abaixo.
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="form-section">
-            <h3 class="section-titulo">📝 Cadastro Manual / Complementar</h3>
-            <p class="subtitulo-secao">Preencha ou complemente os campos abaixo. O CEP também pode ser buscado por API com fallback manual.</p>
+            <h3 class="section-titulo">2️⃣ Dados do Veículo</h3>
+            <p class="subtitulo-secao">Esses dados representam o objeto principal do cadastro e devem vir logo após a consulta inicial por placa.</p>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fabricante">Marca</label>
+                    <input type="text" id="fabricante" placeholder="Ex: Volkswagen, Fiat, Ford">
+                </div>
+
+                <div class="form-group">
+                    <label for="modelo">Modelo</label>
+                    <input type="text" id="modelo" placeholder="Ex: Gol, Onix, Fiesta">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ano">Ano</label>
+                    <input type="text" id="ano" placeholder="2024" maxlength="4">
+                </div>
+
+                <div class="form-group">
+                    <label for="cor">Cor</label>
+                    <input type="text" id="cor" placeholder="Ex: Preto, Branco, Prata">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="motor">Motor</label>
+                    <input type="text" id="motor" placeholder="Ex: 1.0, 1.4, 2.0">
+                </div>
+
+                <div class="form-group">
+                    <label for="combustivel">Combustível</label>
+                    <input type="text" id="combustivel" placeholder="Ex: Gasolina, Flex, Diesel">
+                </div>
+
+                <div class="form-group">
+                    <label for="tanque">Tanque (%)</label>
+                    <input type="text" id="tanque" placeholder="Ex: 1/4, 1/2, 3/4">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="km">KM</label>
+                    <input type="text" id="km" placeholder="Ex: 50000">
+                </div>
+
+                <div class="form-group">
+                    <label for="direcao">Direção</label>
+                    <input type="text" id="direcao" placeholder="Ex: Hidráulica, Elétrica">
+                </div>
+
+                <div class="form-group">
+                    <label for="ar">Ar Condicionado</label>
+                    <input type="text" id="ar" placeholder="Sim / Não">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="section-titulo">3️⃣ Dados Pessoais</h3>
+            <p class="subtitulo-secao">Aqui ficam os dados do dono, proprietário ou responsável pelo veículo.</p>
 
             <div class="form-row">
                 <div class="form-group">
@@ -78,9 +141,11 @@
                     <input type="email" id="email" placeholder="cliente@email.com">
                 </div>
             </div>
+        </div>
 
-            <h3 class="section-titulo secao-subbloco">📍 Endereço</h3>
-            <p class="subtitulo-secao">Se a consulta de CEP não funcionar, você pode preencher o endereço manualmente.</p>
+        <div class="form-section">
+            <h3 class="section-titulo">4️⃣ Endereço</h3>
+            <p class="subtitulo-secao">Use o CEP para preenchimento assistido. Se a consulta não responder, o endereço pode ser completado manualmente.</p>
 
             <div class="form-row">
                 <div class="form-group endereco-full">
@@ -94,7 +159,7 @@
                     <label for="cidade">Cidade</label>
                     <input type="text" id="cidade" placeholder="Digite a cidade">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="estado">Estado</label>
                     <input type="text" id="estado" placeholder="UF" maxlength="2">
@@ -106,67 +171,6 @@
                         <input type="text" id="cep" placeholder="00000-000" maxlength="9">
                         <button type="button" class="btn-campo-acao" onclick="buscarCep()">Buscar CEP</button>
                     </div>
-                </div>
-            </div>
-
-            <h3 class="section-titulo secao-subbloco">🚗 Veículo</h3>
-            <p class="subtitulo-secao">Use a consulta de placa para sugerir os dados do veículo. Se não funcionar, preencha manualmente.</p>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="fabricante">Marca</label>
-                    <input type="text" id="fabricante" placeholder="Ex: Volkswagen, Fiat, Ford">
-                </div>
-                
-                <div class="form-group">
-                    <label for="modelo">Modelo</label>
-                    <input type="text" id="modelo" placeholder="Ex: Gol, Onix, Fiesta">
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="ano">Ano</label>
-                    <input type="text" id="ano" placeholder="2024" maxlength="4">
-                </div>
-                
-                <div class="form-group">
-                    <label for="cor">Cor</label>
-                    <input type="text" id="cor" placeholder="Ex: Preto, Branco, Prata">
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="motor">Motor</label>
-                    <input type="text" id="motor" placeholder="Ex: 1.0, 1.4, 2.0">
-                </div>
-                
-                <div class="form-group">
-                    <label for="combustivel">Combustível</label>
-                    <input type="text" id="combustivel" placeholder="Ex: Gasolina, Flex, Diesel">
-                </div>
-                
-                <div class="form-group">
-                    <label for="tanque">Tanque (%)</label>
-                    <input type="text" id="tanque" placeholder="Ex: 1/4, 1/2, 3/4">
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="km">KM</label>
-                    <input type="text" id="km" placeholder="Ex: 50000">
-                </div>
-                
-                <div class="form-group">
-                    <label for="direcao">Direção</label>
-                    <input type="text" id="direcao" placeholder="Ex: Hidráulica, Elétrica">
-                </div>
-                
-                <div class="form-group">
-                    <label for="ar">Ar Condicionado</label>
-                    <input type="text" id="ar" placeholder="Sim / Não">
                 </div>
             </div>
         </div>

@@ -253,7 +253,7 @@ function limparFormularioCadastro() {
         el.value = '';
         el.style.borderColor = '';
     });
-    document.getElementById('nome_cliente')?.focus();
+    document.getElementById('placa')?.focus();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -321,6 +321,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const valor = (campoCep.value || '').replace(/\D/g, '');
             if (valor.length === 8) buscarCep();
         });
+    }
+
+    if (!clienteEdicaoId) {
+        document.getElementById('placa')?.focus();
     }
 });
 
