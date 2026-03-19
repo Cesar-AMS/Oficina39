@@ -5,7 +5,9 @@
 }
 
 .consultar-container {
+    width: min(100%, 1400px);
     max-width: 1400px;
+    margin: 0 auto;
 }
 
 .titulo-consultar {
@@ -41,6 +43,7 @@
     grid-template-columns: minmax(320px, 760px);
     align-items: start;
     max-width: 760px;
+    margin: 0 auto;
 }
 
 .campo-busca-principal .filtro-input {

@@ -71,6 +71,15 @@ function voltarTelaCliente() {
     window.location.href = destinoPosEdicao();
 }
 
+function executarAoPressionarEnter(campo, callback) {
+    if (!campo) return;
+    campo.addEventListener('keydown', function(e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        callback();
+    });
+}
+
 async function buscarCep() {
     const cepInput = document.getElementById('cep');
     const enderecoInput = document.getElementById('endereco');
@@ -288,6 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.target.value = value;
             }
         });
+        executarAoPressionarEnter(campoPlaca, consultarPlaca);
         campoPlaca.addEventListener('blur', function() {
             const valor = campoPlaca.value.trim();
             if (valor.length >= 7 && !clienteEdicaoId) {
@@ -317,6 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (value.length > 5) value = `${value.slice(0, 5)}-${value.slice(5)}`;
             e.target.value = value;
         });
+        executarAoPressionarEnter(campoCep, buscarCep);
         campoCep.addEventListener('blur', function() {
             const valor = (campoCep.value || '').replace(/\D/g, '');
             if (valor.length === 8) buscarCep();
