@@ -261,14 +261,17 @@
     background: var(--secondary);
     color: white;
     padding: 12px;
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 600;
+    text-align: center;
+    vertical-align: middle;
 }
 
 .tabela-servicos td,
 .tabela-pecas td {
     padding: 8px;
     border-bottom: 1px solid var(--border);
+    vertical-align: middle;
 }
 
 .tabela-servicos input,
@@ -418,6 +421,11 @@
     justify-content: flex-end;
 }
 
+.tabela-pecas .valor-unitario-peca[readonly] {
+    background: var(--bg-hover);
+    font-weight: 600;
+}
+
 .botoes-nova-os .btn-acao-final {
     height: 46px;
     min-width: 190px;
@@ -431,6 +439,15 @@
 
 .botoes-nova-os .btn-imprimir {
     white-space: nowrap;
+}
+
+.botoes-nova-os .btn-caixa {
+    background: var(--secondary);
+    color: #fff;
+}
+
+.botoes-nova-os .btn-caixa:hover {
+    background: var(--secondary-dark);
 }
 
 /* =========================================== */

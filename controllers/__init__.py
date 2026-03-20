@@ -7,6 +7,7 @@ from .ordens_routes import ordens_bp
 from .fluxo_routes import fluxo_bp
 from .profissionais_routes import profissionais_bp
 from .config_routes import config_bp
+from .debitos_routes import debitos_bp
 from .export_routes import export_bp
 from .relatorios_routes import relatorios_bp
 from .paginas_routes import paginas_bp
@@ -19,6 +20,7 @@ blueprints = [
     fluxo_bp,
     profissionais_bp,
     config_bp,
+    debitos_bp,
     export_bp,
     relatorios_bp,
     paginas_bp,

@@ -64,6 +64,14 @@ def fluxo_caixa_page():
     return render_template('fluxoCaixa.html')
 
 # ===========================================
+# DÉBITOS
+# ===========================================
+@paginas_bp.route('/debitos.html')
+def debitos_page():
+    """Página de débitos em aberto"""
+    return render_template('debitos.html')
+
+# ===========================================
 # CONFIGURAÇÕES
 # ===========================================
 @paginas_bp.route('/config_contador.html')

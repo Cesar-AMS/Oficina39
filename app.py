@@ -86,6 +86,30 @@ def create_app():
                 )
                 db.session.commit()
                 print("Coluna observacao_interna adicionada em ordens")
+            if 'debito_vencimento' not in colunas_ordens:
+                db.session.execute(
+                    text("ALTER TABLE ordens ADD COLUMN debito_vencimento DATE")
+                )
+                db.session.commit()
+                print("Coluna debito_vencimento adicionada em ordens")
+            if 'debito_observacao' not in colunas_ordens:
+                db.session.execute(
+                    text("ALTER TABLE ordens ADD COLUMN debito_observacao VARCHAR(255)")
+                )
+                db.session.commit()
+                print("Coluna debito_observacao adicionada em ordens")
+            if 'desconto_percentual' not in colunas_ordens:
+                db.session.execute(
+                    text("ALTER TABLE ordens ADD COLUMN desconto_percentual FLOAT DEFAULT 0")
+                )
+                db.session.commit()
+                print("Coluna desconto_percentual adicionada em ordens")
+            if 'desconto_valor' not in colunas_ordens:
+                db.session.execute(
+                    text("ALTER TABLE ordens ADD COLUMN desconto_valor FLOAT DEFAULT 0")
+                )
+                db.session.commit()
+                print("Coluna desconto_valor adicionada em ordens")
 
         if 'servicos' in inspector.get_table_names():
             colunas_servicos = {c['name'] for c in inspector.get_columns('servicos')}
@@ -121,6 +145,30 @@ def create_app():
                     db.session.execute(text(sql))
                     db.session.commit()
                     print(f"Coluna {nome_coluna} adicionada em config_contador")
+
+        if 'pecas' in inspector.get_table_names():
+            colunas_pecas = {c['name'] for c in inspector.get_columns('pecas')}
+            if 'valor_custo' not in colunas_pecas:
+                db.session.execute(
+                    text("ALTER TABLE pecas ADD COLUMN valor_custo FLOAT DEFAULT 0")
+                )
+                db.session.commit()
+                print("Coluna valor_custo adicionada em pecas")
+            if 'percentual_lucro' not in colunas_pecas:
+                db.session.execute(
+                    text("ALTER TABLE pecas ADD COLUMN percentual_lucro FLOAT DEFAULT 0")
+                )
+                db.session.commit()
+                print("Coluna percentual_lucro adicionada em pecas")
+
+        if 'config_contador' in inspector.get_table_names():
+            colunas_config = {c['name'] for c in inspector.get_columns('config_contador')}
+            if 'whatsapp_orcamento' not in colunas_config:
+                db.session.execute(
+                    text("ALTER TABLE config_contador ADD COLUMN whatsapp_orcamento VARCHAR(30)")
+                )
+                db.session.commit()
+                print("Coluna whatsapp_orcamento adicionada em config_contador")
 
         # Verificar quais tabelas foram criadas
         tabelas = inspector.get_table_names()

@@ -5,7 +5,10 @@ from repositories import cliente_repository, ordem_repository
 from services.auditoria_service import registrar_evento_auditoria
 
 STATUS_CONCLUIDOS = {'Concluído', 'Garantia'}
-FORMAS_PAGAMENTO_VALIDAS = {'Dinheiro', 'Pix', 'Cartão', 'Boleto', 'Transferência', 'Não informado'}
+FORMAS_PAGAMENTO_VALIDAS = {
+    'Dinheiro', 'Pix', 'Cartão', 'Cartão débito', 'Cartão crédito',
+    'Transferência', 'Boleto', 'Outro', 'Múltiplos', 'Não informado'
+}
 
 
 def normalizar_forma_pagamento(valor):
@@ -17,9 +20,16 @@ def normalizar_forma_pagamento(valor):
         'pix': 'Pix',
         'cartao': 'Cartão',
         'cartão': 'Cartão',
+        'cartao debito': 'Cartão débito',
+        'cartão débito': 'Cartão débito',
+        'cartao credito': 'Cartão crédito',
+        'cartão crédito': 'Cartão crédito',
         'boleto': 'Boleto',
         'transferencia': 'Transferência',
         'transferência': 'Transferência',
+        'outro': 'Outro',
+        'multiplos': 'Múltiplos',
+        'múltiplos': 'Múltiplos',
         'nao informado': 'Não informado',
         'não informado': 'Não informado'
     }
@@ -54,6 +64,18 @@ def _recalcular_totais_manualmente(ordem):
     ordem.total_servicos = sum(float(s.valor_servico or 0) for s in ordem.servicos)
     ordem.total_pecas = sum(float((p.quantidade or 0) * (p.valor_unitario or 0)) for p in ordem.pecas)
     ordem.total_geral = ordem.total_servicos + ordem.total_pecas
+
+
+def _calcular_valor_venda_peca(dados_peca):
+    valor_unitario = float(dados_peca.get('valor_unitario') or 0)
+    valor_custo = float(dados_peca.get('valor_custo') or 0)
+    percentual_lucro = float(dados_peca.get('percentual_lucro') or 0)
+
+    if valor_unitario > 0:
+        return valor_unitario, valor_custo, percentual_lucro
+
+    valor_unitario = valor_custo * (1 + (percentual_lucro / 100))
+    return valor_unitario, valor_custo, percentual_lucro
 
 
 def criar_ordem(dados, request_ctx):
@@ -97,12 +119,15 @@ def criar_ordem(dados, request_ctx):
 
     for peca in dados.get('pecas', []):
         if peca.get('descricao_peca'):
+            valor_unitario, valor_custo, percentual_lucro = _calcular_valor_venda_peca(peca)
             db.session.add(ItemPeca(
                 ordem_id=ordem.id,
                 codigo_peca=peca.get('codigo_peca', ''),
                 descricao_peca=peca['descricao_peca'],
                 quantidade=peca.get('quantidade', 1),
-                valor_unitario=peca.get('valor_unitario', 0)
+                valor_custo=valor_custo,
+                percentual_lucro=percentual_lucro,
+                valor_unitario=valor_unitario
             ))
 
     db.session.flush()
@@ -159,12 +184,15 @@ def atualizar_ordem(ordem, dados, request_ctx):
         ItemPeca.query.filter_by(ordem_id=ordem.id).delete()
         for peca in dados['pecas']:
             if peca.get('descricao_peca'):
+                valor_unitario, valor_custo, percentual_lucro = _calcular_valor_venda_peca(peca)
                 db.session.add(ItemPeca(
                     ordem_id=ordem.id,
                     codigo_peca=peca.get('codigo_peca', ''),
                     descricao_peca=peca['descricao_peca'],
                     quantidade=peca.get('quantidade', 1),
-                    valor_unitario=peca.get('valor_unitario', 0)
+                    valor_custo=valor_custo,
+                    percentual_lucro=percentual_lucro,
+                    valor_unitario=valor_unitario
                 ))
 
     db.session.flush()
@@ -300,6 +328,8 @@ def duplicar_ordem(origem, request_ctx):
             codigo_peca=p.codigo_peca,
             descricao_peca=p.descricao_peca,
             quantidade=p.quantidade or 0,
+            valor_custo=p.valor_custo or 0,
+            percentual_lucro=p.percentual_lucro or 0,
             valor_unitario=p.valor_unitario or 0
         ))
 

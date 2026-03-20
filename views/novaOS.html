@@ -216,6 +216,8 @@
                             <th>Código</th>
                             <th>Descrição</th>
                             <th>Qtd</th>
+                            <th>Valor Custo</th>
+                            <th>Lucro %</th>
                             <th>Valor Unit.</th>
                             <th>Valor Total</th>
                             <th></th>
@@ -255,7 +257,8 @@
         <!-- BOTÕES -->
         <div class="button-group botoes-nova-os button-group-final">
             <button class="btn btn-cancelar btn-final" onclick="cancelar()">✕ Cancelar</button>
-            <button class="btn btn-salvar btn-final btn-imprimir" id="btnSalvarImprimir" onclick="salvarEImprimir()">💾 Salvar e Imprimir</button>
+            <button class="btn btn-salvar btn-final btn-caixa" id="btnFinalizarCaixa" onclick="finalizarNoCaixa()">✅ Finalizar no Caixa</button>
+            <button class="btn btn-salvar btn-final btn-imprimir" id="btnSalvarImprimir" onclick="enviarOrcamentoWhatsapp()">📲 Enviar Orçamento</button>
         </div>
 
     </div>

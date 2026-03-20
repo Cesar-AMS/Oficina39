@@ -1,8 +1,84 @@
 from datetime import datetime, timedelta
 
 from extensions import db
-from models import Saida
-from repositories import ordem_repository, saida_repository
+from models import OrdemPagamento, Saida
+from repositories import saida_repository
+
+
+FORMAS_PAGAMENTO_FECHAMENTO = ['Pix', 'Cartão', 'Dinheiro', 'Boleto', 'Não informado']
+
+
+def _listar_pagamentos_periodo(data_inicio, data_fim):
+    return (
+        OrdemPagamento.query
+        .join(OrdemPagamento.ordem)
+        .filter(OrdemPagamento.data_pagamento >= data_inicio, OrdemPagamento.data_pagamento <= data_fim)
+        .order_by(OrdemPagamento.data_pagamento.desc(), OrdemPagamento.id.desc())
+        .all()
+    )
+
+
+def _veiculo_cliente(cliente):
+    if not cliente:
+        return ''
+    return f"{cliente.fabricante or ''} {cliente.modelo or ''}".strip()
+
+
+def _serializar_entrada_pagamento(pagamento):
+    ordem = pagamento.ordem
+    cliente = ordem.cliente if ordem else None
+    return {
+        'id': pagamento.id,
+        'ordem_id': ordem.id if ordem else None,
+        'data': pagamento.data_pagamento.strftime('%d/%m/%Y'),
+        'cliente_nome': cliente.nome_cliente if cliente else '---',
+        'veiculo': _veiculo_cliente(cliente),
+        'placa': cliente.placa if cliente else '---',
+        'forma_pagamento': pagamento.forma_pagamento,
+        'observacao': pagamento.observacao,
+        'total': float(pagamento.valor or 0),
+        'total_pago': float(ordem.total_pago or 0) if ordem else 0,
+        'saldo_pendente': float(ordem.saldo_pendente or 0) if ordem else 0,
+        'status_financeiro': ordem.status_financeiro if ordem else '---',
+        'status': ordem.status if ordem else '---'
+    }
+
+
+def _serializar_saida(saida):
+    return {
+        'id': saida.id,
+        'data': saida.data.strftime('%d/%m/%Y') if saida.data else None,
+        'descricao': saida.descricao,
+        'categoria': saida.categoria or 'Outros',
+        'valor': float(saida.valor or 0)
+    }
+
+
+def _normalizar_valor_positivo(valor):
+    valor_numerico = float(valor)
+    if valor_numerico <= 0:
+        raise ValueError('Valor deve ser maior que zero')
+    return valor_numerico
+
+
+def _parse_data_recebida(data_str):
+    return datetime.strptime(data_str, '%Y-%m-%d') if data_str else datetime.now()
+
+
+def _agrupar_valores_por_forma(pagamentos_periodo):
+    esperados = {}
+    for pagamento in pagamentos_periodo:
+        forma = pagamento.forma_pagamento or 'Não informado'
+        esperados[forma] = esperados.get(forma, 0.0) + float(pagamento.valor or 0)
+    return esperados
+
+
+def _formas_para_comparativo(esperados, contagem):
+    formas = list(FORMAS_PAGAMENTO_FECHAMENTO)
+    for forma in list(esperados.keys()) + list(contagem.keys()):
+        if forma not in formas:
+            formas.append(forma)
+    return formas
 
 
 def periodo_por_data(data_str=None):
@@ -38,29 +114,9 @@ def resolver_intervalo_periodo(periodo):
 
 def obter_fluxo_periodo(periodo):
     data_inicio, data_fim = resolver_intervalo_periodo(periodo)
-    ordens_concluidas = ordem_repository.listar_concluidas_por_periodo(data_inicio, data_fim)
-    entradas = []
-    for ordem in ordens_concluidas:
-        cliente = ordem.cliente
-        data_ordem = ordem.data_conclusao or ordem.data_retirada
-        if data_ordem:
-            entradas.append({
-                'id': ordem.id,
-                'data': data_ordem.strftime('%d/%m/%Y'),
-                'cliente_nome': cliente.nome_cliente if cliente else '---',
-                'veiculo': f"{cliente.fabricante or ''} {cliente.modelo or ''}".strip() if cliente else '',
-                'placa': cliente.placa if cliente else '---',
-                'total': float(ordem.total_geral or 0),
-                'status': ordem.status
-            })
-
-    saidas = [{
-        'id': s.id,
-        'data': s.data.strftime('%d/%m/%Y') if s.data else None,
-        'descricao': s.descricao,
-        'categoria': s.categoria or 'Outros',
-        'valor': float(s.valor or 0)
-    } for s in saida_repository.listar_por_periodo(data_inicio, data_fim)]
+    pagamentos_periodo = _listar_pagamentos_periodo(data_inicio, data_fim)
+    entradas = [_serializar_entrada_pagamento(pagamento) for pagamento in pagamentos_periodo]
+    saidas = [_serializar_saida(saida) for saida in saida_repository.listar_por_periodo(data_inicio, data_fim)]
 
     return {'entradas': entradas, 'saidas': saidas}
 
@@ -69,15 +125,12 @@ def criar_saida(dados):
     if not dados.get('descricao') or not dados.get('valor'):
         raise ValueError('Descrição e valor são obrigatórios')
 
-    data_recebida = dados.get('data')
-    if data_recebida:
-        data_obj = datetime.strptime(data_recebida, '%Y-%m-%d')
-    else:
-        data_obj = datetime.now()
+    data_obj = _parse_data_recebida(dados.get('data'))
+    valor = _normalizar_valor_positivo(dados['valor'])
 
     saida = Saida(
         descricao=dados['descricao'],
-        valor=float(dados['valor']),
+        valor=valor,
         data=data_obj,
         categoria=dados.get('categoria', 'Outros')
     )
@@ -93,19 +146,14 @@ def fechamento_conferencia(dados):
         raise TypeError('contagem deve ser um objeto.')
 
     data_inicio, data_fim = periodo_por_data(data_ref)
-    esperados_rows = ordem_repository.somatorio_por_forma_pagamento(data_inicio, data_fim)
-    esperados = {row.forma_pagamento: float(row.valor_esperado or 0) for row in esperados_rows}
-
-    ordem_formas = ['Pix', 'Cartão', 'Dinheiro', 'Boleto', 'Transferência', 'Não informado']
-    formas_dict = {forma: True for forma in ordem_formas}
-    for forma in list(esperados.keys()) + list(contagem.keys()):
-        if forma not in formas_dict:
-            formas_dict[forma] = True
+    pagamentos_periodo = _listar_pagamentos_periodo(data_inicio, data_fim)
+    esperados = _agrupar_valores_por_forma(pagamentos_periodo)
+    formas = _formas_para_comparativo(esperados, contagem)
 
     comparativo = []
     total_esperado = 0.0
     total_contado = 0.0
-    for forma in formas_dict.keys():
+    for forma in formas:
         esperado = float(esperados.get(forma, 0.0))
         contado = float(contagem.get(forma, 0.0) or 0.0)
         diferenca = contado - esperado

@@ -34,6 +34,7 @@ def salvar_config_contador(dados):
     config.placa_api_key_primaria = (dados.get('placa_api_key_primaria') or '').strip() or None
     config.placa_provider_secundario = (dados.get('placa_provider_secundario') or '').strip() or None
     config.placa_api_key_secundaria = (dados.get('placa_api_key_secundaria') or '').strip() or None
+    config.whatsapp_orcamento = (dados.get('whatsapp_orcamento') or '').strip() or None
 
     if not config.id:
         db.session.add(config)

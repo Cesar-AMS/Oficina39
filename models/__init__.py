@@ -13,6 +13,7 @@ from .profissional import Profissional
 from .ordem_status_log import OrdemStatusLog
 from .ordem_anexo import OrdemAnexo
 from .auditoria_evento import AuditoriaEvento
+from .ordem_pagamento import OrdemPagamento
 
 # Lista de todos os models para facilitar importação
 __all__ = [
@@ -26,7 +27,8 @@ __all__ = [
     'Profissional',
     'OrdemStatusLog',
     'OrdemAnexo',
-    'AuditoriaEvento'
+    'AuditoriaEvento',
+    'OrdemPagamento'
 ]
 
 # Opcional: print para debug

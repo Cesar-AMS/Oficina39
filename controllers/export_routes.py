@@ -391,20 +391,21 @@ def gerar_pdf_ordem(id):
         elementos.append(Paragraph("PECAS UTILIZADAS", estilo_secao))
 
         if ordem.pecas and len(ordem.pecas) > 0:
-            pecas_data = [['Código', 'Descrição', 'Qtd', 'Valor Unit.', 'Total']]
+            pecas_data = [['Código', 'Descrição', 'Qtd', 'Lucro %', 'Valor Unit.', 'Total']]
             for p in ordem.pecas:
                 total = p.quantidade * p.valor_unitario
                 pecas_data.append([
                     p.codigo_peca or '---',
                     p.descricao_peca or '---',
                     str(p.quantidade),
+                    f"{float(getattr(p, 'percentual_lucro', 0) or 0):.2f}%",
                     moeda(p.valor_unitario),
                     moeda(total)
                 ])
 
             pecas_table = Table(
                 pecas_data,
-                colWidths=larguras_proporcionais(largura_conteudo, [24, 78, 18, 35, 35]),
+                colWidths=larguras_proporcionais(largura_conteudo, [22, 74, 16, 20, 29, 29]),
                 hAlign='LEFT'
             )
             pecas_table.setStyle(TableStyle([
@@ -442,8 +443,16 @@ def gerar_pdf_ordem(id):
              Paragraph(moeda(ordem.total_servicos), estilo_valor)],
             [Paragraph('Total Peças:', estilo_normal),
              Paragraph(moeda(ordem.total_pecas), estilo_valor)],
-            [Paragraph('TOTAL GERAL:', estilo_total_geral),
-             Paragraph(moeda(ordem.total_geral), estilo_total_geral)]
+            [Paragraph('Desconto aplicado:', estilo_normal),
+             Paragraph(moeda(getattr(ordem, 'desconto_valor', 0)), estilo_valor)],
+            [Paragraph('Total Pago:', estilo_normal),
+             Paragraph(moeda(getattr(ordem, 'total_pago', 0)), estilo_valor)],
+            [Paragraph('Saldo Pendente:', estilo_normal),
+             Paragraph(moeda(getattr(ordem, 'saldo_pendente', 0)), estilo_valor)],
+            [Paragraph('TOTAL BRUTO:', estilo_normal),
+             Paragraph(moeda(ordem.total_geral), estilo_valor)],
+            [Paragraph('TOTAL FINAL DA VENDA:', estilo_total_geral),
+             Paragraph(moeda(getattr(ordem, 'total_cobrado', ordem.total_geral)), estilo_total_geral)]
         ]
 
         resumo_table = Table(
@@ -455,12 +464,65 @@ def gerar_pdf_ordem(id):
             ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
             ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
             ('LINEABOVE', (0, 2), (1, 2), 0.5, colors.HexColor('#dddddd')),
-            ('LINEABOVE', (0, 3), (1, 3), 0.5, colors.HexColor('#dddddd')),
+            ('LINEABOVE', (0, 4), (1, 4), 0.5, colors.HexColor('#dddddd')),
             ('TOPPADDING', (0, 2), (1, -1), 5),
             ('BOTTOMPADDING', (0, 0), (1, -1), 3),
             ('BACKGROUND', (0, 1), (1, -1), colors.HexColor('#f8f9fb')),
         ]))
         elementos.append(resumo_table)
+        elementos.append(Spacer(1, 8*mm))
+
+        elementos.append(Paragraph("RESUMO FINANCEIRO", estilo_secao))
+        if float(getattr(ordem, 'saldo_pendente', 0) or 0) > 0.009:
+            detalhes_debito = []
+            detalhes_debito.append(
+                f"<b>Valor restante em aberto:</b> {moeda(getattr(ordem, 'saldo_pendente', 0))}"
+            )
+            if getattr(ordem, 'debito_vencimento', None):
+                detalhes_debito.append(
+                    f"<b>Vencimento:</b> {ordem.debito_vencimento.strftime('%d/%m/%Y')}"
+                )
+            if getattr(ordem, 'debito_observacao', None):
+                detalhes_debito.append(
+                    f"<b>Observação do débito:</b> {ordem.debito_observacao}"
+                )
+            elementos.append(Paragraph('<br/>'.join(detalhes_debito), estilo_normal))
+            elementos.append(Spacer(1, 3*mm))
+
+        pagamentos = getattr(ordem, 'pagamentos', []) or []
+        if pagamentos:
+            pagamentos_data = [['Data', 'Forma', 'Valor', 'Observação']]
+            for pg in pagamentos:
+                pagamentos_data.append([
+                    pg.data_pagamento.strftime('%d/%m/%Y %H:%M') if getattr(pg, 'data_pagamento', None) else '---',
+                    pg.forma_pagamento or '---',
+                    moeda(pg.valor),
+                    pg.observacao or '---'
+                ])
+
+            pagamentos_table = Table(
+                pagamentos_data,
+                colWidths=larguras_proporcionais(largura_conteudo, [34, 30, 26, 100]),
+                hAlign='LEFT'
+            )
+            pagamentos_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0a3147')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#dddddd')),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('ALIGN', (0, 1), (1, -1), 'CENTER'),
+                ('ALIGN', (2, 1), (2, -1), 'RIGHT'),
+                ('ALIGN', (3, 1), (3, -1), 'LEFT'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 3),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ]))
+            elementos.append(pagamentos_table)
+        else:
+            elementos.append(Paragraph("Nenhum pagamento registrado", estilo_normal))
         elementos.append(Spacer(1, 8*mm))
 
         # ===========================================

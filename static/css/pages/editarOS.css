@@ -207,7 +207,7 @@
     padding: 12px 8px;
     font-weight: 600;
     font-size: 0.9rem;
-    text-align: left;
+    text-align: center;
     white-space: nowrap;
 }
 
@@ -216,6 +216,7 @@
     border-bottom: 1px solid var(--border);
     color: var(--text-primary);
     font-size: 0.9rem;
+    vertical-align: middle;
 }
 
 .tabela-itens tbody tr:nth-child(even) {
@@ -234,6 +235,11 @@
     background: var(--bg-card);
     color: var(--text-primary);
     font-size: 0.9rem;
+}
+
+.tabela-itens .valor-unitario-peca[readonly] {
+    background: var(--bg-hover);
+    font-weight: 600;
 }
 
 /* =========================================== */

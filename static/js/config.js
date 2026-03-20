@@ -30,6 +30,15 @@ function formatarCnpj(valor) {
     return `${digitos.slice(0, 2)}.${digitos.slice(2, 5)}.${digitos.slice(5, 8)}/${digitos.slice(8, 12)}-${digitos.slice(12, 14)}`;
 }
 
+function formatarWhatsapp(valor) {
+    const digitos = soDigitos(valor).slice(0, 13);
+    if (!digitos) return '';
+    if (digitos.length <= 2) return `+${digitos}`;
+    if (digitos.length <= 4) return `+${digitos.slice(0, 2)} (${digitos.slice(2)}`;
+    if (digitos.length <= 9) return `+${digitos.slice(0, 2)} (${digitos.slice(2, 4)}) ${digitos.slice(4)}`;
+    return `+${digitos.slice(0, 2)} (${digitos.slice(2, 4)}) ${digitos.slice(4, 9)}-${digitos.slice(9)}`;
+}
+
 function validarCnpj(cnpj) {
     const valor = soDigitos(cnpj);
     if (valor.length !== 14) return false;
@@ -125,6 +134,7 @@ function preencherCampos(config) {
     if (config.placa_api_key_primaria) getEl('placaApiKeyPrimaria').value = config.placa_api_key_primaria;
     if (config.placa_provider_secundario) getEl('placaProviderSecundario').value = config.placa_provider_secundario;
     if (config.placa_api_key_secundaria) getEl('placaApiKeySecundaria').value = config.placa_api_key_secundaria;
+    if (config.whatsapp_orcamento) getEl('whatsappOrcamento').value = formatarWhatsapp(config.whatsapp_orcamento);
 
     const selectProf = getEl('profissionalEnvioAuto');
     if (selectProf) {
@@ -174,7 +184,8 @@ async function salvarConfig() {
         placa_provider_primario: (getEl('placaProviderPrimario')?.value || '').trim(),
         placa_api_key_primaria: (getEl('placaApiKeyPrimaria')?.value || '').trim(),
         placa_provider_secundario: (getEl('placaProviderSecundario')?.value || '').trim(),
-        placa_api_key_secundaria: (getEl('placaApiKeySecundaria')?.value || '').trim()
+        placa_api_key_secundaria: (getEl('placaApiKeySecundaria')?.value || '').trim(),
+        whatsapp_orcamento: soDigitos(getEl('whatsappOrcamento')?.value || '')
     };
 
     try {
@@ -406,6 +417,13 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarConfig();
     carregarHistorico();
     carregarProfissionaisCadastrados();
+
+    const whatsappInput = getEl('whatsappOrcamento');
+    if (whatsappInput) {
+        whatsappInput.addEventListener('input', () => {
+            whatsappInput.value = formatarWhatsapp(whatsappInput.value);
+        });
+    }
 
     const cnpjCadastroInput = getEl('cnpjProfissionalCadastro');
     if (cnpjCadastroInput) {

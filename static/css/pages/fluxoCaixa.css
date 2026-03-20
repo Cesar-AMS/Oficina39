@@ -92,6 +92,454 @@
     color: white;
 }
 
+.fluxo-tabs-barra {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin: var(--space-lg) 0 0;
+}
+
+.fluxo-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.fluxo-tab-retorno {
+    flex-shrink: 0;
+}
+
+.fluxo-tab {
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.fluxo-tab.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+.fluxo-tab-panel {
+    display: none;
+}
+
+.fluxo-tab-panel.active {
+    display: block;
+}
+
+.caixa-dia-section {
+    margin-top: 18px;
+}
+
+.pdv-section {
+    margin-top: 18px;
+}
+
+.pdv-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.pdv-card {
+    margin-top: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--bg-card);
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.12);
+}
+
+.pdv-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.pdv-grid-dados,
+.pdv-grid-pagamento,
+.pdv-grid-resumo {
+    grid-template-columns: 1fr;
+}
+
+.pdv-box {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    background: var(--bg-body);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.pdv-box-titulo {
+    margin: 0 0 14px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+#fluxoTabOs .pdv-card {
+    padding: 14px;
+    max-height: calc(100vh - 235px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+#fluxoTabOs .pdv-box {
+    padding: 10px;
+}
+
+#fluxoTabOs .pdv-box .form-row {
+    margin-bottom: 6px;
+    align-items: end;
+}
+
+#fluxoTabOs .pdv-box .form-group {
+    margin-bottom: 0;
+}
+
+#fluxoTabOs .pdv-box label {
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+
+#fluxoTabOs .pdv-box input,
+#fluxoTabOs .pdv-box select {
+    height: 34px;
+    padding: 0 8px;
+    font-size: 0.9rem;
+}
+
+#fluxoTabOs .pdv-form-group-acao {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+#fluxoTabOs .pdv-btn-full {
+    width: 100%;
+    min-width: 0;
+}
+
+#fluxoTabOs .pdv-tab {
+    padding: 9px 12px;
+    font-size: 0.84rem;
+}
+
+#fluxoTabOs .pdv-hint-box {
+    margin-top: 8px;
+    padding: 7px 9px;
+    font-size: 0.84rem;
+}
+
+#fluxoTabOs .table-container {
+    margin: 12px 0;
+    max-height: 210px;
+    overflow-y: auto;
+}
+
+#fluxoTabOs .tabela-pagamentos-modal th,
+#fluxoTabOs .tabela-pagamentos-modal td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+#fluxoTabOs .modal-actions {
+    margin-top: 12px;
+    padding-top: 10px;
+}
+
+#fluxoTabOs .pdv-final-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+#fluxoTabOs .pdv-final-actions-direita {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#fluxoTabOs .pdv-final-actions .btn {
+    min-width: 150px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#fluxoTabOs .pdv-final-actions-simples {
+    justify-content: flex-end;
+}
+
+#fluxoTabOs .pdv-box-titulo {
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+}
+
+.pdv-step-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.pdv-step-actions .btn {
+    min-width: 136px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pdv-step-actions .btn-voltar {
+    order: 1;
+}
+
+.pdv-step-actions .btn-salvar {
+    order: 2;
+}
+
+#fluxoTabOs .tabela-pagamentos-modal {
+    table-layout: fixed;
+}
+
+#fluxoTabOs .tabela-pagamentos-modal th:nth-child(1),
+#fluxoTabOs .tabela-pagamentos-modal td:nth-child(1) {
+    width: 22%;
+}
+
+#fluxoTabOs .tabela-pagamentos-modal th:nth-child(2),
+#fluxoTabOs .tabela-pagamentos-modal td:nth-child(2) {
+    width: 16%;
+}
+
+#fluxoTabOs .tabela-pagamentos-modal th:nth-child(4),
+#fluxoTabOs .tabela-pagamentos-modal td:nth-child(4) {
+    width: 16%;
+}
+
+.pdv-tabs {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.pdv-hint-box {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(10, 49, 71, 0.05);
+    border: 1px solid rgba(10, 49, 71, 0.14);
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.pdv-hint-box strong {
+    color: var(--text-primary);
+}
+
+.pdv-tab {
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 42px;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.pdv-tab:hover:not(:disabled) {
+    border-color: var(--secondary);
+    transform: translateY(-1px);
+}
+
+.pdv-tab.active {
+    background: var(--secondary);
+    color: #fff;
+    border-color: var(--secondary);
+    box-shadow: 0 10px 24px rgba(10, 49, 71, 0.18);
+}
+
+.pdv-tab:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pdv-tab-panel {
+    display: none;
+}
+
+.pdv-tab-panel.active {
+    display: block;
+}
+
+.pdv-busca-resultado {
+    margin-top: 14px;
+}
+
+.pdv-busca-lista {
+    max-height: 220px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+}
+
+.pdv-busca-tabela th:nth-child(1),
+.pdv-busca-tabela td:nth-child(1) {
+    width: 10%;
+}
+
+.pdv-busca-tabela th:nth-child(2),
+.pdv-busca-tabela td:nth-child(2) {
+    width: 28%;
+}
+
+.pdv-busca-tabela th:nth-child(3),
+.pdv-busca-tabela td:nth-child(3) {
+    width: 18%;
+}
+
+.pdv-busca-tabela th:nth-child(4),
+.pdv-busca-tabela td:nth-child(4) {
+    width: 16%;
+}
+
+.pdv-busca-tabela th:nth-child(5),
+.pdv-busca-tabela td:nth-child(5) {
+    width: 14%;
+}
+
+.pdv-busca-tabela th:nth-child(6),
+.pdv-busca-tabela td:nth-child(6) {
+    width: 14%;
+}
+
+.pdv-busca-tabela tr td:last-child,
+.pdv-busca-tabela tr th:last-child {
+    text-align: right;
+}
+
+.pdv-busca-tabela .btn {
+    min-width: 110px;
+}
+
+.form-group-destaque input[readonly] {
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.form-group-financeiro input[readonly] {
+    border-color: rgba(39, 174, 96, 0.45);
+    background: rgba(39, 174, 96, 0.1);
+    color: #daf5e5;
+}
+
+.form-group-saldo input[readonly] {
+    border-color: rgba(196, 69, 54, 0.45);
+    background: rgba(196, 69, 54, 0.12);
+    color: #ffd9d2;
+}
+
+.form-group-status input[readonly] {
+    border-color: rgba(10, 49, 71, 0.45);
+    background: rgba(10, 49, 71, 0.14);
+}
+
+.form-group-entrada-principal input {
+    border-width: 2px;
+    border-color: rgba(39, 174, 96, 0.5);
+    background: rgba(39, 174, 96, 0.08);
+    font-weight: 700;
+}
+
+.pdv-painel-rapido {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.pdv-painel-item {
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.pdv-painel-item-destaque {
+    border-color: rgba(196, 69, 54, 0.45);
+    background: rgba(196, 69, 54, 0.12);
+}
+
+.pdv-painel-label {
+    display: block;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.pdv-painel-item strong {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.pdv-resumo-topo {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.pdv-resumo-topo-item {
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: rgba(10, 49, 71, 0.08);
+}
+
+.pdv-resumo-topo-item-alerta {
+    border-color: rgba(196, 69, 54, 0.45);
+    background: rgba(196, 69, 54, 0.12);
+}
+
+.pdv-resumo-topo-item span {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+
+.pdv-resumo-topo-item strong {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
 .resumo-item {
     text-align: center;
     min-width: 150px;
@@ -248,10 +696,6 @@
     grid-column: span 2;
 }
 
-/* =========================================== */
-/* ===== TABELAS - VERSÃO PROPORCIONAL ======= */
-/* =========================================== */
-
 .table-container {
     width: 100%;
     overflow-x: auto;
@@ -260,167 +704,66 @@
     border-radius: var(--radius-lg);
 }
 
-.tabela-saidas,
-.tabela-entradas {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    table-layout: fixed !important;
-}
-
-/* Cabeçalhos */
-.tabela-saidas th,
-.tabela-entradas th {
-    background-color: var(--cor-modal-header) !important;
-    color: white !important;
-    padding: 12px 8px !important;
-    font-weight: 600 !important;
-    white-space: nowrap !important;
-}
-
-/* Células */
-.tabela-saidas td,
-.tabela-entradas td {
-    padding: 10px 8px !important;
-    border-bottom: 1px solid var(--border) !important;
-    vertical-align: middle !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-}
-
-/* ===== LARGURAS PROPORCIONAIS ===== */
-
-/* Coluna 1 - Data (pequena) */
-.tabela-saidas th:nth-child(1),
-.tabela-saidas td:nth-child(1),
-.tabela-entradas th:nth-child(1),
-.tabela-entradas td:nth-child(1) { width: 9% !important; }
-
-/* Coluna 2 - Informação curta (Categoria/Cliente) */
-.tabela-saidas th:nth-child(2),
-.tabela-saidas td:nth-child(2),
-.tabela-entradas th:nth-child(2),
-.tabela-entradas td:nth-child(2) { width: 14% !important; }
-
-/* Coluna 3 - Descrição/Serviço (maior espaço) */
-.tabela-saidas th:nth-child(3),
-.tabela-saidas td:nth-child(3),
-.tabela-entradas th:nth-child(3),
-.tabela-entradas td:nth-child(3) { width: 32% !important; }
-
-/* Coluna 4 - Valor (médio) */
-.tabela-saidas th:nth-child(4),
-.tabela-saidas td:nth-child(4),
-.tabela-entradas th:nth-child(4),
-.tabela-entradas td:nth-child(4) { 
-    width: 12% !important;
-    text-align: right !important;
-    padding-right: 15px !important;
-}
-
-/* Coluna 5 - Ações/Pagamento (médio) */
-.tabela-saidas th:nth-child(5),
-.tabela-saidas td:nth-child(5),
-.tabela-entradas th:nth-child(5),
-.tabela-entradas td:nth-child(5) { width: 15% !important; }
-
-/* ===== CORES DOS VALORES ===== */
-.tabela-saidas td:nth-child(4) {
-    color: var(--cor-saida) !important;
-    font-weight: 700 !important;
-}
-
-.tabela-entradas td:nth-child(4) {
-    color: var(--cor-entrada) !important;
-    font-weight: 700 !important;
-}
-
-/* Alinhamento dos valores */
-.tabela-saidas th:nth-child(4),
-.tabela-entradas th:nth-child(4) {
-    text-align: right !important;
-    padding-right: 15px !important;
-}
-
-/* ===== LINHAS ALTERNADAS ===== */
-.tabela-saidas tbody tr:nth-child(even),
-.tabela-entradas tbody tr:nth-child(even) {
-    background-color: rgba(0, 0, 0, 0.02) !important;
-}
-
-.tabela-saidas tbody tr:hover,
-.tabela-entradas tbody tr:hover {
-    background-color: rgba(196, 69, 54, 0.05) !important;
-}
-
-/* =========================================== */
-/* ===== AJUSTE DA ÚLTIMA COLUNA ============= */
-/* =========================================== */
-
-/* Centralizar o cabeçalho "Ações" */
-.tabela-saidas th:last-child {
-    text-align: center !important;
-}
-
-/* Centralizar o conteúdo da coluna de ações */
-.tabela-saidas td:last-child {
-    text-align: center !important;
-    vertical-align: middle !important;
-}
-
-/* Ajustar o botão excluir */
-.tabela-saidas .btn-excluir {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin: 0 auto !important;
-    width: auto !important;
-    min-width: 80px !important;
-    padding: 8px 16px !important;
-    font-size: 0.9rem !important;
-    border-radius: 20px !important;  /* Botão mais arredondado */
-    background-color: var(--cor-saida) !important;
-    color: white !important;
-    border: none !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-}
-
-.tabela-saidas .btn-excluir:hover {
-    background-color: var(--cor-saida-hover) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
-}
-
-.tabela-saidas .btn-excluir:active {
-    transform: translateY(0) !important;
-}
-
-/* Alinhar a coluna "Pagamento" das entradas */
-.tabela-entradas th:last-child,
-.tabela-entradas td:last-child {
-    text-align: center !important;
-}
-
-/* =========================================== */
-/* ===== TÍTULOS DAS TABELAS ================= */
-/* =========================================== */
-
-.tabela-titulo {
-    margin: 30px 0 15px 0;
-    color: var(--text-primary);
-}
-
-/* =========================================== */
-/* ===== MENSAGEM DE CARREGAMENTO ============ */
-/* =========================================== */
-
 .mensagem-carregando {
-    padding: 40px !important;
+    padding: 24px !important;
     text-align: center !important;
     color: var(--text-muted) !important;
     font-style: italic !important;
+}
+
+.modal-debito {
+    max-width: 920px;
+    width: 100%;
+}
+
+.debito-resumo-card,
+.resumo-modal-debito {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
+.acoes-modal-debito {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.tabela-pagamentos-modal th,
+.tabela-pagamentos-modal td {
+    vertical-align: middle;
+}
+
+.tabela-pagamentos-modal th {
+    text-align: center;
+}
+
+.status-financeiro {
+    display: inline-flex;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.84rem;
+}
+
+.status-financeiro.em-aberto {
+    background: rgba(231, 76, 60, 0.12);
+    color: #b93c2e;
+}
+
+.status-financeiro.parcial {
+    background: rgba(243, 156, 18, 0.14);
+    color: #a05f00;
+}
+
+.status-financeiro.quitado {
+    background: rgba(39, 174, 96, 0.12);
+    color: #1f8a4c;
 }
 
 /* =========================================== */
@@ -658,22 +1001,120 @@
         width: 100%;
     }
     
-    /* Tabelas */
-    .tabela-saidas,
-    .tabela-entradas {
-        font-size: 0.85rem;
+    .pdv-tabs {
+        flex-direction: column;
     }
-    
-    .tabela-saidas th,
-    .tabela-saidas td,
-    .tabela-entradas th,
-    .tabela-entradas td {
-        padding: 8px 5px !important;
+
+    .fluxo-tabs {
+        flex-direction: column;
     }
-    
-    .btn-excluir {
-        padding: 4px 8px !important;
-        font-size: 0.75rem !important;
-        min-width: 50px !important;
+
+    .fluxo-tabs-barra {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #fluxoTabOs .pdv-final-actions,
+    #fluxoTabOs .pdv-final-actions-direita {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+@media (min-width: 992px) {
+    .pdv-grid-dados,
+    .pdv-grid-resumo {
+        grid-template-columns: 1.3fr 1fr;
+    }
+
+    .pdv-grid-pagamento {
+        grid-template-columns: 1fr;
+        align-items: start;
+    }
+
+    #fluxoTabOs .pdv-box .form-row {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    #fluxoTabOs #pdvTabBusca .form-row {
+        grid-template-columns: 2fr 180px;
+    }
+
+    #fluxoTabOs #pdvTabDados .form-row > .form-group:nth-child(1) {
+        grid-column: span 3;
+    }
+
+    #fluxoTabOs #pdvTabDados .form-row > .form-group:nth-child(2) {
+        grid-column: span 6;
+    }
+
+    #fluxoTabOs #pdvTabDados .form-row > .form-group:nth-child(3) {
+        grid-column: span 3;
+    }
+
+    #fluxoTabOs #pdvTabDados .pdv-box:last-child .form-row > .form-group {
+        grid-column: span 3;
+    }
+
+    #fluxoTabOs #pdvTabPagamento .pdv-pagamento-atual-row > .form-group:first-child {
+        grid-column: span 5;
+    }
+
+    #fluxoTabOs #pdvTabPagamento .pdv-pagamento-atual-row > .form-group:nth-child(2),
+    #fluxoTabOs #pdvTabPagamento .pdv-pagamento-atual-row > .form-group:nth-child(3) {
+        grid-column: span 3;
+    }
+
+    #fluxoTabOs #pdvTabPagamento .pdv-formas-row > .form-group:nth-child(1) {
+        grid-column: span 3;
+    }
+
+    #fluxoTabOs #pdvTabPagamento .pdv-formas-row > .form-group:nth-child(2) {
+        grid-column: span 2;
+    }
+
+    #fluxoTabOs #pdvTabPagamento .pdv-formas-row > .form-group:nth-child(3) {
+        grid-column: span 4;
+    }
+
+    #fluxoTabOs #pdvTabPagamento .pdv-formas-row > .form-group:nth-child(4) {
+        grid-column: span 3;
+    }
+
+    #fluxoTabOs #pdvTabResumo .pdv-box:first-child .form-row > .form-group {
+        grid-column: span 4;
+    }
+
+    #fluxoTabOs #pdvTabResumo .pdv-box:first-child .form-row:last-child > .form-group {
+        grid-column: span 6;
+    }
+
+    #fluxoTabOs #pdvTabResumo .pdv-box:last-child .form-row > .form-group {
+        grid-column: span 6;
+    }
+
+    #fluxoTabOs #pdvTabResumo .pdv-grid-resumo {
+        grid-template-columns: 1.5fr 1fr;
+    }
+}
+
+@media (max-height: 860px) {
+    #fluxoTabOs .pdv-card {
+        max-height: calc(100vh - 210px);
+    }
+
+    #fluxoTabOs .pdv-box {
+        padding: 8px;
+    }
+
+    #fluxoTabOs .pdv-box input,
+    #fluxoTabOs .pdv-box select {
+        height: 32px;
+    }
+
+    #fluxoTabOs .table-container {
+        max-height: 170px;
     }
 }

@@ -1,0 +1,135 @@
+.pagina-debitos {
+    background: var(--bg-body);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.debitos-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.titulo-debitos {
+    font-size: 2rem;
+}
+
+.subtitulo-debitos {
+    margin-top: 4px;
+    color: var(--text-secondary);
+}
+
+.acoes-debitos {
+    display: flex;
+    align-items: center;
+}
+
+.resumo-debitos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.resumo-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.resumo-item .label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.resumo-item strong {
+    font-size: 1.5rem;
+    color: var(--accent);
+}
+
+.tabela-debitos th,
+.tabela-pagamentos-modal th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.tabela-debitos td,
+.tabela-pagamentos-modal td {
+    vertical-align: middle;
+}
+
+.cliente-bloco {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cliente-bloco .cliente-nome {
+    font-weight: 700;
+}
+
+.cliente-bloco .cliente-detalhe {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+.status-financeiro {
+    display: inline-flex;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.84rem;
+}
+
+.status-financeiro.em-aberto {
+    background: rgba(231, 76, 60, 0.12);
+    color: #b93c2e;
+}
+
+.status-financeiro.parcial {
+    background: rgba(243, 156, 18, 0.14);
+    color: #a05f00;
+}
+
+.status-financeiro.quitado {
+    background: rgba(39, 174, 96, 0.12);
+    color: #1f8a4c;
+}
+
+.acoes-debito {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.modal-debito {
+    max-width: 920px;
+    width: 100%;
+}
+
+.debito-resumo-card,
+.resumo-modal-debito {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
+.acoes-modal-debito {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.input-valor-pagamento,
+.select-forma-pagamento,
+.input-observacao-pagamento {
+    width: 100%;
+}

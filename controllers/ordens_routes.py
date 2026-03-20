@@ -18,6 +18,7 @@ from services.ordem_service import (
     parse_data_iso,
     reabrir_ordem as reabrir_ordem_service,
 )
+from services.debito_service import faturar_ordem_no_caixa
 
 ordens_bp = Blueprint('ordens', __name__, url_prefix='/api/ordens')
 logger = logging.getLogger(__name__)
@@ -124,6 +125,22 @@ def atualizar_status(id):
     except ValueError as e:
         db.session.rollback()
         return jsonify({'erro': str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'erro': str(e)}), 500
+
+
+@ordens_bp.route('/<int:id>/faturamento', methods=['POST'])
+def faturar_ordem(id):
+    try:
+        ordem = faturar_ordem_no_caixa(id, request.json or {}, request)
+        return jsonify(ordem.to_dict())
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({'erro': str(e)}), 400
+    except LookupError as e:
+        db.session.rollback()
+        return jsonify({'erro': str(e)}), 404
     except Exception as e:
         db.session.rollback()
         return jsonify({'erro': str(e)}), 500

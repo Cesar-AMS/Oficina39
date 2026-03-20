@@ -25,6 +25,12 @@ function formatarValor(valor) {
     return 'R$ ' + valor.toFixed(2).replace('.', ',');
 }
 
+function calcularValorVendaPeca(valorCusto, percentualLucro) {
+    const custo = parseFloat(valorCusto) || 0;
+    const lucro = parseFloat(percentualLucro) || 0;
+    return custo * (1 + (lucro / 100));
+}
+
 function formatarData(data) {
     if (!data) return '';
     try {
@@ -181,7 +187,9 @@ function adicionarPeca(dados = null) {
     
     const descricao = dados ? dados.descricao_peca : '';
     const quantidade = dados ? dados.quantidade : 1;
-    const valor = dados ? dados.valor_unitario : 0;
+    const valorCusto = dados ? (dados.valor_custo || 0) : 0;
+    const lucro = dados ? (dados.percentual_lucro || 0) : 0;
+    const valor = dados ? dados.valor_unitario : calcularValorVendaPeca(valorCusto, lucro);
     
     const tbody = document.getElementById('corpo-pecas');
     const novaLinha = document.createElement('tr');
@@ -190,11 +198,20 @@ function adicionarPeca(dados = null) {
         <td><input type="text" class="codigo-peca" value="${codigo}" style="width: 80px;"></td>
         <td><input type="text" class="descricao-peca" value="${descricao.replace(/"/g, '&quot;')}" placeholder="Descrição" style="width: 100%;"></td>
         <td><input type="number" class="qtd-peca" value="${quantidade}" step="0.01" onchange="calcularTotalPeca(this)" style="width: 80px;"></td>
-        <td><input type="number" class="valor-unitario-peca" value="${valor}" step="0.01" onchange="calcularTotalPeca(this)" style="width: 100px;"></td>
+        <td><input type="number" class="valor-custo-peca" value="${valorCusto}" step="0.01" onchange="calcularTotalPeca(this)" style="width: 100px;"></td>
+        <td><input type="number" class="lucro-peca" value="${lucro}" step="0.01" onchange="calcularTotalPeca(this)" style="width: 80px;"></td>
+        <td><input type="number" class="valor-unitario-peca" value="${valor}" step="0.01" readonly style="width: 100px;"></td>
         <td><span class="total-peca">${formatarValor(quantidade * valor)}</span></td>
         <td><button type="button" class="btn-remover" onclick="removerPeca(${contadorPecas})">🗑️</button></td>
     `;
     tbody.appendChild(novaLinha);
+
+    novaLinha.querySelectorAll('input[type="number"]').forEach((input) => {
+        input.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            input.blur();
+        }, { passive: false });
+    });
 }
 
 async function removerPeca(id) {
@@ -209,9 +226,12 @@ async function removerPeca(id) {
 function calcularTotalPeca(elemento) {
     const linha = elemento.closest('tr');
     const qtd = parseFloat(linha.querySelector('.qtd-peca').value) || 0;
-    const valor = parseFloat(linha.querySelector('.valor-unitario-peca').value) || 0;
+    const valorCusto = parseFloat(linha.querySelector('.valor-custo-peca').value) || 0;
+    const percentualLucro = parseFloat(linha.querySelector('.lucro-peca').value) || 0;
+    const valor = calcularValorVendaPeca(valorCusto, percentualLucro);
     const total = qtd * valor;
     
+    linha.querySelector('.valor-unitario-peca').value = valor.toFixed(2);
     linha.querySelector('.total-peca').textContent = formatarValor(total);
     calcularTotais();
 }
@@ -294,6 +314,8 @@ function coletarDados() {
                 codigo_peca: codigo,
                 descricao_peca: descricao,
                 quantidade: quantidade,
+                valor_custo: parseFloat(linha.querySelector('.valor-custo-peca')?.value) || 0,
+                percentual_lucro: parseFloat(linha.querySelector('.lucro-peca')?.value) || 0,
                 valor_unitario: valor
             });
         }

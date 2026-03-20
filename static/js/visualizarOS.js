@@ -2,8 +2,20 @@
 
 const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
+const origem = params.get("origem") || '';
 
 let ordem = null;
+
+function destinoVoltar() {
+    if (origem === 'debitos') return '/debitos.html';
+    return '/consultarOS.html';
+}
+
+function atualizarLinksVoltar() {
+    const destino = destinoVoltar();
+    document.getElementById('linkVoltarVisualizacao')?.setAttribute('href', destino);
+    document.getElementById('linkVoltarVisualizacaoRodape')?.setAttribute('href', destino);
+}
 
 function alertErro(mensagem) {
     if (window.ui) return window.ui.error(mensagem);
@@ -45,7 +57,8 @@ function getStatusBadge(status) {
     else if (statusLower.includes('conclu')) classe = 'status-concluido';
     else if (statusLower.includes('garantia')) classe = 'status-garantia';
     
-    return `<span class="status-badge ${classe}">${status || 'Não definido'}</span>`;
+    const statusExibicao = status === 'Concluído' ? 'Finalizado' : (status || 'Não definido');
+    return `<span class="status-badge ${classe}">${statusExibicao}</span>`;
 }
 
 // ===========================================
@@ -97,6 +110,10 @@ function preencherCampos() {
     setValue('profissional_responsavel', ordem.profissional_responsavel);
     setValue('assinatura_cliente', ordem.assinatura_cliente);
     setValue('forma_pagamento', ordem.forma_pagamento || '---');
+    setValue('status_financeiro', ordem.status_financeiro || '---');
+    setValue('debito_valor_restante', formatarValor(ordem.saldo_pendente || 0));
+    setValue('debito_vencimento', ordem.debito_vencimento || '---');
+    setValue('debito_observacao', ordem.debito_observacao || (Number(ordem.saldo_pendente || 0) > 0 ? 'Pagamento pendente sem observação.' : 'Sem débito pendente.'));
     
     setValue('data_entrada', formatarData(ordem.data_entrada));
     setValue('data_emissao', formatarData(ordem.data_emissao));
@@ -132,6 +149,7 @@ function preencherCampos() {
                         <td>${p.codigo_peca || '---'}</td>
                         <td>${p.descricao_peca || ''}</td>
                         <td>${p.quantidade || 0}</td>
+                        <td>${(p.percentual_lucro || 0).toFixed(2)}%</td>
                         <td>${formatarValor(p.valor_unitario)}</td>
                         <td>${formatarValor(total)}</td>
                     </tr>
@@ -139,13 +157,33 @@ function preencherCampos() {
             });
             tbodyPecas.innerHTML = html;
         } else {
-            tbodyPecas.innerHTML = `<tr><td colspan="5" class="text-center mensagem-vazia">Nenhuma peça registrada</td></tr>`;
+            tbodyPecas.innerHTML = `<tr><td colspan="6" class="text-center mensagem-vazia">Nenhuma peça registrada</td></tr>`;
         }
     }
     
     setValue('total-servicos', formatarValor(ordem.total_servicos || 0), 'span');
     setValue('total-pecas', formatarValor(ordem.total_pecas || 0), 'span');
     setValue('total-geral', formatarValor(ordem.total_geral || 0), 'span');
+    setValue('desconto-valor', formatarValor(ordem.desconto_valor || 0), 'span');
+    setValue('total-cobrado', formatarValor(ordem.total_cobrado || ordem.total_geral || 0), 'span');
+    setValue('total-pago', formatarValor(ordem.total_pago || 0), 'span');
+    setValue('saldo-pendente', formatarValor(ordem.saldo_pendente || 0), 'span');
+
+    const tbodyPagamentos = document.getElementById('tabela-pagamentos');
+    if (tbodyPagamentos) {
+        if (ordem.pagamentos && ordem.pagamentos.length > 0) {
+            tbodyPagamentos.innerHTML = ordem.pagamentos.map((pagamento) => `
+                <tr>
+                    <td>${pagamento.data_pagamento || '---'}</td>
+                    <td>${pagamento.forma_pagamento || '---'}</td>
+                    <td>${formatarValor(pagamento.valor || 0)}</td>
+                    <td>${pagamento.observacao || '---'}</td>
+                </tr>
+            `).join('');
+        } else {
+            tbodyPagamentos.innerHTML = `<tr><td colspan="4" class="text-center mensagem-vazia">Nenhum pagamento registrado</td></tr>`;
+        }
+    }
 }
 
 function renderTimelineStatus(logs) {
@@ -237,12 +275,13 @@ async function carregarTimelineStatus() {
 // ===========================================
 
 function voltar() {
-    window.location.assign("/consultarOS.html");
+    window.location.assign(destinoVoltar());
 }
 
 function editarOrdem() {
     if (id) {
-        window.location.assign(`/editarOS.html?id=${id}`);
+        const queryOrigem = origem ? `&origem=${encodeURIComponent(origem)}` : '';
+        window.location.assign(`/editarOS.html?id=${id}${queryOrigem}`);
     }
 }
 
@@ -281,5 +320,6 @@ document.addEventListener('keydown', function(e) {
 // ===========================================
 
 document.addEventListener('DOMContentLoaded', function() {
+    atualizarLinksVoltar();
     carregarOrdem();
 });

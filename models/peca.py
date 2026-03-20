@@ -13,6 +13,8 @@ class ItemPeca(db.Model):
     codigo_peca = db.Column(db.String(20))
     descricao_peca = db.Column(db.String(200))
     quantidade = db.Column(db.Float, default=1)
+    valor_custo = db.Column(db.Float, default=0)
+    percentual_lucro = db.Column(db.Float, default=0)
     valor_unitario = db.Column(db.Float, default=0)
     created_at = db.Column(db.DateTime, default=datetime.now)  # ← ADICIONADO
     
@@ -22,7 +24,7 @@ class ItemPeca(db.Model):
     @property
     def total(self):
         """Calcula o total da peça (quantidade * valor unitário)"""
-        return self.quantidade * self.valor_unitario
+        return float(self.quantidade or 0) * float(self.valor_unitario or 0)
     
     def to_dict(self):
         """Converte o objeto para dicionário (para JSON)"""
@@ -32,6 +34,8 @@ class ItemPeca(db.Model):
             'codigo_peca': self.codigo_peca,
             'descricao_peca': self.descricao_peca,
             'quantidade': self.quantidade,
+            'valor_custo': self.valor_custo,
+            'percentual_lucro': self.percentual_lucro,
             'valor_unitario': self.valor_unitario,
             'total': self.total,
             'created_at': self.created_at.strftime('%d/%m/%Y %H:%M') if self.created_at else None

@@ -8,6 +8,7 @@ let contadorPecas = 0;
 let sugestoesClientes = [];
 let timerBuscaCliente = null;
 let profissionaisDisponiveis = [];
+let whatsappOrcamentoConfigurado = '5511992092341';
 
 function alertErro(mensagem) {
     if (window.ui) return window.ui.error(mensagem);
@@ -25,6 +26,20 @@ function alertSucesso(mensagem) {
 
 function formatarValor(valor) {
     return 'R$ ' + (valor || 0).toFixed(2).replace('.', ',');
+}
+
+function formatarStatusExibicao(status) {
+    return status === 'Concluído' ? 'Finalizado' : (status || '---');
+}
+
+function calcularValorVendaPeca(valorCusto, percentualLucro) {
+    const custo = parseFloat(valorCusto) || 0;
+    const lucro = parseFloat(percentualLucro) || 0;
+    return custo * (1 + (lucro / 100));
+}
+
+function normalizarWhatsapp(valor) {
+    return String(valor || '').replace(/\D/g, '');
 }
 
 function preencherDadosCliente(encontrado) {
@@ -138,6 +153,18 @@ async function carregarProfissionais() {
     }
 }
 
+async function carregarWhatsappOrcamento() {
+    try {
+        const config = await fetch('/api/config/contador').then((r) => r.json());
+        const numero = normalizarWhatsapp(config?.whatsapp_orcamento || '');
+        if (numero) {
+            whatsappOrcamentoConfigurado = numero;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar WhatsApp do orçamento:', error);
+    }
+}
+
 // ===========================================
 // FUNÇÃO DE CÁLCULO (SERÁ CHAMADA DE VÁRIAS FORMAS)
 // ===========================================
@@ -179,9 +206,15 @@ window.calcularTotais = function() {
 window.calcularTotalPeca = function(elemento) {
     const linha = elemento.closest('tr');
     const qtd = parseFloat(linha.querySelector('.qtd-peca').value) || 0;
-    const valor = parseFloat(linha.querySelector('.valor-unitario-peca').value) || 0;
-    const total = qtd * valor;
-    
+    const valorCusto = parseFloat(linha.querySelector('.valor-custo-peca').value) || 0;
+    const percentualLucro = parseFloat(linha.querySelector('.lucro-peca').value) || 0;
+    const valorVenda = calcularValorVendaPeca(valorCusto, percentualLucro);
+    const total = qtd * valorVenda;
+
+    const valorUnitarioCampo = linha.querySelector('.valor-unitario-peca');
+    if (valorUnitarioCampo) {
+        valorUnitarioCampo.value = valorVenda.toFixed(2);
+    }
     linha.querySelector('.total-peca').textContent = formatarValor(total);
     window.calcularTotais();
 };
@@ -205,19 +238,33 @@ function adicionarEventosServico(linha) {
 
 function adicionarEventosPeca(linha) {
     const qtdInput = linha.querySelector('.qtd-peca');
-    const valorInput = linha.querySelector('.valor-unitario-peca');
+    const valorCustoInput = linha.querySelector('.valor-custo-peca');
+    const lucroInput = linha.querySelector('.lucro-peca');
     
     if (qtdInput) {
         qtdInput.addEventListener('input', function() { window.calcularTotalPeca(this); });
         qtdInput.addEventListener('change', function() { window.calcularTotalPeca(this); });
         qtdInput.addEventListener('keyup', function() { window.calcularTotalPeca(this); });
     }
-    
-    if (valorInput) {
-        valorInput.addEventListener('input', function() { window.calcularTotalPeca(this); });
-        valorInput.addEventListener('change', function() { window.calcularTotalPeca(this); });
-        valorInput.addEventListener('keyup', function() { window.calcularTotalPeca(this); });
+
+    if (valorCustoInput) {
+        valorCustoInput.addEventListener('input', function() { window.calcularTotalPeca(this); });
+        valorCustoInput.addEventListener('change', function() { window.calcularTotalPeca(this); });
+        valorCustoInput.addEventListener('keyup', function() { window.calcularTotalPeca(this); });
     }
+
+    if (lucroInput) {
+        lucroInput.addEventListener('input', function() { window.calcularTotalPeca(this); });
+        lucroInput.addEventListener('change', function() { window.calcularTotalPeca(this); });
+        lucroInput.addEventListener('keyup', function() { window.calcularTotalPeca(this); });
+    }
+
+    linha.querySelectorAll('input[type="number"]').forEach((input) => {
+        input.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            input.blur();
+        }, { passive: false });
+    });
 }
 
 // ===========================================
@@ -281,7 +328,9 @@ window.adicionarPeca = function() {
         <td><input type="text" class="codigo-peca" value="${codigoServico}.${contadorPecas}" readonly style="width:80px"></td>
         <td><input type="text" class="descricao-peca" placeholder="Descrição da peça" style="width:100%"></td>
         <td><input type="number" class="qtd-peca" placeholder="Qtd" step="0.01" value="1" style="width:80px"></td>
-        <td><input type="number" class="valor-unitario-peca" placeholder="R$" step="0.01" style="width:100px"></td>
+        <td><input type="number" class="valor-custo-peca" placeholder="Custo" step="0.01" style="width:110px"></td>
+        <td><input type="number" class="lucro-peca" placeholder="%" step="0.01" value="0" style="width:85px"></td>
+        <td><input type="number" class="valor-unitario-peca" placeholder="Venda" step="0.01" style="width:110px" readonly></td>
         <td><span class="total-peca">R$ 0,00</span></td>
         <td><button type="button" class="btn-remover" onclick="window.removerPeca(this)">🗑️</button></td>
     `;
@@ -404,6 +453,8 @@ function coletarDadosOrdem() {
                 codigo_peca: linha.querySelector('.codigo-peca')?.value || '',
                 descricao_peca: descricao,
                 quantidade: parseFloat(linha.querySelector('.qtd-peca')?.value) || 0,
+                valor_custo: parseFloat(linha.querySelector('.valor-custo-peca')?.value) || 0,
+                percentual_lucro: parseFloat(linha.querySelector('.lucro-peca')?.value) || 0,
                 valor_unitario: parseFloat(linha.querySelector('.valor-unitario-peca')?.value) || 0
             });
         }
@@ -442,6 +493,56 @@ window.salvarOrdem = async function() {
 // ===========================================
 // FUNÇÃO SALVAR E IMPRIMIR - GERA PDF DIRETO
 // ===========================================
+
+function montarMensagemOrcamento(resultado, dados) {
+    const cliente = clienteSelecionado || {};
+    const telefoneCliente = cliente.telefone || 'não informado';
+    const servicosResumo = (dados.servicos || []).map((s) => `- ${s.descricao_servico}: ${formatarValor(s.valor_servico)}`).join('%0A');
+    const pecasResumo = (dados.pecas || []).map((p) => `- ${p.descricao_peca}: ${formatarValor((p.quantidade || 0) * (p.valor_unitario || 0))}`).join('%0A');
+
+    return [
+        `Olá! Orçamento da OS #${resultado.id}`,
+        `Cliente: ${cliente.nome_cliente || '---'}`,
+        `Telefone do cliente: ${telefoneCliente}`,
+        `Veículo: ${(cliente.fabricante || '')} ${(cliente.modelo || '')} - ${cliente.placa || '---'}`.trim(),
+        `Profissional: ${dados.profissional_responsavel || '---'}`,
+        dados.servicos?.length ? `Serviços:%0A${servicosResumo}` : 'Serviços: não informados',
+        dados.pecas?.length ? `Peças:%0A${pecasResumo}` : 'Peças: não informadas',
+        `Total: ${formatarValor(resultado.total_geral || 0)}`
+    ].join('%0A%0A');
+}
+
+function abrirWhatsappOrcamento(resultado, dados) {
+    const numeroWhatsapp = normalizarWhatsapp(whatsappOrcamentoConfigurado);
+    if (!numeroWhatsapp) {
+        alertErro('Configure o WhatsApp da oficina em Configurações antes de enviar orçamento.');
+        return;
+    }
+    const mensagem = montarMensagemOrcamento(resultado, dados);
+    const url = `https://wa.me/${numeroWhatsapp}?text=${mensagem}`;
+    window.open(url, '_blank', 'noopener');
+}
+
+window.enviarOrcamentoWhatsapp = async function() {
+    const dados = coletarDadosOrdem();
+    if (!dados) return;
+
+    const resultado = await criarOrdemNoServidor(dados);
+    if (!resultado) return;
+
+    abrirWhatsappOrcamento(resultado, dados);
+    window.location.assign('/nova-os');
+};
+
+window.finalizarNoCaixa = async function() {
+    const dados = coletarDadosOrdem();
+    if (!dados) return;
+
+    const resultado = await criarOrdemNoServidor(dados);
+    if (!resultado) return;
+
+    window.location.assign(`/fluxo_caixa.html?ordem_id=${resultado.id}`);
+};
 
 window.salvarEImprimir = async function() {
     const dados = coletarDadosOrdem();
@@ -556,6 +657,7 @@ setInterval(function() {
 
 document.addEventListener('DOMContentLoaded', function() {
     carregarProfissionais();
+    carregarWhatsappOrcamento();
     verificarCamposExistentes();
 
     const buscaInput = document.getElementById('buscaCliente');
@@ -590,7 +692,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (e.key === 'F6') {
             e.preventDefault();
-            window.salvarEImprimir();
+            window.enviarOrcamentoWhatsapp();
             return;
         }
         if (e.key === 's' && (e.ctrlKey || e.metaKey)) {

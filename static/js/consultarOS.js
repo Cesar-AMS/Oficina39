@@ -83,9 +83,13 @@ function getStatusClass(status) {
     return '';
 }
 
+function getStatusLabel(status) {
+    return status === 'Concluído' ? 'Finalizado' : (status || '---');
+}
+
 function solicitarFormaPagamento() {
     return new Promise((resolve) => {
-        const opcoes = ['Pix', 'Cartão', 'Dinheiro', 'Boleto', 'Transferência'];
+        const opcoes = ['Pix', 'Cartão', 'Dinheiro', 'Boleto'];
 
         const overlay = document.createElement('div');
         overlay.className = 'modal-pagamento-overlay';
@@ -191,40 +195,10 @@ function opcoesProfissionaisHtml(profissionalAtual) {
 
 async function finalizarOrdem(id) {
     const confirmado = window.ui?.confirmAsync
-        ? await window.ui.confirmAsync('Confirma finalizar esta ordem?')
-        : (window.ui ? window.ui.confirm('Confirma finalizar esta ordem?') : confirm('Confirma finalizar esta ordem?'));
+        ? await window.ui.confirmAsync('Encaminhar esta ordem para finalização no caixa?')
+        : (window.ui ? window.ui.confirm('Encaminhar esta ordem para finalização no caixa?') : confirm('Encaminhar esta ordem para finalização no caixa?'));
     if (!confirmado) return;
-
-    const formaPagamento = await solicitarFormaPagamento();
-    if (!formaPagamento) {
-        alertErro('Forma de pagamento inválida ou não informada.');
-        return;
-    }
-    
-    const dataConclusao = new Date().toISOString();
-    
-    try {
-        const response = await fetch(`/api/ordens/${id}/status`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                status: 'Concluído',
-                data_conclusao: dataConclusao,
-                forma_pagamento: formaPagamento
-            })
-        });
-        
-        if (response.ok) {
-            alertSucesso('Ordem finalizada. Garantia de 90 dias ativada.');
-            carregarOrdens();
-        } else {
-            const erro = await response.json();
-            alertErro(erro.erro || 'Erro desconhecido.');
-        }
-    } catch (error) {
-        alertErro('Falha ao finalizar ordem.');
-        console.error(error);
-    }
+    window.location.assign(`/fluxo_caixa.html?ordem_id=${id}`);
 }
 
 async function ativarGarantia(id) {
@@ -368,6 +342,7 @@ function carregarTabela(lista) {
     
     lista.forEach(ordem => {
         const statusClass = getStatusClass(ordem.status);
+        const statusLabel = getStatusLabel(ordem.status);
         const valorFormatado = formatarValor(ordem.total_geral || ordem.valor);
         const diasRestantes = calcularDiasGarantia(ordem.data_conclusao, ordem.data_retirada);
         const profissionalAtual = (ordem.profissional_responsavel || '').trim();
@@ -450,7 +425,7 @@ function carregarTabela(lista) {
                     </div>
                 </td>
                 <td>${valorFormatado}</td>
-                <td><span class="status-badge ${statusClass}">${ordem.status}</span></td>
+                <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
                 <td class="acao-buttons">${botoesAcao}</td>
             </tr>
         `;

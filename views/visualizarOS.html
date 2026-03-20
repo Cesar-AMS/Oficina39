@@ -25,7 +25,7 @@
         <div class="cabecalho-duplo">
             <h1 class="titulo-visualizar">👁️ Visualizar Ordem de Serviço</h1>
             <div class="acoes-visualizar">
-                <a class="btn btn-voltar" href="/consultarOS.html">↩ Voltar</a>
+                <a class="btn btn-voltar" id="linkVoltarVisualizacao" href="/consultarOS.html">↩ Voltar</a>
             </div>
         </div>
 
@@ -166,13 +166,14 @@
                             <th>Código</th>
                             <th>Descrição</th>
                             <th>Qtd</th>
+                            <th>Lucro %</th>
                             <th>Valor Unit.</th>
                             <th>Total</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-pecas">
                         <tr>
-                            <td colspan="5" class="text-center mensagem-vazia">Nenhuma peça registrada</td>
+                            <td colspan="6" class="text-center mensagem-vazia">Nenhuma peça registrada</td>
                         </tr>
                     </tbody>
                 </table>
@@ -190,8 +191,42 @@
                 <div class="valor" id="total-pecas">R$ 0,00</div>
             </div>
             <div class="resumo-item">
-                <div class="label">TOTAL GERAL</div>
+                <div class="label">Total Bruto</div>
                 <div class="valor total-destaque" id="total-geral">R$ 0,00</div>
+            </div>
+            <div class="resumo-item">
+                <div class="label">Desconto</div>
+                <div class="valor" id="desconto-valor">R$ 0,00</div>
+            </div>
+            <div class="resumo-item">
+                <div class="label">Total Final</div>
+                <div class="valor total-destaque" id="total-cobrado">R$ 0,00</div>
+            </div>
+            <div class="resumo-item">
+                <div class="label">Total Pago</div>
+                <div class="valor" id="total-pago">R$ 0,00</div>
+            </div>
+            <div class="resumo-item">
+                <div class="label">Saldo Pendente</div>
+                <div class="valor" id="saldo-pendente">R$ 0,00</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="section-titulo">💸 Débito / Pendência</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Valor restante</label>
+                    <input type="text" id="debito_valor_restante" readonly disabled class="campo-readonly">
+                </div>
+                <div class="form-group">
+                    <label>Vencimento</label>
+                    <input type="text" id="debito_vencimento" readonly disabled class="campo-readonly">
+                </div>
+                <div class="form-group">
+                    <label>Observação do débito</label>
+                    <input type="text" id="debito_observacao" readonly disabled class="campo-readonly">
+                </div>
             </div>
         </div>
 
@@ -223,6 +258,31 @@
                     <label>Forma de Pagamento</label>
                     <input type="text" id="forma_pagamento" readonly disabled class="campo-readonly">
                 </div>
+                <div class="form-group">
+                    <label>Status Financeiro</label>
+                    <input type="text" id="status_financeiro" readonly disabled class="campo-readonly">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="section-titulo">💳 Histórico de Pagamentos</h3>
+            <div class="table-container">
+                <table class="tabela-visualizar">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Forma</th>
+                            <th>Valor</th>
+                            <th>Observação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-pagamentos">
+                        <tr>
+                            <td colspan="4" class="text-center mensagem-vazia">Nenhum pagamento registrado</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -236,7 +296,7 @@
 
         <!-- BOTÕES -->
         <div class="button-group botoes-visualizar button-group-final">
-            <a class="btn btn-voltar btn-final" href="/consultarOS.html">↩ Voltar</a>
+            <a class="btn btn-voltar btn-final" id="linkVoltarVisualizacaoRodape" href="/consultarOS.html">↩ Voltar</a>
             <button class="btn btn-salvar btn-final" id="botaoImprimirOS" onclick="imprimirOrdem()">🖨️ Imprimir</button>
             <button class="btn btn-editar btn-final" onclick="editarOrdem()">✏️ Editar</button>
         </div>

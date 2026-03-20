@@ -24,86 +24,372 @@
 
     <div class="container fluxo-container">
 
-        <!-- CABEÇALHO COM BOTÃO VOLTAR -->
-        <div class="cabecalho-duplo">
-            <div>
-                <h1 class="titulo-fluxo">🧾 PDV / Caixa do Dia</h1>
-                <p class="subtitulo-fluxo">Movimentação operacional diária (entradas e saídas)</p>
+        <div class="fluxo-tabs-barra">
+            <div class="fluxo-tabs">
+                <button class="fluxo-tab active" data-tab="caixa" onclick="alternarAbaFluxo('caixa')">Caixa do Dia</button>
+                <button class="fluxo-tab" data-tab="os" onclick="alternarAbaFluxo('os')">Recebimento de OS</button>
             </div>
-            <div class="acoes-fluxo">
-                <a class="btn btn-voltar" href="/">↩ Voltar</a>
-            </div>
+            <a class="btn btn-voltar btn-compact fluxo-tab-retorno" href="/">↩ Voltar</a>
         </div>
 
-        <!-- CARD DE RESUMO -->
-        <div class="resumo-card">
-            <div class="resumo-item">
-                <div class="label">Entradas (OS)</div>
-                <div class="valor" id="totalEntradas">R$ 0,00</div>
+        <section class="fluxo-tab-panel active" id="fluxoTabCaixa">
+            <div class="resumo-card">
+                <div class="resumo-item">
+                    <div class="label">Recebimentos</div>
+                    <div class="valor" id="totalEntradas">R$ 0,00</div>
+                </div>
+                <div class="resumo-item">
+                    <div class="label">Saídas</div>
+                    <div class="valor" id="totalSaidas">R$ 0,00</div>
+                </div>
+                <div class="resumo-item">
+                    <div class="label">Saldo</div>
+                    <div class="valor" id="saldo">R$ 0,00</div>
+                </div>
             </div>
-            <div class="resumo-item">
-                <div class="label">Saídas</div>
-                <div class="valor" id="totalSaidas">R$ 0,00</div>
-            </div>
-            <div class="resumo-item">
-                <div class="label">Saldo</div>
-                <div class="valor" id="saldo">R$ 0,00</div>
-            </div>
-        </div>
 
-        <!-- BOTÃO NOVA SAÍDA -->
-        <div class="nova-saida-container">
-            <div class="acoes-caixa-botoes">
-                <button class="btn btn-nova-saida" onclick="abrirModalSaida()">
-                    ➕ Nova Saída
-                </button>
-                <button class="btn btn-calculadora" onclick="abrirModalCalculadora()">
-                    🧮 Calculadora
-                </button>
-            </div>
-        </div>
+            <section class="form-section caixa-dia-section">
+                <div class="pdv-header">
+                    <div>
+                        <h3 class="section-titulo">💵 Caixa do Dia</h3>
+                        <p class="subtitulo-fluxo">Resumo financeiro do dia com atalhos operacionais para saída e apoio de cálculo.</p>
+                    </div>
+                </div>
 
-        <!-- TABELA DE SAÍDAS -->
-        <h3 class="tabela-titulo">📤 Saídas do Dia</h3>
-        <div class="table-container">
-            <table class="tabela-saidas">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Categoria</th>
-                        <th>Descrição</th>
-                        <th>Valor</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaSaidas">
-                    <tr>
-                        <td colspan="5" class="text-center mensagem-carregando">Carregando...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                <div class="pdv-hint-box">
+                    <strong>Uso:</strong> esta aba concentra o saldo do dia. Use <strong>Nova Saída</strong> para despesas e <strong>Calculadora</strong> para apoio rápido no atendimento.
+                </div>
 
-        <!-- TABELA DE ENTRADAS -->
-        <h3 class="tabela-titulo">📥 Entradas do Dia (Ordens Concluídas)</h3>
-        <div class="table-container">
-            <table class="tabela-entradas">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Cliente</th>
-                        <th>Serviço</th>
-                        <th>Valor</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaEntradas">
-                    <tr>
-                        <td colspan="5" class="text-center mensagem-carregando">Carregando...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                <div class="nova-saida-container">
+                    <div class="acoes-caixa-botoes">
+                        <button class="btn btn-nova-saida" onclick="abrirModalSaida()">
+                            ➕ Nova Saída
+                        </button>
+                        <button class="btn btn-calculadora" onclick="abrirModalCalculadora()">
+                            🧮 Calculadora
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <section class="fluxo-tab-panel" id="fluxoTabOs">
+            <section class="form-section pdv-section">
+                <div class="pdv-header">
+                    <div>
+                        <h3 class="section-titulo">🧾 Recebimento de OS</h3>
+                        <p class="subtitulo-fluxo">Conclua a ordem no PDV, receba total ou parcial e deixe o restante em débito quando necessário.</p>
+                    </div>
+                </div>
+                <div class="pdv-tabs">
+                    <button class="pdv-tab active" data-tab="busca" onclick="alternarAbaPdv('busca')">1. Busca da OS</button>
+                    <button class="pdv-tab" data-tab="dados" onclick="alternarAbaPdv('dados')">2. Dados da OS</button>
+                    <button class="pdv-tab" data-tab="pagamento" onclick="alternarAbaPdv('pagamento')">3. Pagamento</button>
+                    <button class="pdv-tab" data-tab="resumo" onclick="alternarAbaPdv('resumo')">4. Resumo e debito</button>
+                </div>
+
+                <div class="pdv-card" id="pdvCard">
+                    <div class="pdv-tab-panel active" id="pdvTabBusca">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pdvBuscaCliente">Cliente ou CPF</label>
+                                <input type="text" id="pdvBuscaCliente" placeholder="Digite o nome ou CPF do cliente">
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button class="btn btn-salvar btn-compact" onclick="buscarOrdemPdv()">🔎 Buscar OS</button>
+                            </div>
+                        </div>
+                        <div class="pdv-hint-box">
+                            <strong>Fluxo:</strong> busque a OS pelo nome ou CPF do cliente, carregue a ordem correta e siga com o recebimento no PDV.
+                        </div>
+                        <div class="pdv-busca-resultado" id="pdvBuscaResultadosWrap" hidden>
+                            <div class="table-container pdv-busca-lista">
+                                <table class="tabela-pagamentos-modal pdv-busca-tabela">
+                                    <thead>
+                                        <tr>
+                                            <th>OS</th>
+                                            <th>Cliente</th>
+                                            <th>CPF</th>
+                                            <th>Status</th>
+                                            <th>Saldo</th>
+                                            <th>Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="corpoBuscaOsPdv">
+                                        <tr>
+                                            <td colspan="6" class="text-center mensagem-carregando">Nenhuma busca realizada.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="pdv-step-actions">
+                            <button class="btn btn-voltar btn-compact" onclick="limparPdv()">Limpar busca</button>
+                        </div>
+                    </div>
+
+                    <div class="pdv-tab-panel" id="pdvTabDados">
+                        <div class="pdv-grid pdv-grid-dados">
+                            <div class="pdv-box">
+                                <h4 class="pdv-box-titulo">Dados da venda</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Número da OS</label>
+                                        <input type="text" id="pdvOsNumeroField" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Cliente</label>
+                                        <input type="text" id="pdvClienteNomeField" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Telefone</label>
+                                        <input type="text" id="pdvTelefoneField" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Valor bruto da OS</label>
+                                        <input type="text" id="pdvTotalOrdemField" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Total já pago</label>
+                                        <input type="text" id="pdvTotalPagoField" readonly>
+                                    </div>
+                                    <div class="form-group form-group-destaque form-group-status">
+                                        <label>Status financeiro</label>
+                                        <input type="text" id="pdvStatusFinanceiroField" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pdv-box">
+                                <h4 class="pdv-box-titulo">Desconto no fechamento</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="pdvDescontoPercentual">Desconto (%)</label>
+                                        <input type="number" id="pdvDescontoPercentual" min="0" max="100" step="0.01" placeholder="0,00">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Valor do desconto</label>
+                                        <input type="text" id="pdvDescontoValor" readonly>
+                                    </div>
+                                    <div class="form-group form-group-destaque form-group-financeiro">
+                                        <label>Valor final da venda</label>
+                                        <input type="text" id="pdvTotalFinalField" readonly>
+                                    </div>
+                                    <div class="form-group form-group-destaque form-group-saldo">
+                                        <label>Saldo pendente</label>
+                                        <input type="text" id="pdvSaldoPendenteField" readonly>
+                                    </div>
+                                </div>
+                                <div class="pdv-hint-box">
+                                    <strong>Desconto:</strong> aplicado no momento do recebimento. O saldo, os debitos e os proximos pagamentos passam a considerar esse valor final.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pdv-step-actions">
+                            <button class="btn btn-voltar btn-compact" onclick="irParaEtapaPdv('busca')">Voltar</button>
+                            <button class="btn btn-salvar btn-compact" onclick="irParaProximaEtapaPdv('pagamento')">Avançar</button>
+                        </div>
+                    </div>
+
+                    <div class="pdv-tab-panel" id="pdvTabPagamento">
+                        <div class="pdv-grid pdv-grid-pagamento">
+                            <div class="pdv-box">
+                                <h4 class="pdv-box-titulo">Pagamento atual e formas de pagamento</h4>
+                                <div class="pdv-painel-rapido">
+                                    <div class="pdv-painel-item pdv-painel-item-destaque">
+                                        <span class="pdv-painel-label">Saldo para receber</span>
+                                        <strong id="pdvPainelSaldoPendente">R$ 0,00</strong>
+                                    </div>
+                                    <div class="pdv-painel-item">
+                                        <span class="pdv-painel-label">Recebido agora</span>
+                                        <strong id="pdvPainelRecebidoAgora">R$ 0,00</strong>
+                                    </div>
+                                    <div class="pdv-painel-item">
+                                        <span class="pdv-painel-label">Diferença</span>
+                                        <strong id="pdvPainelDiferenca">R$ 0,00</strong>
+                                    </div>
+                                </div>
+                                <div class="form-row pdv-pagamento-atual-row">
+                                    <div class="form-group form-group-entrada-principal">
+                                        <label for="pdvValorRecebidoAgora">Valor recebido agora</label>
+                                        <input type="number" id="pdvValorRecebidoAgora" step="0.01" min="0" placeholder="0,00">
+                                    </div>
+                                    <div class="form-group pdv-form-group-acao">
+                                        <label>&nbsp;</label>
+                                        <button class="btn btn-salvar btn-compact pdv-btn-full" onclick="preencherValorTotalRecebido()">💰 Preencher valor total pendente</button>
+                                    </div>
+                                    <div class="form-group pdv-form-group-acao">
+                                        <label>&nbsp;</label>
+                                        <button class="btn btn-cancelar btn-compact pdv-btn-full" onclick="limparValorRecebido()">🧹 Limpar valor</button>
+                                    </div>
+                                </div>
+
+                                <div class="form-row pdv-formas-row">
+                                    <div class="form-group">
+                                        <label for="pdvFormaPagamento">Forma de pagamento</label>
+                                        <select id="pdvFormaPagamento">
+                                            <option value="">Selecione</option>
+                                            <option value="Dinheiro">Dinheiro</option>
+                                            <option value="Pix">Pix</option>
+                                            <option value="Cartão débito">Cartão débito</option>
+                                            <option value="Cartão crédito">Cartão crédito</option>
+                                            <option value="Transferência">Transferência</option>
+                                            <option value="Boleto">Boleto</option>
+                                            <option value="Outro">Outro</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pdvValorForma">Valor da forma</label>
+                                        <input type="number" id="pdvValorForma" step="0.01" min="0" placeholder="0,00">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pdvObservacaoForma">Observação</label>
+                                        <input type="text" id="pdvObservacaoForma" placeholder="Opcional">
+                                    </div>
+                                    <div class="form-group pdv-form-group-acao">
+                                        <label>&nbsp;</label>
+                                        <button class="btn btn-salvar btn-compact pdv-btn-full" onclick="adicionarFormaPagamentoPdv()">➕ Adicionar forma de pagamento</button>
+                                    </div>
+                                </div>
+
+                                <div class="pdv-hint-box">
+                                    <strong>Regra:</strong> a soma das formas deve bater exatamente com o valor recebido agora.
+                                </div>
+
+                                <div class="table-container">
+                                    <table class="tabela-pagamentos-modal">
+                                        <thead>
+                                            <tr>
+                                                <th>Forma de pagamento</th>
+                                                <th>Valor</th>
+                                                <th>Observação</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="corpoPagamentosPdv">
+                                            <tr>
+                                                <td colspan="4" class="text-center mensagem-carregando">Nenhuma forma adicionada.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Total das formas lançadas</label>
+                                        <input type="text" id="pdvTotalFormas" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Diferença para o valor recebido</label>
+                                        <input type="text" id="pdvDiferencaFormas" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pdv-step-actions">
+                            <button class="btn btn-voltar btn-compact" onclick="irParaEtapaPdv('dados')">Voltar</button>
+                            <button class="btn btn-salvar btn-compact" onclick="irParaProximaEtapaPdv('resumo')">Avançar</button>
+                        </div>
+                    </div>
+
+                    <div class="pdv-tab-panel" id="pdvTabResumo">
+                        <div class="pdv-grid pdv-grid-resumo">
+                            <div class="pdv-box">
+                                <h4 class="pdv-box-titulo">Resumo da venda</h4>
+                                <div class="pdv-resumo-topo">
+                                    <div class="pdv-resumo-topo-item">
+                                        <span>Valor final</span>
+                                        <strong id="pdvResumoTopoTotalFinal">R$ 0,00</strong>
+                                    </div>
+                                    <div class="pdv-resumo-topo-item">
+                                        <span>Pago nesta operação</span>
+                                        <strong id="pdvResumoTopoPagoAgora">R$ 0,00</strong>
+                                    </div>
+                                    <div class="pdv-resumo-topo-item pdv-resumo-topo-item-alerta">
+                                        <span>Saldo após operação</span>
+                                        <strong id="pdvResumoTopoSaldoApos">R$ 0,00</strong>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Valor bruto da OS</label>
+                                        <input type="text" id="pdvResumoTotalOs" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Desconto aplicado</label>
+                                        <input type="text" id="pdvResumoDesconto" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Valor final da venda</label>
+                                        <input type="text" id="pdvResumoTotalFinal" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Total já pago antes</label>
+                                        <input type="text" id="pdvResumoPagoAntes" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Pago nesta operação</label>
+                                        <input type="text" id="pdvResumoPagoAgora" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Saldo após operação</label>
+                                        <input type="text" id="pdvResumoSaldoApos" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Situação após operação</label>
+                                        <input type="text" id="pdvResumoSituacao" readonly>
+                                    </div>
+                                    <div class="form-group form-group-destaque form-group-saldo">
+                                        <label>Valor restante</label>
+                                        <input type="text" id="pdvValorRestante" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pdv-box">
+                                <h4 class="pdv-box-titulo">Pendência / débito</h4>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="pdvGerarDebito" checked>
+                                    <label for="pdvGerarDebito">Gerar débito automaticamente para o valor restante</label>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="pdvDebitoVencimento">Data de vencimento</label>
+                                        <input type="date" id="pdvDebitoVencimento">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pdvDebitoObservacao">Observação do débito</label>
+                                        <input type="text" id="pdvDebitoObservacao" placeholder="Ex: cliente combinará pagamento em 10 dias">
+                                    </div>
+                                </div>
+
+                                <div class="pdv-hint-box">
+                                    <strong>Resultado:</strong> pagamento total quita a OS. Pagamento parcial ou fiado joga o restante automaticamente para a tela de débitos.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pdv-final-actions pdv-final-actions-simples">
+                            <div class="pdv-final-actions-direita">
+                                <button class="btn btn-voltar btn-compact" onclick="irParaEtapaPdv('pagamento')">↩ Voltar</button>
+                                <button class="btn btn-salvar btn-compact" onclick="salvarFaturamentoPdv()">Concluir recebimento</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
 
     </div>
 
