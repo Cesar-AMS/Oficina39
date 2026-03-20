@@ -172,7 +172,7 @@ async function carregarClienteEdicao() {
         if (!response.ok) throw new Error(cliente.erro || 'Cliente não encontrado.');
         preencherFormularioCliente(cliente);
 
-        document.getElementById('tituloCadastroCliente').textContent = '✏️ Editar Cadastro';
+        document.getElementById('tituloCadastroCliente').textContent = 'Editar Cadastro';
         document.getElementById('subtituloCadastroCliente').textContent = `Ajuste os dados do cadastro #${id}.`;
         document.getElementById('btnSalvarCliente').textContent = '✓ Salvar Alterações';
     } catch (error) {
@@ -350,3 +350,4 @@ document.addEventListener('keydown', function(e) {
 window.voltarTelaCliente = voltarTelaCliente;
 window.buscarCep = buscarCep;
 window.consultarPlaca = consultarPlaca;
+

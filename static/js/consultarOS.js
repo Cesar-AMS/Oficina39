@@ -336,7 +336,7 @@ function carregarTabela(lista) {
     tabela.innerHTML = "";
     
     if(lista.length === 0) {
-        tabela.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px;">📭 Nenhuma ordem encontrada</td></tr>`;
+        tabela.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px;">Nenhuma ordem encontrada</td></tr>`;
         return;
     }
     
@@ -353,33 +353,33 @@ function carregarTabela(lista) {
         if (ordem.status === 'Aguardando' || ordem.status === 'Aguardando peças') {
             botoesAcao = `
                 <button class="btn-iniciar" onclick="iniciarOrdem(${ordem.id})">▶ INICIAR</button>
-                <button class="btn-visualizar" onclick="visualizar(${ordem.id})">👁 VER</button>
-                <button class="btn-excluir-os" onclick="excluirOrdem(${ordem.id})">🗑 EXCLUIR</button>
+                <button class="btn-visualizar" onclick="visualizar(${ordem.id})">Ver</button>
+                <button class="btn-excluir-os" onclick="excluirOrdem(${ordem.id})">Excluir</button>
             `;
         } 
         else if (ordem.status === 'Em andamento') {
             botoesAcao = `
                 <button class="btn-finalizar" onclick="finalizarOrdem(${ordem.id})">✅ FINALIZAR</button>
-                <button class="btn-visualizar" onclick="visualizar(${ordem.id})">👁 VER</button>
-                <button class="btn-excluir-os" onclick="excluirOrdem(${ordem.id})">🗑 EXCLUIR</button>
+                <button class="btn-visualizar" onclick="visualizar(${ordem.id})">Ver</button>
+                <button class="btn-excluir-os" onclick="excluirOrdem(${ordem.id})">Excluir</button>
             `;
         } 
         else if (ordem.status === 'Concluído') {
             if (diasRestantes > 0) {
                 botoesAcao = `
                     <button class="btn-garantia" onclick="ativarGarantia(${ordem.id})" title="Prazo para ativação de garantia">
-                        🔧 GARANTIA (${diasRestantes}d)
+                        Garantia (${diasRestantes}d)
                     </button>
-                    <button class="btn-visualizar" onclick="visualizar(${ordem.id})">👁 VER</button>
-                    <button class="btn-excluir-os" onclick="excluirOrdem(${ordem.id})">🗑 EXCLUIR</button>
+                    <button class="btn-visualizar" onclick="visualizar(${ordem.id})">Ver</button>
+                    <button class="btn-excluir-os" onclick="excluirOrdem(${ordem.id})">Excluir</button>
                 `;
             } else {
                 botoesAcao = `
                     <span class="garantia-expirada" title="Prazo para ativar garantia expirado">
-                        ⚠️ Prazo de garantia expirado
+                        Prazo de garantia expirado
                     </span>
-                    <button class="btn-visualizar" onclick="visualizar(${ordem.id})">👁 VER</button>
-                    <button class="btn-excluir-os" onclick="excluirOrdem(${ordem.id})">🗑 EXCLUIR</button>
+                    <button class="btn-visualizar" onclick="visualizar(${ordem.id})">Ver</button>
+                    <button class="btn-excluir-os" onclick="excluirOrdem(${ordem.id})">Excluir</button>
                 `;
             }
         } 
@@ -387,16 +387,16 @@ function carregarTabela(lista) {
             if (diasRestantes > 0) {
                 botoesAcao = `
                     <span class="status-garantia" title="Serviço em garantia por mais ${diasRestantes} dias">
-                        🔧 Serviço na garantia (${diasRestantes} dias)
+                        Serviço na garantia (${diasRestantes} dias)
                     </span>
-                    <button class="btn-visualizar" onclick="visualizar(${ordem.id})">👁 VER</button>
-                    <button class="btn-excluir-os" onclick="excluirOrdem(${ordem.id})">🗑 EXCLUIR</button>
+                    <button class="btn-visualizar" onclick="visualizar(${ordem.id})">Ver</button>
+                    <button class="btn-excluir-os" onclick="excluirOrdem(${ordem.id})">Excluir</button>
                 `;
             } else {
                 botoesAcao = `
-                    <span class="garantia-expirada">⚠️ Garantia expirada</span>
-                    <button class="btn-visualizar" onclick="visualizar(${ordem.id})">👁 VER</button>
-                    <button class="btn-excluir-os" onclick="excluirOrdem(${ordem.id})">🗑 EXCLUIR</button>
+                    <span class="garantia-expirada">Garantia expirada</span>
+                    <button class="btn-visualizar" onclick="visualizar(${ordem.id})">Ver</button>
+                    <button class="btn-excluir-os" onclick="excluirOrdem(${ordem.id})">Excluir</button>
                 `;
             }
         }
@@ -575,3 +575,4 @@ window.salvarProfissional = salvarProfissional;
 window.excluirOrdem = excluirOrdem;
 
 window.editarCliente = editarCliente;
+

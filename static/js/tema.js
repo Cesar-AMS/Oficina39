@@ -9,8 +9,8 @@ function atualizarRotuloTema(tema) {
     if (temaSpan) temaSpan.textContent = texto;
     if (botaoTema) {
         botaoTema.textContent = tema === 'dark'
-            ? '🎨 Tema Global: Escuro (clique para Claro)'
-            : '🎨 Tema Global: Claro (clique para Escuro)';
+            ? 'Tema Global: Escuro (clique para Claro)'
+            : 'Tema Global: Claro (clique para Escuro)';
     }
 }
 
@@ -54,3 +54,4 @@ document.addEventListener('DOMContentLoaded', carregarTema);
 // Exportar função para uso global
 window.alternarTema = alternarTema;
 window.alternarTemaGlobal = alternarTemaGlobal;
+

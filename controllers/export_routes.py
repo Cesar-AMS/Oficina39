@@ -188,7 +188,7 @@ def gerar_pdf_ordem(id):
             cabecalho_linha1.append(logo_bloco)
         else:
             cabecalho_linha1.append(
-                Paragraph("🚗", ParagraphStyle('Logo', fontSize=30)))
+                Paragraph("OF39", ParagraphStyle('Logo', fontSize=18)))
 
         # DADOS DA EMPRESA (bloco com hierarquia visual mais profissional)
         empresa_nome = Paragraph("OFICINA 39", estilo_nome_empresa)

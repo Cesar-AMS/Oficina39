@@ -6,7 +6,7 @@
 .btn {
     height: 36px;
     padding: 0 14px;
-    border: none;
+    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     font-size: 0.84rem;
     font-weight: 600;
@@ -16,15 +16,17 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-sm);
-    border: 1px solid transparent;
     min-width: 130px;
-    color: white !important;
+    background: var(--bg-card);
+    color: var(--text-primary) !important;
 }
 
 .btn-salvar,
 .btn-criar-ordem,
 .btn-ordem-primary {
     background: var(--success);
+    color: white !important;
+    border-color: transparent;
 }
 
 .btn-salvar:hover,
@@ -36,6 +38,8 @@
 .btn-cancelar,
 .btn-ordem-secondary {
     background: var(--danger);
+    color: white !important;
+    border-color: transparent;
 }
 
 .btn-cancelar:hover,
@@ -57,7 +61,7 @@
 .btn-mostrar-todas {
     background: var(--primary-light) !important;
     color: white !important;
-    border: 1px solid var(--border);
+    border: 1px solid transparent;
 }
 
 .btn-mostrar-todas:hover {
@@ -81,10 +85,6 @@
 
 .btn-buscar:hover {
     background: var(--accent-light);
-}
-
-button, .btn, a.btn, input[type="button"], input[type="submit"] {
-    color: white !important;
 }
 
 .button-group,
@@ -148,6 +148,7 @@ button, .btn, a.btn, input[type="button"], input[type="submit"] {
     cursor: pointer;
     transition: all 0.2s;
     color: white !important;
+    border-color: transparent;
 }
 
 .btn-visualizar { background: var(--primary-light); }

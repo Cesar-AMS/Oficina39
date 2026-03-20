@@ -11,6 +11,15 @@ function alertSucesso(mensagem) {
 let relatorioSelecionado = null;
 let profissionaisCadastrados = [];
 
+function alternarAbaRelatorios(nomeAba) {
+    document.querySelectorAll('.relatorios-tab').forEach((aba) => {
+        aba.classList.toggle('active', aba.dataset.tab === nomeAba);
+    });
+    document.querySelectorAll('.relatorios-tab-panel').forEach((painel) => {
+        painel.classList.toggle('active', painel.id === `relatoriosTab${nomeAba.charAt(0).toUpperCase()}${nomeAba.slice(1)}`);
+    });
+}
+
 function formatarMoeda(valor) {
     return 'R$ ' + (Number(valor || 0)).toFixed(2).replace('.', ',');
 }
@@ -55,7 +64,7 @@ function nomePeriodo(chave) {
 }
 
 function emojiPeriodo(chave) {
-    return chave ? '📅' : '📊';
+    return chave ? 'Periodo' : 'Resumo';
 }
 
 function preencherPeriodo(bloco, periodoSelecionado, intervaloCustom = null) {
@@ -390,6 +399,7 @@ async function baixarExcelContabilidade() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    alternarAbaRelatorios('producao');
     const hoje = new Date().toISOString().split('T')[0];
     const mesAtual = hoje.slice(0, 7);
     const dataFim = document.getElementById('dataFim');
@@ -414,3 +424,5 @@ window.carregarContabilidadeGeral = carregarContabilidadeGeral;
 window.baixarExcelContabilidade = baixarExcelContabilidade;
 window.carregarRelatorioOperacional = carregarRelatorioOperacional;
 window.baixarExcelOperacional = baixarExcelOperacional;
+window.alternarAbaRelatorios = alternarAbaRelatorios;
+

@@ -17,7 +17,7 @@
 }
 
 .modal-content {
-    background: white;
+    background: var(--bg-card);
     padding: var(--space-xl);
     border-radius: var(--radius-lg);
     width: 90%;
@@ -46,8 +46,8 @@
 .modal select,
 .modal textarea {
     color: var(--text-dark) !important;
-    background: white;
-    border: 1px solid #ccc;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
 }
 
 .modal-actions {

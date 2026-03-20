@@ -218,7 +218,7 @@ function mostrarErro(mensagem) {
     container.innerHTML = `
         <h1 style="color: var(--danger); text-align: center; margin: 50px 0;">❌ ${mensagem}</h1>
         <div style="text-align: center;">
-            <button class="btn btn-voltar" onclick="voltar()">↩ Voltar</button>
+            <button class="btn btn-voltar" onclick="voltar()">Voltar</button>
         </div>
     `;
 }
@@ -323,3 +323,4 @@ document.addEventListener('DOMContentLoaded', function() {
     atualizarLinksVoltar();
     carregarOrdem();
 });
+

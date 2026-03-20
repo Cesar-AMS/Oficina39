@@ -18,193 +18,213 @@
         <section class="topo-relatorios-card">
             <p class="titulo-relatorios-topo">Relatórios</p>
             <div class="acoes-cabecalho">
-                <a class="btn btn-voltar" href="/">↩ Voltar</a>
+                <a class="btn btn-voltar" href="/">Voltar</a>
             </div>
         </section>
 
-        <section class="periodo-card secao-producao-unica">
-            <h2 class="secao-titulo">📊 Produção por Profissional</h2>
-            <p class="secao-subtitulo" id="tituloPeriodoSelecionado">Resultado do período selecionado</p>
-            <div class="filtros-grid">
-                <div class="form-group">
-                    <label for="profissionalBusca">Profissional</label>
-                    <select id="profissionalBusca">
-                        <option value="">Selecione um profissional cadastrado</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="dataInicio">Data Início</label>
-                    <input type="date" id="dataInicio">
-                </div>
-                <div class="form-group">
-                    <label for="dataFim">Data Fim (máx. 31 dias)</label>
-                    <input type="date" id="dataFim">
-                </div>
-                <div class="form-group form-group-botao">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-salvar btn-compact" onclick="buscarResumoProfissional()">🔎 Pesquisar</button>
-                </div>
-                <div class="form-group form-group-botao">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-voltar btn-compact" onclick="baixarRelatorioSelecionado()">⬇️ Download</button>
-                </div>
-            </div>
-            <div class="resumo-profissional-card">
-                <strong>Profissional selecionado:</strong> <span id="profissionalSelecionado">-</span>
-                <br>
-                <strong>Período solicitado:</strong> <span id="periodoSelecionado">-</span>
-            </div>
-            <div class="resumo-grid">
-                <div><span>Serviços</span><strong id="periodoQtd">0</strong></div>
-                <div><span>Total</span><strong id="periodoTotal">R$ 0,00</strong></div>
-                <div><span>Média</span><strong id="periodoMedia">R$ 0,00</strong></div>
-                <div><span>Intervalo</span><strong id="periodoIntervalo">-</strong></div>
-            </div>
-            <div class="table-container">
-                <table class="tabela-servicos-periodo">
-                    <thead>
-                        <tr>
-                            <th>OS</th>
-                            <th>Data</th>
-                            <th>Cliente</th>
-                            <th>Serviço</th>
-                            <th>Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody id="periodoTabela"></tbody>
-                </table>
+        <section class="relatorios-hero">
+            <div class="relatorios-hero-copy">
+                <p class="relatorios-hero-eyebrow">Centro analítico</p>
+                <h1>Painel de Relatórios</h1>
+                <p>Alterne entre produção, contabilidade e visão operacional sem misturar filtros e indicadores na mesma tela.</p>
             </div>
         </section>
 
-        <section class="periodo-card">
-            <h2 class="secao-titulo">🧾 Contabilidade Geral (Mensal)</h2>
-            <div class="filtros-grid">
-                <div class="form-group">
-                    <label for="mesContabil">Mês de Referência</label>
-                    <input type="month" id="mesContabil">
-                </div>
-                <div class="form-group form-group-botao">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-salvar btn-compact" onclick="carregarContabilidadeGeral()">Atualizar Resumo</button>
-                </div>
-                <div class="form-group form-group-botao">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-voltar btn-compact" onclick="baixarExcelContabilidade()">⬇️ Download</button>
-                </div>
-            </div>
+        <div class="relatorios-tabs">
+            <button class="relatorios-tab active" data-tab="producao" onclick="alternarAbaRelatorios('producao')">Produção</button>
+            <button class="relatorios-tab" data-tab="contabilidade" onclick="alternarAbaRelatorios('contabilidade')">Contabilidade</button>
+            <button class="relatorios-tab" data-tab="operacional" onclick="alternarAbaRelatorios('operacional')">Operacional</button>
+        </div>
 
-            <div class="resumo-grid">
-                <div><span>Faturamento Bruto</span><strong id="contabFaturamento">R$ 0,00</strong></div>
-                <div><span>Total Saídas</span><strong id="contabSaidas">R$ 0,00</strong></div>
-                <div><span>Saldo Operacional</span><strong id="contabSaldo">R$ 0,00</strong></div>
-                <div><span>OS Concluídas</span><strong id="contabOs">0</strong></div>
-            </div>
-            <div class="resumo-grid">
-                <div><span>Ticket Médio</span><strong id="contabTicket">R$ 0,00</strong></div>
-                <div><span>Período</span><strong id="contabPeriodo">-</strong></div>
-            </div>
-
-            <div class="table-container">
-                <table class="tabela-servicos-periodo">
-                    <thead>
-                        <tr>
-                            <th>Forma de Pagamento</th>
-                            <th>Quantidade</th>
-                            <th>Valor Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="contabTabelaPagamentos">
-                        <tr><td colspan="3" class="sem-dados">Sem dados.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section class="periodo-card">
-            <h2 class="secao-titulo">📦 Relatório Operacional (Serviços, Peças e Saídas)</h2>
-            <div class="filtros-grid">
-                <div class="form-group">
-                    <label for="opDataInicio">Data Início</label>
-                    <input type="date" id="opDataInicio">
+        <section class="relatorios-tab-panel active" id="relatoriosTabProducao">
+            <section class="periodo-card secao-producao-unica">
+                <h2 class="secao-titulo">Produção por Profissional</h2>
+                <p class="secao-subtitulo" id="tituloPeriodoSelecionado">Resultado do período selecionado</p>
+                <div class="filtros-grid">
+                    <div class="form-group">
+                        <label for="profissionalBusca">Profissional</label>
+                        <select id="profissionalBusca">
+                            <option value="">Selecione um profissional cadastrado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dataInicio">Data Início</label>
+                        <input type="date" id="dataInicio">
+                    </div>
+                    <div class="form-group">
+                        <label for="dataFim">Data Fim (máx. 31 dias)</label>
+                        <input type="date" id="dataFim">
+                    </div>
+                    <div class="form-group form-group-botao">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-salvar btn-compact" onclick="buscarResumoProfissional()">Pesquisar</button>
+                    </div>
+                    <div class="form-group form-group-botao">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-voltar btn-compact" onclick="baixarRelatorioSelecionado()">Download</button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="opDataFim">Data Fim</label>
-                    <input type="date" id="opDataFim">
+                <div class="resumo-profissional-card">
+                    <strong>Profissional selecionado:</strong> <span id="profissionalSelecionado">-</span>
+                    <br>
+                    <strong>Período solicitado:</strong> <span id="periodoSelecionado">-</span>
                 </div>
-                <div class="form-group form-group-botao">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-salvar btn-compact" onclick="carregarRelatorioOperacional()">Atualizar</button>
+                <div class="resumo-grid">
+                    <div><span>Serviços</span><strong id="periodoQtd">0</strong></div>
+                    <div><span>Total</span><strong id="periodoTotal">R$ 0,00</strong></div>
+                    <div><span>Média</span><strong id="periodoMedia">R$ 0,00</strong></div>
+                    <div><span>Intervalo</span><strong id="periodoIntervalo">-</strong></div>
                 </div>
-                <div class="form-group form-group-botao">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-voltar btn-compact" onclick="baixarExcelOperacional()">⬇️ Download</button>
-                </div>
-            </div>
-
-            <div class="resumo-grid">
-                <div><span>Qtd Serviços</span><strong id="opQtdServicos">0</strong></div>
-                <div><span>Total Serviços</span><strong id="opTotalServicos">R$ 0,00</strong></div>
-                <div><span>Qtd Peças</span><strong id="opQtdPecas">0</strong></div>
-                <div><span>Total Peças</span><strong id="opTotalPecas">R$ 0,00</strong></div>
-            </div>
-            <div class="resumo-grid">
-                <div><span>Qtd Saídas</span><strong id="opQtdSaidas">0</strong></div>
-                <div><span>Total Saídas</span><strong id="opTotalSaidas">R$ 0,00</strong></div>
-                <div><span>Período</span><strong id="opPeriodo">-</strong></div>
-            </div>
-
-            <div class="grid-operacional">
                 <div class="table-container">
-                    <div class="secao-etiqueta">Serviços</div>
                     <table class="tabela-servicos-periodo">
                         <thead>
                             <tr>
                                 <th>OS</th>
                                 <th>Data</th>
-                                <th>Profissional</th>
+                                <th>Cliente</th>
                                 <th>Serviço</th>
                                 <th>Valor</th>
                             </tr>
                         </thead>
-                        <tbody id="opTabelaServicos">
-                            <tr><td colspan="5" class="sem-dados">Sem dados.</td></tr>
-                        </tbody>
+                        <tbody id="periodoTabela"></tbody>
                     </table>
                 </div>
+            </section>
+        </section>
+
+        <section class="relatorios-tab-panel" id="relatoriosTabContabilidade">
+            <section class="periodo-card">
+                <h2 class="secao-titulo">Contabilidade Geral (Mensal)</h2>
+                <div class="filtros-grid">
+                    <div class="form-group">
+                        <label for="mesContabil">Mês de Referência</label>
+                        <input type="month" id="mesContabil">
+                    </div>
+                    <div class="form-group form-group-botao">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-salvar btn-compact" onclick="carregarContabilidadeGeral()">Atualizar Resumo</button>
+                    </div>
+                    <div class="form-group form-group-botao">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-voltar btn-compact" onclick="baixarExcelContabilidade()">Download</button>
+                    </div>
+                </div>
+
+                <div class="resumo-grid">
+                    <div><span>Faturamento Bruto</span><strong id="contabFaturamento">R$ 0,00</strong></div>
+                    <div><span>Total Saídas</span><strong id="contabSaidas">R$ 0,00</strong></div>
+                    <div><span>Saldo Operacional</span><strong id="contabSaldo">R$ 0,00</strong></div>
+                    <div><span>OS Concluídas</span><strong id="contabOs">0</strong></div>
+                </div>
+                <div class="resumo-grid">
+                    <div><span>Ticket Médio</span><strong id="contabTicket">R$ 0,00</strong></div>
+                    <div><span>Período</span><strong id="contabPeriodo">-</strong></div>
+                </div>
+
                 <div class="table-container">
-                    <div class="secao-etiqueta">Peças</div>
                     <table class="tabela-servicos-periodo">
                         <thead>
                             <tr>
-                                <th>OS</th>
-                                <th>Data</th>
-                                <th>Peça</th>
-                                <th>Qtd</th>
-                                <th>Total</th>
+                                <th>Forma de Pagamento</th>
+                                <th>Quantidade</th>
+                                <th>Valor Total</th>
                             </tr>
                         </thead>
-                        <tbody id="opTabelaPecas">
-                            <tr><td colspan="5" class="sem-dados">Sem dados.</td></tr>
+                        <tbody id="contabTabelaPagamentos">
+                            <tr><td colspan="3" class="sem-dados">Sem dados.</td></tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="table-container">
-                    <div class="secao-etiqueta">Saídas</div>
-                    <table class="tabela-servicos-periodo">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Categoria</th>
-                                <th>Descrição</th>
-                                <th>Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody id="opTabelaSaidas">
-                            <tr><td colspan="4" class="sem-dados">Sem dados.</td></tr>
-                        </tbody>
-                    </table>
+            </section>
+        </section>
+
+        <section class="relatorios-tab-panel" id="relatoriosTabOperacional">
+            <section class="periodo-card">
+                <h2 class="secao-titulo">Relatório Operacional (Serviços, Peças e Saídas)</h2>
+                <div class="filtros-grid">
+                    <div class="form-group">
+                        <label for="opDataInicio">Data Início</label>
+                        <input type="date" id="opDataInicio">
+                    </div>
+                    <div class="form-group">
+                        <label for="opDataFim">Data Fim</label>
+                        <input type="date" id="opDataFim">
+                    </div>
+                    <div class="form-group form-group-botao">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-salvar btn-compact" onclick="carregarRelatorioOperacional()">Atualizar</button>
+                    </div>
+                    <div class="form-group form-group-botao">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-voltar btn-compact" onclick="baixarExcelOperacional()">Download</button>
+                    </div>
                 </div>
-            </div>
+
+                <div class="resumo-grid">
+                    <div><span>Qtd Serviços</span><strong id="opQtdServicos">0</strong></div>
+                    <div><span>Total Serviços</span><strong id="opTotalServicos">R$ 0,00</strong></div>
+                    <div><span>Qtd Peças</span><strong id="opQtdPecas">0</strong></div>
+                    <div><span>Total Peças</span><strong id="opTotalPecas">R$ 0,00</strong></div>
+                </div>
+                <div class="resumo-grid">
+                    <div><span>Qtd Saídas</span><strong id="opQtdSaidas">0</strong></div>
+                    <div><span>Total Saídas</span><strong id="opTotalSaidas">R$ 0,00</strong></div>
+                    <div><span>Período</span><strong id="opPeriodo">-</strong></div>
+                </div>
+
+                <div class="grid-operacional">
+                    <div class="table-container">
+                        <div class="secao-etiqueta">Serviços</div>
+                        <table class="tabela-servicos-periodo">
+                            <thead>
+                                <tr>
+                                    <th>OS</th>
+                                    <th>Data</th>
+                                    <th>Profissional</th>
+                                    <th>Serviço</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="opTabelaServicos">
+                                <tr><td colspan="5" class="sem-dados">Sem dados.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-container">
+                        <div class="secao-etiqueta">Peças</div>
+                        <table class="tabela-servicos-periodo">
+                            <thead>
+                                <tr>
+                                    <th>OS</th>
+                                    <th>Data</th>
+                                    <th>Peça</th>
+                                    <th>Qtd</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="opTabelaPecas">
+                                <tr><td colspan="5" class="sem-dados">Sem dados.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-container">
+                        <div class="secao-etiqueta">Saídas</div>
+                        <table class="tabela-servicos-periodo">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Categoria</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="opTabelaSaidas">
+                                <tr><td colspan="4" class="sem-dados">Sem dados.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </section>
     </div>
 
@@ -214,3 +234,4 @@
 </body>
 
 </html>
+

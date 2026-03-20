@@ -157,7 +157,7 @@ function adicionarServico(dados = null) {
         <td><input type="text" class="codigo-servico" value="${codigo}" style="width: 60px;"></td>
         <td><input type="text" class="descricao-servico" value="${descricao.replace(/"/g, '&quot;')}" placeholder="Descrição" style="width: 100%;"></td>
         <td><input type="number" class="valor-servico" value="${valor}" placeholder="0,00" step="0.01" onchange="calcularTotais()" style="width: 100%;"></td>
-        <td><button type="button" class="btn-remover" onclick="removerServico(${contadorServicos})">🗑️</button></td>
+        <td><button type="button" class="btn-remover" onclick="removerServico(${contadorServicos})">Excluir</button></td>
     `;
     tbody.appendChild(novaLinha);
 }
@@ -202,7 +202,7 @@ function adicionarPeca(dados = null) {
         <td><input type="number" class="lucro-peca" value="${lucro}" step="0.01" onchange="calcularTotalPeca(this)" style="width: 80px;"></td>
         <td><input type="number" class="valor-unitario-peca" value="${valor}" step="0.01" readonly style="width: 100px;"></td>
         <td><span class="total-peca">${formatarValor(quantidade * valor)}</span></td>
-        <td><button type="button" class="btn-remover" onclick="removerPeca(${contadorPecas})">🗑️</button></td>
+        <td><button type="button" class="btn-remover" onclick="removerPeca(${contadorPecas})">Excluir</button></td>
     `;
     tbody.appendChild(novaLinha);
 
@@ -397,3 +397,4 @@ document.addEventListener('keydown', function(e) {
         cancelar();
     }
 });
+

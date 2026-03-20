@@ -13,271 +13,307 @@
 <body class="pagina-config">
     <div class="container config-container">
         <header class="cabecalho-duplo">
-            <h1 class="titulo-config">⚙️ Configurações do Sistema</h1>
+            <h1 class="titulo-config">Configurações do Sistema</h1>
             <div class="acoes-config">
-                <a class="btn btn-voltar" href="/">↩ Voltar</a>
+                <a class="btn btn-voltar" href="/">Voltar</a>
             </div>
         </header>
 
-        <section class="info-box">
-            <h3>🎨 Aparência Global</h3>
-            <p>Use um único botão para alternar o tema em todo o sistema.</p>
-            <button id="btnTemaGlobal" class="btn btn-salvar btn-compact" onclick="alternarTemaGlobal()">🎨 Tema Global</button>
-        </section>
-
-        <section class="info-box">
-            <h3>📧 Sistema de Envio Automático</h3>
-            <p>Configure os e-mails para envio automático de relatórios financeiros.</p>
-            <p><strong>Frequências:</strong> Diário (18h), Semanal (segunda às 8h), Mensal (dia 1 às 8h).</p>
-        </section>
-
-        <section class="form-section config-section" id="secao-profissionais">
-            <h3 class="section-titulo">👷 Cadastro de Profissionais</h3>
-            <div class="config-row">
-                <div class="form-group">
-                    <label for="nomeProfissionalCadastro">Nome do profissional</label>
-                    <input type="text" id="nomeProfissionalCadastro" class="filtro-input" placeholder="Ex: João Silva">
-                </div>
-                <div class="form-group">
-                    <label for="cnpjProfissionalCadastro">CNPJ</label>
-                    <input type="text" id="cnpjProfissionalCadastro" class="filtro-input" placeholder="00.000.000/0001-00" maxlength="18" inputmode="numeric">
-                </div>
-                <div class="form-group botao-exportar">
-                    <button class="btn btn-salvar" onclick="cadastrarProfissional()">➕ Cadastrar Profissional</button>
-                </div>
+        <section class="config-hero">
+            <div class="config-hero-copy">
+                <p class="config-hero-eyebrow">Painel administrativo</p>
+                <h2>Organize o sistema por área</h2>
+                <p>Use as abas para separar operação, profissionais, dados, integrações e histórico sem poluir a tela.</p>
             </div>
-            <div class="table-container">
-                <table class="tabela-historico">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>CNPJ</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelaProfissionaisCadastro">
-                        <tr>
-                            <td colspan="3" class="text-center mensagem-carregando">Carregando profissionais...</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="config-hero-meta">
+                <div class="config-hero-pill">
+                    <span>Banco</span>
+                    <strong>SQLite local</strong>
+                </div>
+                <div class="config-hero-pill">
+                    <span>Entrega</span>
+                    <strong>Modo portátil</strong>
+                </div>
             </div>
         </section>
 
-        <section class="form-section config-section" id="secao-config-email">
-            <h3 class="section-titulo">📧 Configuração de E-mails</h3>
-            <div class="form-group">
-                <label for="emailCliente">E-mail do Cliente (remetente) *</label>
-                <input type="email" id="emailCliente" placeholder="contato@oficina.com.br" required>
-            </div>
-            <div class="form-group">
-                <label for="senhaApp">Senha de App (16 dígitos) *</label>
-                <input type="password" id="senhaApp" placeholder="abcdefghijklmnop" required>
-                <small class="texto-ajuda">Gerada no Google com verificação em duas etapas.</small>
-            </div>
-            <div class="form-group">
-                <label for="emailContador">E-mail do Contador (destinatário) *</label>
-                <input type="email" id="emailContador" placeholder="contador@escritorio.com.br" required>
-            </div>
-            <div class="form-group">
-                <label for="profissionalEnvioAuto">Profissional para envio automático ao contador</label>
-                <select id="profissionalEnvioAuto" class="filtro-input">
-                    <option value="">Todos os profissionais</option>
-                </select>
-            </div>
-            <div class="config-row">
+        <div class="config-tabs">
+            <button class="config-tab active" data-tab="geral" onclick="alternarAbaConfig('geral')">Geral</button>
+            <button class="config-tab" data-tab="profissionais" onclick="alternarAbaConfig('profissionais')">Profissionais</button>
+            <button class="config-tab" data-tab="dados" onclick="alternarAbaConfig('dados')">Dados</button>
+            <button class="config-tab" data-tab="integracoes" onclick="alternarAbaConfig('integracoes')">Integrações</button>
+            <button class="config-tab" data-tab="historico" onclick="alternarAbaConfig('historico')">Histórico</button>
+        </div>
+
+        <section class="config-tab-panel active" id="configTabGeral">
+            <section class="info-box">
+                <h3>Aparência Global</h3>
+                <p>Use um único botão para alternar o tema em todo o sistema.</p>
+                <button id="btnTemaGlobal" class="btn btn-salvar btn-compact" onclick="alternarTemaGlobal()">Tema Global</button>
+            </section>
+
+            <section class="info-box">
+                <h3>Sistema de Envio Automático</h3>
+                <p>Configure os e-mails para envio automático de relatórios financeiros.</p>
+                <p><strong>Frequências:</strong> Diário (18h), Semanal (segunda às 8h), Mensal (dia 1 às 8h).</p>
+            </section>
+
+            <section class="form-section config-section" id="secao-config-email">
+                <h3 class="section-titulo">Configuração de E-mails</h3>
                 <div class="form-group">
-                    <label for="frequenciaEnvio">Frequência de envio</label>
-                    <select id="frequenciaEnvio">
-                        <option value="">Selecione...</option>
-                        <option value="diario">📅 Diário (18h)</option>
-                        <option value="semanal">📆 Semanal (segunda 8h)</option>
-                        <option value="mensal">📊 Mensal (dia 1, 8h)</option>
+                    <label for="emailCliente">E-mail do Cliente (remetente) *</label>
+                    <input type="email" id="emailCliente" placeholder="contato@oficina.com.br" required>
+                </div>
+                <div class="form-group">
+                    <label for="senhaApp">Senha de App (16 dígitos) *</label>
+                    <input type="password" id="senhaApp" placeholder="abcdefghijklmnop" required>
+                    <small class="texto-ajuda">Gerada no Google com verificação em duas etapas.</small>
+                </div>
+                <div class="form-group">
+                    <label for="emailContador">E-mail do Contador (destinatário) *</label>
+                    <input type="email" id="emailContador" placeholder="contador@escritorio.com.br" required>
+                </div>
+                <div class="form-group">
+                    <label for="profissionalEnvioAuto">Profissional para envio automático ao contador</label>
+                    <select id="profissionalEnvioAuto" class="filtro-input">
+                        <option value="">Todos os profissionais</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="diaEnvio">Dia do mês (mensal)</label>
-                    <input type="number" id="diaEnvio" min="1" max="28" value="1">
-                </div>
-            </div>
-            <div class="checkbox-wrapper">
-                <input type="checkbox" id="envioAtivo" checked>
-                <label for="envioAtivo">Ativar envio automático de relatórios</label>
-            </div>
-            <div class="button-group alinhar-esquerda">
-                <button class="btn btn-salvar" onclick="salvarConfig()">💾 Salvar Configurações</button>
-            </div>
-        </section>
-
-        <section class="form-section config-section" id="secao-whatsapp-orcamento">
-            <h3 class="section-titulo">💬 WhatsApp para Orçamentos</h3>
-            <p class="texto-ajuda">Informe o número que deve abrir quando o usuário clicar em "Enviar Orçamento" na Nova OS.</p>
-            <div class="config-row">
-                <div class="form-group">
-                    <label for="whatsappOrcamento">WhatsApp da oficina</label>
-                    <input type="text" id="whatsappOrcamento" placeholder="Ex: 5511992092341 ou (11) 99209-2341">
-                    <small class="texto-ajuda">Pode informar com ou sem máscara. O sistema usa apenas os números.</small>
-                </div>
-            </div>
-        </section>
-
-
-        <section class="form-section config-section" id="secao-backup">
-            <h3 class="section-titulo">💾 Backup e Exportação de Dados</h3>
-            <div class="config-row">
-                <div class="form-group">
-                    <label for="tipoExportacao">Tipo de exportação</label>
-                    <select id="tipoExportacao">
-                        <option value="completo">📦 Banco completo (.db)</option>
-                        <option value="clientes">👤 Apenas clientes</option>
-                        <option value="ordens">🔧 Apenas ordens</option>
-                        <option value="financeiro">💰 Apenas financeiro (entradas/saídas)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="formatoExportacao">Formato</label>
-                    <select id="formatoExportacao">
-                        <option value="db">🗄️ SQLite (.db)</option>
-                        <option value="csv">📊 CSV</option>
-                        <option value="xlsx">📗 Excel</option>
-                        <option value="json">📋 JSON</option>
-                    </select>
-                </div>
-                <div class="form-group botao-exportar">
-                    <button class="btn btn-salvar" onclick="exportarDados()">⬇️ Exportar</button>
-                </div>
-            </div>
-            <p class="texto-aviso"><small>⚠️ O backup completo (.db) contém todos os dados do sistema.</small></p>
-        </section>
-
-        <section class="form-section config-section" id="secao-importacao">
-            <h3 class="section-titulo">📂 Importação de Dados</h3>
-            <div class="config-row">
-                <div class="form-group">
-                    <label for="tipoImportacao">Tipo de importação</label>
-                    <select id="tipoImportacao">
-                        <option value="clientes">👤 Importar clientes</option>
-                        <option value="ordens">🔧 Importar ordens</option>
-                        <option value="saidas">💰 Importar saídas</option>
-                        <option value="completo">📦 Importar tudo (restaurar backup)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="formatoImportacao">Formato do arquivo</label>
-                    <select id="formatoImportacao">
-                        <option value="csv">📊 CSV</option>
-                        <option value="xlsx">📗 Excel</option>
-                        <option value="json">📋 JSON</option>
-                    </select>
-                </div>
-            </div>
-            <div class="file-upload">
-                <input type="file" id="arquivoImportar" accept=".csv,.xlsx,.json">
-                <button class="btn btn-salvar botao-importar" onclick="importarDados()">⬆️ Importar Dados</button>
-            </div>
-            <div id="resultadoImportacao" class="resultado-mensagem"></div>
-        </section>
-
-        <section class="form-section config-section" id="secao-historico">
-            <h3 class="section-titulo">📋 Últimos Relatórios Enviados</h3>
-            <div class="table-container">
-                <table class="tabela-historico">
-                    <thead>
-                        <tr>
-                            <th>Data/Hora</th>
-                            <th>Período</th>
-                            <th>Formato</th>
-                            <th>Remetente</th>
-                            <th>Destinatário</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelaEnvios">
-                        <tr>
-                            <td colspan="6" class="text-center mensagem-carregando">Carregando histórico...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section class="form-section config-section" id="secao-integracoes">
-            <h3 class="section-titulo">🔌 APIs de CEP e Consulta de Placa</h3>
-            <p class="texto-ajuda">Defina provedores primário e secundário para cada integração e troque o provedor ativo quando quiser.</p>
-
-            <div class="integracao-bloco">
-                <h4 class="subtitulo-config">CEP</h4>
                 <div class="config-row">
                     <div class="form-group">
-                        <label for="cepProviderAtivo">Provedor ativo</label>
-                        <select id="cepProviderAtivo">
+                        <label for="frequenciaEnvio">Frequência de envio</label>
+                        <select id="frequenciaEnvio">
                             <option value="">Selecione...</option>
-                            <option value="viacep">ViaCEP</option>
-                            <option value="brasilapi">BrasilAPI</option>
-                            <option value="custom">Customizado</option>
+                            <option value="diario">Diário (18h)</option>
+                            <option value="semanal">Semanal (segunda 8h)</option>
+                            <option value="mensal">Mensal (dia 1, 8h)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="cepProviderPrimario">Primário</label>
-                        <input type="text" id="cepProviderPrimario" placeholder="Ex: viacep">
-                    </div>
-                    <div class="form-group">
-                        <label for="cepApiKeyPrimaria">Chave primária</label>
-                        <input type="text" id="cepApiKeyPrimaria" placeholder="Opcional">
+                        <label for="diaEnvio">Dia do mês (mensal)</label>
+                        <input type="number" id="diaEnvio" min="1" max="28" value="1">
                     </div>
                 </div>
-                <div class="config-row">
-                    <div class="form-group">
-                        <label for="cepProviderSecundario">Secundário</label>
-                        <input type="text" id="cepProviderSecundario" placeholder="Ex: brasilapi">
-                    </div>
-                    <div class="form-group">
-                        <label for="cepApiKeySecundaria">Chave secundária</label>
-                        <input type="text" id="cepApiKeySecundaria" placeholder="Opcional">
-                    </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="envioAtivo" checked>
+                    <label for="envioAtivo">Ativar envio automático de relatórios</label>
                 </div>
-            </div>
+            </section>
 
-            <div class="integracao-bloco">
-                <h4 class="subtitulo-config">Consulta de Placa</h4>
+            <section class="form-section config-section" id="secao-whatsapp-orcamento">
+                <h3 class="section-titulo">WhatsApp para Orçamentos</h3>
+                <p class="texto-ajuda">Informe o número que deve abrir quando o usuário clicar em "Enviar Orçamento" na Nova OS.</p>
                 <div class="config-row">
                     <div class="form-group">
-                        <label for="placaProviderAtivo">Provedor ativo</label>
-                        <select id="placaProviderAtivo">
-                            <option value="">Selecione...</option>
-                            <option value="placafipe">PlacaFipe</option>
-                            <option value="fipeapi">FIPE API</option>
-                            <option value="custom">Customizado</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="placaProviderPrimario">Primário</label>
-                        <input type="text" id="placaProviderPrimario" placeholder="Ex: placafipe">
-                    </div>
-                    <div class="form-group">
-                        <label for="placaApiKeyPrimaria">Chave primária</label>
-                        <input type="text" id="placaApiKeyPrimaria" placeholder="Informe a chave da API">
+                        <label for="whatsappOrcamento">WhatsApp da oficina</label>
+                        <input type="text" id="whatsappOrcamento" placeholder="Ex: 5511992092341 ou (11) 99209-2341">
+                        <small class="texto-ajuda">Pode informar com ou sem máscara. O sistema usa apenas os números.</small>
                     </div>
                 </div>
-                <div class="config-row">
-                    <div class="form-group">
-                        <label for="placaProviderSecundario">Secundário</label>
-                        <input type="text" id="placaProviderSecundario" placeholder="Ex: fipeapi">
-                    </div>
-                    <div class="form-group">
-                        <label for="placaApiKeySecundaria">Chave secundária</label>
-                        <input type="text" id="placaApiKeySecundaria" placeholder="Opcional">
-                    </div>
-                </div>
+            </section>
+
+            <div class="button-group alinhar-esquerda config-footer-actions">
+                <button class="btn btn-salvar" onclick="salvarConfig()">Salvar Configurações</button>
             </div>
         </section>
 
-        <section class="info-box info-tecnica">
-            <h3>🔧 Informações Técnicas</h3>
-            <p><strong>Servidor SMTP:</strong> smtp.gmail.com (porta 587)</p>
-            <p><strong>Horário de envio:</strong> Diário 18h / Semanal 8h / Mensal 8h</p>
-            <p><strong>Banco de dados:</strong> SQLite</p>
-            <p><strong>Versão:</strong> 2.0.0</p>
+        <section class="config-tab-panel" id="configTabProfissionais">
+            <section class="form-section config-section" id="secao-profissionais">
+                <h3 class="section-titulo">Cadastro de Profissionais</h3>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label for="nomeProfissionalCadastro">Nome do profissional</label>
+                        <input type="text" id="nomeProfissionalCadastro" class="filtro-input" placeholder="Ex: João Silva">
+                    </div>
+                    <div class="form-group">
+                        <label for="cnpjProfissionalCadastro">CNPJ</label>
+                        <input type="text" id="cnpjProfissionalCadastro" class="filtro-input" placeholder="00.000.000/0001-00" maxlength="18" inputmode="numeric">
+                    </div>
+                    <div class="form-group botao-exportar">
+                        <button class="btn btn-salvar" onclick="cadastrarProfissional()">Cadastrar Profissional</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="tabela-historico">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>CNPJ</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaProfissionaisCadastro">
+                            <tr>
+                                <td colspan="3" class="text-center mensagem-carregando">Carregando profissionais...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+
+        <section class="config-tab-panel" id="configTabDados">
+            <section class="form-section config-section" id="secao-backup">
+                <h3 class="section-titulo">Backup e Exportação de Dados</h3>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label for="tipoExportacao">Tipo de exportação</label>
+                        <select id="tipoExportacao">
+                            <option value="completo">Banco completo (.db)</option>
+                            <option value="clientes">Apenas clientes</option>
+                            <option value="ordens">Apenas ordens</option>
+                            <option value="financeiro">Apenas financeiro (entradas/saídas)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="formatoExportacao">Formato</label>
+                        <select id="formatoExportacao">
+                            <option value="db">SQLite (.db)</option>
+                            <option value="csv">CSV</option>
+                            <option value="xlsx">Excel</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                    <div class="form-group botao-exportar">
+                        <button class="btn btn-salvar" onclick="exportarDados()">Exportar</button>
+                    </div>
+                </div>
+                <p class="texto-aviso"><small>O backup completo (.db) contém todos os dados do sistema.</small></p>
+            </section>
+
+            <section class="form-section config-section" id="secao-importacao">
+                <h3 class="section-titulo">Importação de Dados</h3>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label for="tipoImportacao">Tipo de importação</label>
+                        <select id="tipoImportacao">
+                            <option value="clientes">Importar clientes</option>
+                            <option value="ordens">Importar ordens</option>
+                            <option value="saidas">Importar saídas</option>
+                            <option value="completo">Importar tudo (restaurar backup)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="formatoImportacao">Formato do arquivo</label>
+                        <select id="formatoImportacao">
+                            <option value="csv">CSV</option>
+                            <option value="xlsx">Excel</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="file-upload">
+                    <input type="file" id="arquivoImportar" accept=".csv,.xlsx,.json">
+                    <button class="btn btn-salvar botao-importar" onclick="importarDados()">Importar dados</button>
+                </div>
+                <div id="resultadoImportacao" class="resultado-mensagem"></div>
+            </section>
+        </section>
+
+        <section class="config-tab-panel" id="configTabIntegracoes">
+            <section class="form-section config-section" id="secao-integracoes">
+                <h3 class="section-titulo">APIs de CEP e Consulta de Placa</h3>
+                <p class="texto-ajuda">Defina provedores primário e secundário para cada integração e troque o provedor ativo quando quiser.</p>
+
+                <div class="integracao-bloco">
+                    <h4 class="subtitulo-config">CEP</h4>
+                    <div class="config-row">
+                        <div class="form-group">
+                            <label for="cepProviderAtivo">Provedor ativo</label>
+                            <select id="cepProviderAtivo">
+                                <option value="">Selecione...</option>
+                                <option value="viacep">ViaCEP</option>
+                                <option value="brasilapi">BrasilAPI</option>
+                                <option value="custom">Customizado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="cepProviderPrimario">Primário</label>
+                            <input type="text" id="cepProviderPrimario" placeholder="Ex: viacep">
+                        </div>
+                        <div class="form-group">
+                            <label for="cepApiKeyPrimaria">Chave primária</label>
+                            <input type="text" id="cepApiKeyPrimaria" placeholder="Opcional">
+                        </div>
+                    </div>
+                    <div class="config-row">
+                        <div class="form-group">
+                            <label for="cepProviderSecundario">Secundário</label>
+                            <input type="text" id="cepProviderSecundario" placeholder="Ex: brasilapi">
+                        </div>
+                        <div class="form-group">
+                            <label for="cepApiKeySecundaria">Chave secundária</label>
+                            <input type="text" id="cepApiKeySecundaria" placeholder="Opcional">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="integracao-bloco">
+                    <h4 class="subtitulo-config">Consulta de Placa</h4>
+                    <div class="config-row">
+                        <div class="form-group">
+                            <label for="placaProviderAtivo">Provedor ativo</label>
+                            <select id="placaProviderAtivo">
+                                <option value="">Selecione...</option>
+                                <option value="placafipe">PlacaFipe</option>
+                                <option value="fipeapi">FIPE API</option>
+                                <option value="custom">Customizado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="placaProviderPrimario">Primário</label>
+                            <input type="text" id="placaProviderPrimario" placeholder="Ex: placafipe">
+                        </div>
+                        <div class="form-group">
+                            <label for="placaApiKeyPrimaria">Chave primária</label>
+                            <input type="text" id="placaApiKeyPrimaria" placeholder="Informe a chave da API">
+                        </div>
+                    </div>
+                    <div class="config-row">
+                        <div class="form-group">
+                            <label for="placaProviderSecundario">Secundário</label>
+                            <input type="text" id="placaProviderSecundario" placeholder="Ex: fipeapi">
+                        </div>
+                        <div class="form-group">
+                            <label for="placaApiKeySecundaria">Chave secundária</label>
+                            <input type="text" id="placaApiKeySecundaria" placeholder="Opcional">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="info-box info-tecnica">
+                <h3>Informações Técnicas</h3>
+                <p><strong>Servidor SMTP:</strong> smtp.gmail.com (porta 587)</p>
+                <p><strong>Horário de envio:</strong> Diário 18h / Semanal 8h / Mensal 8h</p>
+                <p><strong>Banco de dados:</strong> SQLite</p>
+                <p><strong>Versão:</strong> 2.0.0</p>
+            </section>
+        </section>
+
+        <section class="config-tab-panel" id="configTabHistorico">
+            <section class="form-section config-section" id="secao-historico">
+                <h3 class="section-titulo">Últimos Relatórios Enviados</h3>
+                <div class="table-container">
+                    <table class="tabela-historico">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Período</th>
+                                <th>Formato</th>
+                                <th>Remetente</th>
+                                <th>Destinatário</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaEnvios">
+                            <tr>
+                                <td colspan="6" class="text-center mensagem-carregando">Carregando histórico...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </section>
     </div>
 
@@ -286,3 +322,4 @@
     <script src="/static/js/tema.js"></script>
 </body>
 </html>
+

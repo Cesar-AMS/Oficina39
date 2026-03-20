@@ -13,6 +13,8 @@
     --primary-light: #d65a4a;
     --secondary: #0a3147;
     --secondary-dark: #1a4a6f;
+    --accent: #c44536;
+    --accent-light: #d65a4a;
     
     /* CORES DE STATUS */
     --success: #27ae60;
@@ -28,6 +30,8 @@
     --text-secondary: #666666;
     --text-muted: #999999;
     --text-light: #ffffff;
+    --text-dark: #1f2933;
+    --label-color: #4f5d6b;
     
     /* FUNDOS - CLARO */
     --bg-body: #f5f5f5;
@@ -59,6 +63,8 @@
     --text-secondary: #cccccc;
     --text-muted: #999999;
     --text-light: #ffffff;
+    --text-dark: #f5f7fa;
+    --label-color: #d3d9df;
     
     /* FUNDOS - ESCURO */
     --bg-body: #1a1a1a;

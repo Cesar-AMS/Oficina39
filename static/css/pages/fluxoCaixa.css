@@ -453,18 +453,19 @@
 .form-group-financeiro input[readonly] {
     border-color: rgba(39, 174, 96, 0.45);
     background: rgba(39, 174, 96, 0.1);
-    color: #daf5e5;
+    color: #1f5f3a;
 }
 
 .form-group-saldo input[readonly] {
     border-color: rgba(196, 69, 54, 0.45);
     background: rgba(196, 69, 54, 0.12);
-    color: #ffd9d2;
+    color: #8a2d21;
 }
 
 .form-group-status input[readonly] {
     border-color: rgba(10, 49, 71, 0.45);
     background: rgba(10, 49, 71, 0.14);
+    color: #123247;
 }
 
 .form-group-entrada-principal input {
@@ -485,7 +486,7 @@
     padding: 12px 14px;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(10, 49, 71, 0.04);
 }
 
 .pdv-painel-item-destaque {
@@ -559,11 +560,11 @@
 }
 
 .valor-positivo {
-    color: #b5e0b5 !important;
+    color: #1f8a4c !important;
 }
 
 .valor-negativo {
-    color: #ffb5a0 !important;
+    color: #b93c2e !important;
 }
 
 /* =========================================== */
@@ -792,7 +793,7 @@
 }
 
 .modal-titulo::before {
-    content: '📤';
+    content: 'Saida';
     font-size: 1.5rem;
 }
 
@@ -915,6 +916,30 @@
 
 [data-theme="dark"] .modal-saida label {
     color: #ccc;
+}
+
+[data-theme="dark"] .form-group-financeiro input[readonly] {
+    color: #daf5e5;
+}
+
+[data-theme="dark"] .form-group-saldo input[readonly] {
+    color: #ffd9d2;
+}
+
+[data-theme="dark"] .form-group-status input[readonly] {
+    color: #d7ecff;
+}
+
+[data-theme="dark"] .pdv-painel-item {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="dark"] .valor-positivo {
+    color: #b5e0b5 !important;
+}
+
+[data-theme="dark"] .valor-negativo {
+    color: #ffb5a0 !important;
 }
 
 [data-theme="dark"] .modal-titulo {

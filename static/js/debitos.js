@@ -51,8 +51,8 @@ function renderTabelaDebitos(lista) {
             <td><span class="status-financeiro ${classeStatusFinanceiro(ordem.status_financeiro)}">${ordem.status_financeiro || '---'}</span></td>
             <td>
                 <div class="acoes-debito">
-                    <button class="btn btn-salvar btn-compact" onclick="abrirModalDebito(${ordem.id})">💵 Receber</button>
-                    <a class="btn btn-voltar btn-compact" href="/visualizarOS.html?id=${ordem.id}&origem=debitos">👁 Ver OS</a>
+                    <button class="btn btn-salvar btn-compact" onclick="abrirModalDebito(${ordem.id})">Receber</button>
+                    <a class="btn btn-voltar btn-compact" href="/visualizarOS.html?id=${ordem.id}&origem=debitos">Ver OS</a>
                 </div>
             </td>
         </tr>
@@ -185,3 +185,4 @@ window.fecharModalDebito = fecharModalDebito;
 window.adicionarLinhaPagamentoDebito = adicionarLinhaPagamentoDebito;
 window.removerLinhaPagamentoDebito = removerLinhaPagamentoDebito;
 window.salvarPagamentosDebito = salvarPagamentosDebito;
+

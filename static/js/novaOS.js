@@ -287,7 +287,7 @@ window.adicionarServico = function() {
         <td><input type="text" class="codigo-servico" value="${codigo}" readonly style="width:60px"></td>
         <td><input type="text" class="descricao-servico" placeholder="Descrição do serviço" style="width:100%"></td>
         <td><input type="number" class="valor-servico" placeholder="0,00" step="0.01" style="width:100%"></td>
-        <td><button type="button" class="btn-remover" onclick="window.removerServico(this)">🗑️</button></td>
+        <td><button type="button" class="btn-remover" onclick="window.removerServico(this)">Excluir</button></td>
     `;
     tbody.appendChild(novaLinha);
     
@@ -332,7 +332,7 @@ window.adicionarPeca = function() {
         <td><input type="number" class="lucro-peca" placeholder="%" step="0.01" value="0" style="width:85px"></td>
         <td><input type="number" class="valor-unitario-peca" placeholder="Venda" step="0.01" style="width:110px" readonly></td>
         <td><span class="total-peca">R$ 0,00</span></td>
-        <td><button type="button" class="btn-remover" onclick="window.removerPeca(this)">🗑️</button></td>
+        <td><button type="button" class="btn-remover" onclick="window.removerPeca(this)">Excluir</button></td>
     `;
     tbody.appendChild(novaLinha);
     
@@ -701,3 +701,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+

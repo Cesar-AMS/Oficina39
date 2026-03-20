@@ -17,6 +17,15 @@ function getEl(id) {
     return document.getElementById(id);
 }
 
+function alternarAbaConfig(nomeAba) {
+    document.querySelectorAll('.config-tab').forEach((aba) => {
+        aba.classList.toggle('active', aba.dataset.tab === nomeAba);
+    });
+    document.querySelectorAll('.config-tab-panel').forEach((painel) => {
+        painel.classList.toggle('active', painel.id === `configTab${nomeAba.charAt(0).toUpperCase()}${nomeAba.slice(1)}`);
+    });
+}
+
 function soDigitos(valor) {
     return (valor || '').replace(/\D/g, '');
 }
@@ -222,7 +231,7 @@ function renderTabelaProfissionaisCadastro(lista) {
             <td>${formatarCnpj(prof.cnpj || '')}</td>
             <td>
                 <button class="btn btn-cancelar" onclick='removerProfissional(${prof.id}, ${JSON.stringify(prof.nome || "")})'>
-                    🗑️ Remover
+                    Remover
                 </button>
             </td>
         </tr>
@@ -414,6 +423,7 @@ async function carregarHistorico() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    alternarAbaConfig('geral');
     carregarConfig();
     carregarHistorico();
     carregarProfissionaisCadastrados();
@@ -448,3 +458,5 @@ window.mascararCnpjEnvio = mascararCnpjEnvio;
 window.validarCnpjCampo = validarCnpjCampo;
 window.exportarDados = exportarDados;
 window.importarDados = importarDados;
+window.alternarAbaConfig = alternarAbaConfig;
+
