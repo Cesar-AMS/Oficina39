@@ -195,6 +195,165 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
+#secao-personalizacao-index {
+    display: grid;
+    gap: 18px;
+}
+
+#secao-personalizacao-index .section-titulo {
+    margin-bottom: 0;
+}
+
+.branding-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) 320px;
+    align-items: stretch;
+    gap: 18px;
+}
+
+.branding-upload-group {
+    min-width: 0;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr auto;
+    padding: 18px;
+    min-height: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(10, 49, 71, 0.025), var(--bg-hover));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.branding-upload-group label,
+.branding-upload-group .texto-ajuda,
+.branding-upload-group input[type="file"] {
+    width: 100%;
+}
+
+.branding-upload-actions {
+    margin-top: 0;
+    justify-content: flex-start;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    margin-bottom: 10px;
+}
+
+.branding-upload-actions .btn,
+.branding-save-actions .btn {
+    width: 240px;
+    min-width: 240px;
+    min-height: 42px;
+}
+
+.branding-save-actions {
+    justify-content: flex-start;
+    padding-top: 0;
+}
+
+.branding-preview-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    min-height: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(10, 49, 71, 0.03), var(--bg-hover));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.branding-preview-label {
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-weight: 700;
+    align-self: flex-start;
+    width: 100%;
+}
+
+.branding-preview-frame {
+    width: 190px;
+    height: 190px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at top, rgba(196, 69, 54, 0.18), transparent 58%),
+        #05090d;
+    border: 2px solid var(--accent);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.branding-preview-frame.circulo {
+    border-radius: 50%;
+}
+
+.branding-preview-frame.quadrado {
+    border-radius: 24px;
+}
+
+.branding-preview-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.branding-preview-caption {
+    margin: 0;
+    text-align: center;
+    color: var(--text-primary);
+    font-weight: 700;
+    line-height: 1.35;
+    max-width: 240px;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#secao-personalizacao-index .config-footer-actions {
+    margin-top: 4px;
+    margin-bottom: 0;
+    justify-content: flex-start;
+}
+
+#secao-personalizacao-index > .texto-ajuda {
+    max-width: 760px;
+    margin: 0;
+}
+
+#secao-personalizacao-index > .config-row:first-of-type {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(220px, 280px);
+    align-items: end;
+    gap: 18px;
+    margin-bottom: 0;
+}
+
+#secao-personalizacao-index > .config-row:first-of-type .form-group {
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+#secao-personalizacao-index > .config-row:first-of-type .form-group label,
+.branding-upload-group > label {
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+}
+
+#secao-personalizacao-index .branding-upload-group input[type="file"] {
+    min-height: 42px;
+}
+
+#secao-personalizacao-index .branding-upload-group .texto-ajuda {
+    min-height: 38px;
+}
+
 .subtitulo-config {
     margin: 0 0 12px;
     font-size: 1rem;
@@ -386,6 +545,27 @@
 
     .botao-importar {
         width: 100%;
+    }
+
+    .branding-preview-card {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .branding-upload-group {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .branding-row,
+    #secao-personalizacao-index > .config-row:first-of-type {
+        grid-template-columns: 1fr;
+    }
+
+    .branding-upload-actions .btn,
+    .branding-save-actions .btn {
+        width: 100%;
+        min-width: 0;
     }
 }
 

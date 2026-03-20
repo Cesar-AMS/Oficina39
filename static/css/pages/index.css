@@ -154,19 +154,22 @@ html, body {
     background: #000000;
 }
 
-/* 🔥 ADICIONE ISSO - Círculo vermelho ao redor do logo */
 .imagem-container::before {
     content: '';
     position: absolute;
     width: 465px;        /* Tamanho do círculo */
     height: 465px;       /* Tamanho do círculo */
-    border-radius: 50%;
     border: 4px solid var(--accent);  /* Borda vermelha */
     background: transparent;  /* Fundo transparente */
     box-shadow: 0 4px 15px rgba(196, 69, 54, 0.3);  /* Brilho */
     z-index: 5;
     pointer-events: none;  /* Não atrapalha cliques */
     transform: translateX(-5px);
+    border-radius: 50%;
+}
+
+.imagem-container.logo-shape-square::before {
+    border-radius: 36px;
 }
 
 /* Ajuste da imagem para ficar sobre o círculo */
@@ -205,6 +208,10 @@ html, body {
     
     /* Remove qualquer brilho residual */
     background: transparent;
+}
+
+.imagem-container.logo-shape-square .imagem-destaque {
+    transform: scale(2.45) translateY(-34px);
 }
 
 /* Texto sobre a imagem */

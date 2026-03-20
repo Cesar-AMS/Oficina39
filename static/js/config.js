@@ -2,6 +2,7 @@
 
 let profissionaisCadastrados = [];
 const CHAVE_PROF_ENVIO_AUTO = 'config_profissional_envio_auto';
+const LOGO_INDEX_PADRAO = '/static/images/picapau4.png';
 
 function alertErro(mensagem) {
     if (window.ui) return window.ui.error(mensagem);
@@ -46,6 +47,22 @@ function formatarWhatsapp(valor) {
     if (digitos.length <= 4) return `+${digitos.slice(0, 2)} (${digitos.slice(2)}`;
     if (digitos.length <= 9) return `+${digitos.slice(0, 2)} (${digitos.slice(2, 4)}) ${digitos.slice(4)}`;
     return `+${digitos.slice(0, 2)} (${digitos.slice(2, 4)}) ${digitos.slice(4, 9)}-${digitos.slice(9)}`;
+}
+
+function atualizarPreviewBranding() {
+    const frame = getEl('brandingPreviewFrame');
+    const imagem = getEl('brandingPreviewImage');
+    const legenda = getEl('brandingPreviewCaption');
+    if (!frame || !imagem || !legenda) return;
+
+    const formato = (getEl('logoIndexFormato')?.value || 'circulo').trim() || 'circulo';
+    const logoPath = (getEl('logoIndexPath')?.value || '').trim() || LOGO_INDEX_PADRAO;
+    const nome = (getEl('nomeExibicaoSistema')?.value || '').trim() || 'Sistema de Gerenciamento Oficina 39';
+
+    frame.classList.toggle('circulo', formato === 'circulo');
+    frame.classList.toggle('quadrado', formato === 'quadrado');
+    imagem.src = logoPath;
+    legenda.textContent = nome;
 }
 
 function validarCnpj(cnpj) {
@@ -144,6 +161,10 @@ function preencherCampos(config) {
     if (config.placa_provider_secundario) getEl('placaProviderSecundario').value = config.placa_provider_secundario;
     if (config.placa_api_key_secundaria) getEl('placaApiKeySecundaria').value = config.placa_api_key_secundaria;
     if (config.whatsapp_orcamento) getEl('whatsappOrcamento').value = formatarWhatsapp(config.whatsapp_orcamento);
+    if (config.nome_exibicao_sistema) getEl('nomeExibicaoSistema').value = config.nome_exibicao_sistema;
+    if (config.logo_index_path) getEl('logoIndexPath').value = config.logo_index_path;
+    if (config.logo_index_formato) getEl('logoIndexFormato').value = config.logo_index_formato;
+    atualizarPreviewBranding();
 
     const selectProf = getEl('profissionalEnvioAuto');
     if (selectProf) {
@@ -194,7 +215,10 @@ async function salvarConfig() {
         placa_api_key_primaria: (getEl('placaApiKeyPrimaria')?.value || '').trim(),
         placa_provider_secundario: (getEl('placaProviderSecundario')?.value || '').trim(),
         placa_api_key_secundaria: (getEl('placaApiKeySecundaria')?.value || '').trim(),
-        whatsapp_orcamento: soDigitos(getEl('whatsappOrcamento')?.value || '')
+        whatsapp_orcamento: soDigitos(getEl('whatsappOrcamento')?.value || ''),
+        nome_exibicao_sistema: (getEl('nomeExibicaoSistema')?.value || '').trim(),
+        logo_index_path: (getEl('logoIndexPath')?.value || '').trim(),
+        logo_index_formato: (getEl('logoIndexFormato')?.value || 'circulo').trim()
     };
 
     try {
@@ -207,6 +231,53 @@ async function salvarConfig() {
         localStorage.setItem(CHAVE_PROF_ENVIO_AUTO, profissionalEnvio);
         alertSucesso('Configurações salvas com sucesso.');
         carregarHistorico();
+    } catch (error) {
+        alertErro(error.message);
+    }
+}
+
+async function salvarPersonalizacao() {
+    const payload = {
+        nome_exibicao_sistema: (getEl('nomeExibicaoSistema')?.value || '').trim(),
+        logo_index_path: (getEl('logoIndexPath')?.value || '').trim(),
+        logo_index_formato: (getEl('logoIndexFormato')?.value || 'circulo').trim()
+    };
+
+    try {
+        await requestJson('/api/config/contador', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        alertSucesso('Personalização salva com sucesso.');
+    } catch (error) {
+        alertErro(error.message);
+    }
+}
+
+async function enviarLogoIndex() {
+    const inputArquivo = getEl('logoIndexArquivo');
+    if (!inputArquivo?.files?.length) {
+        alertErro('Selecione uma imagem antes de enviar.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('arquivo', inputArquivo.files[0]);
+
+    try {
+        const response = await fetch('/api/config/branding/logo-upload', {
+            method: 'POST',
+            body: formData
+        });
+        const dados = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(dados.erro || 'Falha ao enviar a imagem.');
+        }
+
+        getEl('logoIndexPath').value = dados.logo_index_path || '';
+        atualizarPreviewBranding();
+        alertSucesso('Imagem enviada. Agora salve a personalização para aplicar na tela inicial.');
     } catch (error) {
         alertErro(error.message);
     }
@@ -435,6 +506,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const nomeExibicaoInput = getEl('nomeExibicaoSistema');
+    if (nomeExibicaoInput) {
+        nomeExibicaoInput.addEventListener('input', atualizarPreviewBranding);
+    }
+
+    const formatoLogoSelect = getEl('logoIndexFormato');
+    if (formatoLogoSelect) {
+        formatoLogoSelect.addEventListener('change', atualizarPreviewBranding);
+    }
+
+    const arquivoLogoInput = getEl('logoIndexArquivo');
+    if (arquivoLogoInput) {
+        arquivoLogoInput.addEventListener('change', () => {
+            const arquivo = arquivoLogoInput.files?.[0];
+            if (!arquivo) return;
+            const reader = new FileReader();
+            reader.onload = (evento) => {
+                const imagem = getEl('brandingPreviewImage');
+                if (imagem) imagem.src = evento.target?.result || LOGO_INDEX_PADRAO;
+            };
+            reader.readAsDataURL(arquivo);
+        });
+    }
+
     const cnpjCadastroInput = getEl('cnpjProfissionalCadastro');
     if (cnpjCadastroInput) {
         cnpjCadastroInput.addEventListener('input', () => mascararCnpjEnvio(cnpjCadastroInput));
@@ -459,4 +554,6 @@ window.validarCnpjCampo = validarCnpjCampo;
 window.exportarDados = exportarDados;
 window.importarDados = importarDados;
 window.alternarAbaConfig = alternarAbaConfig;
+window.enviarLogoIndex = enviarLogoIndex;
+window.salvarPersonalizacao = salvarPersonalizacao;
 

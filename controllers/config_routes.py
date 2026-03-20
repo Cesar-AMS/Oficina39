@@ -2,10 +2,12 @@
 # routes/config_routes.py - Rotas de Configuração
 # ===========================================
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from extensions import db
 import os
 import logging
+import uuid
+from werkzeug.utils import secure_filename
 from infrastructure.backup_service import criar_backup_database, status_backups
 from repositories import config_repository
 from services.config_service import (
@@ -16,6 +18,11 @@ from services.config_service import (
 
 config_bp = Blueprint('config', __name__, url_prefix='/api/config')
 logger = logging.getLogger(__name__)
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
+
+
+def _arquivo_permitido(nome_arquivo):
+    return '.' in nome_arquivo and nome_arquivo.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
 
 # ===========================================
 # CONFIGURAÇÕES DO CONTADOR
@@ -69,6 +76,33 @@ def enviar_relatorio_teste():
         return jsonify({'erro': str(e)}), 400
     except Exception as e:
         db.session.rollback()
+        return jsonify({'erro': str(e)}), 500
+
+
+@config_bp.route('/branding/logo-upload', methods=['POST'])
+def upload_logo_branding():
+    """Recebe a logo de personalização da index."""
+    try:
+        arquivo = request.files.get('arquivo')
+        if not arquivo or not arquivo.filename:
+            return jsonify({'erro': 'Selecione uma imagem para enviar.'}), 400
+
+        if not _arquivo_permitido(arquivo.filename):
+            return jsonify({'erro': 'Formato inválido. Use PNG, JPG, JPEG, WEBP ou GIF.'}), 400
+
+        nome_original = secure_filename(arquivo.filename)
+        extensao = os.path.splitext(nome_original)[1].lower()
+        nome_final = f"cliente_logo_{uuid.uuid4().hex[:12]}{extensao}"
+        pasta_destino = current_app.config['BRANDING_UPLOAD_FOLDER']
+        os.makedirs(pasta_destino, exist_ok=True)
+        caminho_destino = os.path.join(pasta_destino, nome_final)
+        arquivo.save(caminho_destino)
+
+        return jsonify({
+            'mensagem': 'Logo enviada com sucesso.',
+            'logo_index_path': f"/static/uploads/branding/{nome_final}"
+        })
+    except Exception as e:
         return jsonify({'erro': str(e)}), 500
 
 # ===========================================

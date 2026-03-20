@@ -27,6 +27,9 @@ class ConfigContador(db.Model):
     placa_provider_secundario = db.Column(db.String(60))
     placa_api_key_secundaria = db.Column(db.String(255))
     whatsapp_orcamento = db.Column(db.String(30))
+    nome_exibicao_sistema = db.Column(db.String(120))
+    logo_index_path = db.Column(db.String(255))
+    logo_index_formato = db.Column(db.String(20), default='circulo')
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     created_at = db.Column(db.DateTime, default=datetime.now)  # ← ADICIONADO para consistência
     
@@ -47,6 +50,9 @@ class ConfigContador(db.Model):
             'placa_provider_primario': self.placa_provider_primario,
             'placa_provider_secundario': self.placa_provider_secundario,
             'whatsapp_orcamento': self.whatsapp_orcamento,
+            'nome_exibicao_sistema': self.nome_exibicao_sistema,
+            'logo_index_path': self.logo_index_path,
+            'logo_index_formato': self.logo_index_formato or 'circulo',
             'updated_at': self.updated_at.strftime('%d/%m/%Y %H:%M') if self.updated_at else None,
             'created_at': self.created_at.strftime('%d/%m/%Y %H:%M') if self.created_at else None
         }

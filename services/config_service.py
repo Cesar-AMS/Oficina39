@@ -16,25 +16,50 @@ def salvar_config_contador(dados):
     if not config:
         config = ConfigContador()
 
-    config.email_cliente = dados.get('email_cliente', '')
-    if dados.get('senha_app'):
+    def valor_texto(chave, atual=''):
+        if chave not in dados:
+            return atual
+        return dados.get(chave, '')
+
+    def valor_opcional(chave, atual=None):
+        if chave not in dados:
+            return atual
+        return (dados.get(chave) or '').strip() or None
+
+    config.email_cliente = valor_texto('email_cliente', config.email_cliente or '')
+    if 'senha_app' in dados and dados.get('senha_app'):
         config.senha_app = dados.get('senha_app', '')
-    config.email_contador = dados.get('email_contador', '')
-    config.profissional_envio_auto = (dados.get('profissional_envio_auto') or '').strip() or None
-    config.frequencia = dados.get('frequencia', 'diario')
-    config.dia_envio = dados.get('dia_envio', 1)
-    config.ativo = dados.get('ativo', True)
-    config.cep_provider_ativo = (dados.get('cep_provider_ativo') or '').strip() or None
-    config.cep_provider_primario = (dados.get('cep_provider_primario') or '').strip() or None
-    config.cep_api_key_primaria = (dados.get('cep_api_key_primaria') or '').strip() or None
-    config.cep_provider_secundario = (dados.get('cep_provider_secundario') or '').strip() or None
-    config.cep_api_key_secundaria = (dados.get('cep_api_key_secundaria') or '').strip() or None
-    config.placa_provider_ativo = (dados.get('placa_provider_ativo') or '').strip() or None
-    config.placa_provider_primario = (dados.get('placa_provider_primario') or '').strip() or None
-    config.placa_api_key_primaria = (dados.get('placa_api_key_primaria') or '').strip() or None
-    config.placa_provider_secundario = (dados.get('placa_provider_secundario') or '').strip() or None
-    config.placa_api_key_secundaria = (dados.get('placa_api_key_secundaria') or '').strip() or None
-    config.whatsapp_orcamento = (dados.get('whatsapp_orcamento') or '').strip() or None
+    config.email_contador = valor_texto('email_contador', config.email_contador or '')
+    config.profissional_envio_auto = valor_opcional('profissional_envio_auto', config.profissional_envio_auto)
+    if 'frequencia' in dados:
+        config.frequencia = dados.get('frequencia', 'diario')
+    elif not config.frequencia:
+        config.frequencia = 'diario'
+    if 'dia_envio' in dados:
+        config.dia_envio = dados.get('dia_envio', 1)
+    elif config.dia_envio is None:
+        config.dia_envio = 1
+    if 'ativo' in dados:
+        config.ativo = dados.get('ativo', True)
+    elif config.ativo is None:
+        config.ativo = True
+    config.cep_provider_ativo = valor_opcional('cep_provider_ativo', config.cep_provider_ativo)
+    config.cep_provider_primario = valor_opcional('cep_provider_primario', config.cep_provider_primario)
+    config.cep_api_key_primaria = valor_opcional('cep_api_key_primaria', config.cep_api_key_primaria)
+    config.cep_provider_secundario = valor_opcional('cep_provider_secundario', config.cep_provider_secundario)
+    config.cep_api_key_secundaria = valor_opcional('cep_api_key_secundaria', config.cep_api_key_secundaria)
+    config.placa_provider_ativo = valor_opcional('placa_provider_ativo', config.placa_provider_ativo)
+    config.placa_provider_primario = valor_opcional('placa_provider_primario', config.placa_provider_primario)
+    config.placa_api_key_primaria = valor_opcional('placa_api_key_primaria', config.placa_api_key_primaria)
+    config.placa_provider_secundario = valor_opcional('placa_provider_secundario', config.placa_provider_secundario)
+    config.placa_api_key_secundaria = valor_opcional('placa_api_key_secundaria', config.placa_api_key_secundaria)
+    config.whatsapp_orcamento = valor_opcional('whatsapp_orcamento', config.whatsapp_orcamento)
+    config.nome_exibicao_sistema = valor_opcional('nome_exibicao_sistema', config.nome_exibicao_sistema)
+    config.logo_index_path = valor_opcional('logo_index_path', config.logo_index_path)
+    if 'logo_index_formato' in dados:
+        config.logo_index_formato = (dados.get('logo_index_formato') or 'circulo').strip() or 'circulo'
+    elif not config.logo_index_formato:
+        config.logo_index_formato = 'circulo'
 
     if not config.id:
         db.session.add(config)

@@ -198,36 +198,89 @@
                     <div class="pdv-tab-panel" id="pdvTabPagamento">
                         <div class="pdv-grid pdv-grid-pagamento">
                             <div class="pdv-box">
-                                <h4 class="pdv-box-titulo">Pagamento atual e formas de pagamento</h4>
+                                <div class="pdv-box-topo">
+                                    <div>
+                                        <h4 class="pdv-box-titulo">Pagamento atual e formas de pagamento</h4>
+                                        <p class="pdv-box-subtitulo">Informe o valor que entrou agora e distribua nas formas desejadas.</p>
+                                    </div>
+                                </div>
+                                <div class="pdv-pagamento-sec">
+                                    <div class="pdv-sec-head">
+                                        <span class="pdv-sec-kicker">Visão rápida</span>
+                                        <h5 class="pdv-sec-title">Resumo imediato do recebimento</h5>
+                                    </div>
                                 <div class="pdv-painel-rapido">
                                     <div class="pdv-painel-item pdv-painel-item-destaque">
-                                        <span class="pdv-painel-label">Saldo para receber</span>
+                                        <span class="pdv-painel-label">Saldo atual da OS</span>
                                         <strong id="pdvPainelSaldoPendente">R$ 0,00</strong>
                                     </div>
                                     <div class="pdv-painel-item">
-                                        <span class="pdv-painel-label">Recebido agora</span>
+                                        <span class="pdv-painel-label">Valor definido para agora</span>
                                         <strong id="pdvPainelRecebidoAgora">R$ 0,00</strong>
                                     </div>
                                     <div class="pdv-painel-item">
-                                        <span class="pdv-painel-label">Diferença</span>
+                                        <span class="pdv-painel-label">Restante após este valor</span>
                                         <strong id="pdvPainelDiferenca">R$ 0,00</strong>
                                     </div>
                                 </div>
+                                </div>
+                                <div class="pdv-pagamento-sec">
+                                    <div class="pdv-sec-head">
+                                        <span class="pdv-sec-kicker">Estratégia</span>
+                                        <h5 class="pdv-sec-title">Tipo de recebimento</h5>
+                                    </div>
+                                <div class="pdv-recebimento-modo">
+                                    <span class="pdv-recebimento-modo-label">Tipo de recebimento</span>
+                                    <div class="pdv-recebimento-modo-opcoes">
+                                        <button type="button" class="pdv-modo-btn active" id="pdvModoTotalBtn" onclick="selecionarModoRecebimentoPdv('total')">Pagamento à vista</button>
+                                        <button type="button" class="pdv-modo-btn" id="pdvModoParcialBtn" onclick="selecionarModoRecebimentoPdv('parcial')">Pagamento parcial</button>
+                                    </div>
+                                    <p class="pdv-recebimento-modo-ajuda" id="pdvModoRecebimentoAjuda">
+                                        Receba o valor total agora e distribua como quiser nas formas de pagamento.
+                                    </p>
+                                </div>
+                                <div class="pdv-parcial-box" id="pdvParcialBox" hidden>
+                                    <div class="pdv-parcial-resumo">
+                                        <div class="pdv-parcial-item">
+                                            <span>Receber agora</span>
+                                            <strong id="pdvParcialReceberAgora">R$ 0,00</strong>
+                                        </div>
+                                        <div class="pdv-parcial-item">
+                                            <span>Vai para Débitos</span>
+                                            <strong id="pdvParcialVaiDebitos">R$ 0,00</strong>
+                                        </div>
+                                    </div>
+                                    <p class="pdv-parcial-texto">
+                                        No pagamento parcial, você pode dividir o valor recebido entre várias formas. O restante ficará em aberto na tela de Débitos.
+                                    </p>
+                                </div>
+                                </div>
+                                <div class="pdv-pagamento-sec">
+                                    <div class="pdv-sec-head">
+                                        <span class="pdv-sec-kicker">Valor</span>
+                                        <h5 class="pdv-sec-title">Definição do recebimento atual</h5>
+                                    </div>
                                 <div class="form-row pdv-pagamento-atual-row">
                                     <div class="form-group form-group-entrada-principal">
                                         <label for="pdvValorRecebidoAgora">Valor recebido agora</label>
-                                        <input type="number" id="pdvValorRecebidoAgora" step="0.01" min="0" placeholder="0,00">
+                                        <input type="text" id="pdvValorRecebidoAgora" inputmode="decimal" autocomplete="off" placeholder="0,00">
                                     </div>
                                     <div class="form-group pdv-form-group-acao">
                                         <label>&nbsp;</label>
-                                        <button class="btn btn-salvar btn-compact pdv-btn-full" onclick="preencherValorTotalRecebido()">Preencher valor total pendente</button>
+                                        <button class="btn btn-salvar btn-compact pdv-btn-full" id="pdvBtnPreencherTotal" onclick="preencherValorTotalRecebido()">Valor pendente</button>
                                     </div>
                                     <div class="form-group pdv-form-group-acao">
                                         <label>&nbsp;</label>
                                         <button class="btn btn-cancelar btn-compact pdv-btn-full" onclick="limparValorRecebido()">Limpar valor</button>
                                     </div>
                                 </div>
+                                </div>
 
+                                <div class="pdv-pagamento-sec">
+                                    <div class="pdv-sec-head">
+                                        <span class="pdv-sec-kicker">Distribuição</span>
+                                        <h5 class="pdv-sec-title">Formas de pagamento</h5>
+                                    </div>
                                 <div class="form-row pdv-formas-row">
                                     <div class="form-group">
                                         <label for="pdvFormaPagamento">Forma de pagamento</label>
@@ -244,7 +297,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="pdvValorForma">Valor da forma</label>
-                                        <input type="number" id="pdvValorForma" step="0.01" min="0" placeholder="0,00">
+                                        <input type="text" id="pdvValorForma" inputmode="decimal" autocomplete="off" placeholder="0,00">
                                     </div>
                                     <div class="form-group">
                                         <label for="pdvObservacaoForma">Observação</label>
@@ -256,43 +309,16 @@
                                     </div>
                                 </div>
 
-                                <div class="pdv-hint-box">
-                                    <strong>Regra:</strong> a soma das formas deve bater exatamente com o valor recebido agora.
+                                <div class="pdv-hint-box pdv-hint-box-compact">
+                                    <strong>Regra:</strong> a soma das formas continua precisando bater exatamente com o valor recebido agora.
                                 </div>
 
-                                <div class="table-container">
-                                    <table class="tabela-pagamentos-modal">
-                                        <thead>
-                                            <tr>
-                                                <th>Forma de pagamento</th>
-                                                <th>Valor</th>
-                                                <th>Observação</th>
-                                                <th>Ações</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="corpoPagamentosPdv">
-                                            <tr>
-                                                <td colspan="4" class="text-center mensagem-carregando">Nenhuma forma adicionada.</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                <div class="pdv-step-actions pdv-step-actions-interno pdv-step-actions-apos-formas">
+                                    <button class="btn btn-voltar btn-compact" onclick="irParaEtapaPdv('dados')">Voltar</button>
+                                    <button class="btn btn-salvar btn-compact" onclick="irParaProximaEtapaPdv('resumo')">Avançar</button>
                                 </div>
-
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Total das formas lançadas</label>
-                                        <input type="text" id="pdvTotalFormas" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Diferença para o valor recebido</label>
-                                        <input type="text" id="pdvDiferencaFormas" readonly>
-                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="pdv-step-actions">
-                            <button class="btn btn-voltar btn-compact" onclick="irParaEtapaPdv('dados')">Voltar</button>
-                            <button class="btn btn-salvar btn-compact" onclick="irParaProximaEtapaPdv('resumo')">Avançar</button>
                         </div>
                     </div>
 
@@ -335,7 +361,7 @@
                                         <input type="text" id="pdvResumoPagoAntes" readonly>
                                     </div>
                                     <div class="form-group">
-                                        <label>Pago nesta operação</label>
+                                        <label>Recebido agora</label>
                                         <input type="text" id="pdvResumoPagoAgora" readonly>
                                     </div>
                                     <div class="form-group">
@@ -349,8 +375,12 @@
                                         <label>Situação após operação</label>
                                         <input type="text" id="pdvResumoSituacao" readonly>
                                     </div>
+                                    <div class="form-group">
+                                        <label>Valor informado no campo recebido</label>
+                                        <input type="text" id="pdvResumoRecebidoInformado" readonly>
+                                    </div>
                                     <div class="form-group form-group-destaque form-group-saldo">
-                                        <label>Valor restante</label>
+                                        <label>Valor restante para débito</label>
                                         <input type="text" id="pdvValorRestante" readonly>
                                     </div>
                                 </div>
@@ -364,6 +394,10 @@
                                 </div>
 
                                 <div class="form-row">
+                                    <div class="form-group form-group-destaque form-group-saldo">
+                                        <label>Valor que irá para Débitos</label>
+                                        <input type="text" id="pdvDebitoValorGerado" readonly>
+                                    </div>
                                     <div class="form-group">
                                         <label for="pdvDebitoVencimento">Data de vencimento</label>
                                         <input type="date" id="pdvDebitoVencimento">

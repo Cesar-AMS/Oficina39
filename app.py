@@ -42,6 +42,9 @@ def create_app():
     UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    BRANDING_UPLOAD_FOLDER = os.path.join(static_dir, 'uploads', 'branding')
+    os.makedirs(BRANDING_UPLOAD_FOLDER, exist_ok=True)
+    app.config['BRANDING_UPLOAD_FOLDER'] = BRANDING_UPLOAD_FOLDER
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
     
     # ===========================================
@@ -169,6 +172,16 @@ def create_app():
                 )
                 db.session.commit()
                 print("Coluna whatsapp_orcamento adicionada em config_contador")
+            novas_colunas_branding = {
+                'nome_exibicao_sistema': "ALTER TABLE config_contador ADD COLUMN nome_exibicao_sistema VARCHAR(120)",
+                'logo_index_path': "ALTER TABLE config_contador ADD COLUMN logo_index_path VARCHAR(255)",
+                'logo_index_formato': "ALTER TABLE config_contador ADD COLUMN logo_index_formato VARCHAR(20)"
+            }
+            for nome_coluna, sql in novas_colunas_branding.items():
+                if nome_coluna not in colunas_config:
+                    db.session.execute(text(sql))
+                    db.session.commit()
+                    print(f"Coluna {nome_coluna} adicionada em config_contador")
 
         # Verificar quais tabelas foram criadas
         tabelas = inspector.get_table_names()

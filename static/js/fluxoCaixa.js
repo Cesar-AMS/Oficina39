@@ -5,6 +5,8 @@ let ordemPdv = null;
 let formasPagamentoPdv = [];
 let ordensEncontradasPdv = [];
 let buscouOrdensPdv = false;
+let ultimoResumoOperacaoPdv = null;
+let modoRecebimentoPdv = 'total';
 
 const STATUS_PDV_PRIORITARIOS = new Set(['Concluído', 'Garantia', 'Finalizado']);
 
@@ -52,7 +54,28 @@ function escaparHtml(texto) {
 
 function obterDescontoPercentualPdv() {
     const campo = document.getElementById('pdvDescontoPercentual');
-    return Math.min(100, Math.max(0, parseFloat(campo?.value) || 0));
+    return Math.min(100, Math.max(0, lerValorMonetario(campo?.value)));
+}
+
+function lerValorMonetario(valor) {
+    if (valor == null) return 0;
+    const texto = String(valor).replace(/\s/g, '');
+    const normalizado = texto.includes(',')
+        ? texto.replace(/\./g, '').replace(',', '.')
+        : texto;
+    return arredondarMoeda(parseFloat(normalizado) || 0);
+}
+
+function formatarCampoMonetario(id) {
+    const campo = document.getElementById(id);
+    if (!campo) return;
+    const valor = lerValorMonetario(campo.value);
+    campo.value = valor ? valor.toFixed(2).replace('.', ',') : '';
+}
+
+function obterValorRecebidoCampoPdv() {
+    const campo = document.getElementById('pdvValorRecebidoAgora');
+    return lerValorMonetario(campo?.value);
 }
 
 function arredondarMoeda(valor) {
@@ -82,7 +105,7 @@ function obterTotaisPdv() {
     const descontoValor = arredondarMoeda(totalBruto * (descontoPercentual / 100));
     const totalFinal = arredondarMoeda(Math.max(0, totalBruto - descontoValor));
     const saldoBase = arredondarMoeda(Math.max(0, totalFinal - pagoAntes));
-    const valorRecebido = parseFloat(document.getElementById('pdvValorRecebidoAgora')?.value) || 0;
+    const valorRecebido = obterValorRecebidoCampoPdv();
     const totalFormas = obterTotalFormasPdv();
     const saldoApos = arredondarMoeda(Math.max(0, saldoBase - valorRecebido));
     return {
@@ -96,6 +119,64 @@ function obterTotaisPdv() {
         totalFormas,
         saldoApos
     };
+}
+
+function limparResumoOperacaoConcluidaPdv() {
+    ultimoResumoOperacaoPdv = null;
+}
+
+function atualizarModoRecebimentoUiPdv() {
+    const ajuda = document.getElementById('pdvModoRecebimentoAjuda');
+    const totalBtn = document.getElementById('pdvModoTotalBtn');
+    const parcialBtn = document.getElementById('pdvModoParcialBtn');
+    const parcialBox = document.getElementById('pdvParcialBox');
+    const btnPreencherTotal = document.getElementById('pdvBtnPreencherTotal');
+
+    if (totalBtn) totalBtn.classList.toggle('active', modoRecebimentoPdv === 'total');
+    if (parcialBtn) parcialBtn.classList.toggle('active', modoRecebimentoPdv === 'parcial');
+    if (parcialBox) parcialBox.hidden = modoRecebimentoPdv !== 'parcial';
+    if (btnPreencherTotal) btnPreencherTotal.hidden = modoRecebimentoPdv === 'parcial';
+
+    if (ajuda) {
+        ajuda.textContent = modoRecebimentoPdv === 'total'
+            ? 'Receba o valor total agora e distribua como quiser nas formas de pagamento.'
+            : 'Informe apenas o valor que entrou agora. O restante seguirá automaticamente para Débitos.';
+    }
+}
+
+function sincronizarModoRecebimentoPdv() {
+    if (!ordemPdv) {
+        modoRecebimentoPdv = 'total';
+        atualizarModoRecebimentoUiPdv();
+        return;
+    }
+    const totais = obterTotaisPdv();
+    if (totais.valorRecebido > 0 && totais.valorRecebido + 0.009 < totais.saldoBase) {
+        modoRecebimentoPdv = 'parcial';
+    } else if (totais.saldoBase <= 0.009 || totais.valorRecebido >= totais.saldoBase - 0.009) {
+        modoRecebimentoPdv = 'total';
+    }
+    atualizarModoRecebimentoUiPdv();
+}
+
+function selecionarModoRecebimentoPdv(modo) {
+    if (!ordemPdv) {
+        alertErro('Carregue uma OS antes de definir o tipo de recebimento.');
+        return;
+    }
+
+    modoRecebimentoPdv = modo === 'parcial' ? 'parcial' : 'total';
+    limparResumoOperacaoConcluidaPdv();
+
+    if (modoRecebimentoPdv === 'total') {
+        const totais = obterTotaisPdv();
+        setValor('pdvValorRecebidoAgora', totais.saldoBase.toFixed(2));
+    } else {
+        setValor('pdvValorRecebidoAgora', '');
+    }
+
+    atualizarModoRecebimentoUiPdv();
+    atualizarResumoOperacaoPdv();
 }
 
 function exibirCardPdv(exibir) {
@@ -223,6 +304,8 @@ function atualizarDadosOsPdv() {
         setValor('pdvTotalFinalField', formatarValor(0));
         setValor('pdvSaldoPendenteField', formatarValor(0));
         setValor('pdvStatusFinanceiroField', '');
+        modoRecebimentoPdv = 'total';
+        atualizarModoRecebimentoUiPdv();
         return;
     }
 
@@ -236,29 +319,31 @@ function atualizarDadosOsPdv() {
     setValor('pdvTotalFinalField', formatarValor(ordemPdv.total_cobrado || ordemPdv.total_geral || 0));
     setValor('pdvSaldoPendenteField', formatarValor(ordemPdv.saldo_pendente || 0));
     setValor('pdvStatusFinanceiroField', ordemPdv.status_financeiro || '');
+    modoRecebimentoPdv = 'total';
+    atualizarModoRecebimentoUiPdv();
     atualizarResumoOperacaoPdv();
 }
 
 function obterTotalFormasPdv() {
-    return formasPagamentoPdv.reduce((acc, item) => acc + (Number(item.valor) || 0), 0);
+    return formasPagamentoPdv.reduce((acc, item) => acc + lerValorMonetario(item.valor), 0);
 }
 
 function situacaoAposOperacao(saldoApos) {
     if (saldoApos <= 0.009) return 'Quitado';
-    const pagoAgora = parseFloat(document.getElementById('pdvValorRecebidoAgora')?.value) || 0;
+    const pagoAgora = obterValorRecebidoCampoPdv();
     if (pagoAgora > 0) return 'Parcial';
     return 'Em aberto';
 }
 
 function atualizarResumoOperacaoPdv() {
     const totais = obterTotaisPdv();
-    const diferenca = arredondarMoeda(totais.valorRecebido - totais.totalFormas);
+    const valorRestante = totais.saldoApos;
 
     setValor('pdvDescontoValor', formatarValor(totais.descontoValor));
     setValor('pdvTotalFinalField', formatarValor(totais.totalFinal));
     setValor('pdvSaldoPendenteField', formatarValor(totais.saldoBase));
     setValor('pdvTotalFormas', formatarValor(totais.totalFormas));
-    setValor('pdvDiferencaFormas', formatarValor(diferenca));
+    setValor('pdvDiferencaFormas', formatarValor(valorRestante));
     setValor('pdvResumoTotalOs', formatarValor(totais.totalBruto));
     setValor('pdvResumoDesconto', formatarValor(totais.descontoValor));
     setValor('pdvResumoTotalFinal', formatarValor(totais.totalFinal));
@@ -267,18 +352,44 @@ function atualizarResumoOperacaoPdv() {
     setValor('pdvResumoSaldoApos', formatarValor(totais.saldoApos));
     setValor('pdvResumoSituacao', situacaoAposOperacao(totais.saldoApos));
     setValor('pdvValorRestante', formatarValor(totais.saldoApos));
+    setValor('pdvResumoRecebidoInformado', formatarValor(totais.valorRecebido));
+    setValor('pdvDebitoValorGerado', formatarValor(totais.saldoApos));
     setTexto('pdvPainelSaldoPendente', formatarValor(totais.saldoBase));
     setTexto('pdvPainelRecebidoAgora', formatarValor(totais.valorRecebido));
-    setTexto('pdvPainelDiferenca', formatarValor(diferenca));
+    setTexto('pdvPainelDiferenca', formatarValor(valorRestante));
+    setTexto('pdvParcialReceberAgora', formatarValor(totais.valorRecebido));
+    setTexto('pdvParcialVaiDebitos', formatarValor(valorRestante));
     setTexto('pdvResumoTopoTotalFinal', formatarValor(totais.totalFinal));
     setTexto('pdvResumoTopoPagoAgora', formatarValor(totais.valorRecebido));
     setTexto('pdvResumoTopoSaldoApos', formatarValor(totais.saldoApos));
+    sincronizarModoRecebimentoPdv();
     atualizarEstadoDebitoPdv();
+}
+
+function aplicarResumoOperacaoConcluidaPdv() {
+    if (!ultimoResumoOperacaoPdv) return;
+
+    setValor('pdvResumoTotalOs', formatarValor(ultimoResumoOperacaoPdv.totalBruto));
+    setValor('pdvResumoDesconto', formatarValor(ultimoResumoOperacaoPdv.descontoValor));
+    setValor('pdvResumoTotalFinal', formatarValor(ultimoResumoOperacaoPdv.totalFinal));
+    setValor('pdvResumoPagoAntes', formatarValor(ultimoResumoOperacaoPdv.pagoAntes));
+    setValor('pdvResumoPagoAgora', formatarValor(ultimoResumoOperacaoPdv.pagoAgora));
+    setValor('pdvResumoSaldoApos', formatarValor(ultimoResumoOperacaoPdv.saldoApos));
+    setValor('pdvResumoSituacao', ultimoResumoOperacaoPdv.situacao);
+    setValor('pdvValorRestante', formatarValor(ultimoResumoOperacaoPdv.saldoApos));
+    setValor('pdvResumoRecebidoInformado', formatarValor(ultimoResumoOperacaoPdv.pagoAgora));
+    setValor('pdvDebitoValorGerado', formatarValor(ultimoResumoOperacaoPdv.saldoApos));
+    setTexto('pdvResumoTopoTotalFinal', formatarValor(ultimoResumoOperacaoPdv.totalFinal));
+    setTexto('pdvResumoTopoPagoAgora', formatarValor(ultimoResumoOperacaoPdv.pagoAgora));
+    setTexto('pdvResumoTopoSaldoApos', formatarValor(ultimoResumoOperacaoPdv.saldoApos));
 }
 
 function renderFormasPagamentoPdv() {
     const tbody = document.getElementById('corpoPagamentosPdv');
-    if (!tbody) return;
+    if (!tbody) {
+        atualizarResumoOperacaoPdv();
+        return;
+    }
 
     if (!formasPagamentoPdv.length) {
         tbody.innerHTML = '<tr><td colspan="4" class="text-center mensagem-carregando">Nenhuma forma adicionada.</td></tr>';
@@ -303,6 +414,7 @@ async function carregarOrdemNoPdv(ordemId) {
         if (!response.ok) throw new Error(dados.erro || 'Erro ao carregar OS.');
 
         ordemPdv = dados;
+        limparResumoOperacaoConcluidaPdv();
         formasPagamentoPdv = [];
         ordensEncontradasPdv = [dados];
         buscouOrdensPdv = true;
@@ -356,12 +468,11 @@ async function selecionarOrdemBuscaPdv(ordemId) {
 
 function preencherValorTotalRecebido() {
     if (!ordemPdv) return;
-    const totais = obterTotaisPdv();
-    setValor('pdvValorRecebidoAgora', totais.saldoBase.toFixed(2));
-    atualizarResumoOperacaoPdv();
+    selecionarModoRecebimentoPdv('total');
 }
 
 function limparValorRecebido() {
+    limparResumoOperacaoConcluidaPdv();
     setValor('pdvValorRecebidoAgora', '');
     atualizarResumoOperacaoPdv();
 }
@@ -371,9 +482,10 @@ function adicionarFormaPagamentoPdv() {
         alertErro('Carregue uma OS antes de adicionar formas de pagamento.');
         return;
     }
+    limparResumoOperacaoConcluidaPdv();
 
     const forma = (document.getElementById('pdvFormaPagamento')?.value || '').trim();
-    const valor = parseFloat(document.getElementById('pdvValorForma')?.value) || 0;
+    const valor = lerValorMonetario(document.getElementById('pdvValorForma')?.value);
     const observacao = (document.getElementById('pdvObservacaoForma')?.value || '').trim();
 
     if (!forma) {
@@ -398,11 +510,12 @@ function adicionarFormaPagamentoPdv() {
 }
 
 function removerFormaPagamentoPdv(index) {
+    limparResumoOperacaoConcluidaPdv();
     formasPagamentoPdv.splice(index, 1);
     renderFormasPagamentoPdv();
 }
 
-function cancelarRecebimentoPdv() {
+function cancelarRecebimentoPdv(opcoes = {}) {
     formasPagamentoPdv = [];
     setValor('pdvValorRecebidoAgora', '');
     setValor('pdvFormaPagamento', '');
@@ -411,6 +524,11 @@ function cancelarRecebimentoPdv() {
     setValor('pdvDebitoObservacao', ordemPdv?.debito_observacao || '');
     const vencimento = document.getElementById('pdvDebitoVencimento');
     if (vencimento) vencimento.value = '';
+    modoRecebimentoPdv = 'total';
+    atualizarModoRecebimentoUiPdv();
+    if (!opcoes.preservarResumo) {
+        limparResumoOperacaoConcluidaPdv();
+    }
     renderFormasPagamentoPdv();
 }
 
@@ -419,6 +537,7 @@ function limparPdv() {
     formasPagamentoPdv = [];
     ordensEncontradasPdv = [];
     buscouOrdensPdv = false;
+    limparResumoOperacaoConcluidaPdv();
     setValor('pdvBuscaCliente', '');
     cancelarRecebimentoPdv();
     exibirCardPdv(false);
@@ -433,7 +552,7 @@ function validarRegrasPdv() {
         throw new Error('Carregue uma OS no PDV.');
     }
 
-    const valorRecebido = parseFloat(document.getElementById('pdvValorRecebidoAgora')?.value) || 0;
+    const valorRecebido = obterValorRecebidoCampoPdv();
     const totais = obterTotaisPdv();
     const gerarDebito = document.getElementById('pdvGerarDebito')?.checked;
     const debitoVencimento = (document.getElementById('pdvDebitoVencimento')?.value || '').trim();
@@ -449,7 +568,7 @@ async function salvarFaturamentoPdv() {
     try {
         validarRegrasPdv();
 
-        const valorRecebido = parseFloat(document.getElementById('pdvValorRecebidoAgora')?.value) || 0;
+        const totaisOperacao = obterTotaisPdv();
         const payload = {
             pagamentos: formasPagamentoPdv.map((item) => ({
                 forma_pagamento: item.forma_pagamento,
@@ -474,8 +593,18 @@ async function salvarFaturamentoPdv() {
             : 'Recebimento concluído e OS quitada.');
 
         ordemPdv = dados;
+        ultimoResumoOperacaoPdv = {
+            totalBruto: totaisOperacao.totalBruto,
+            descontoValor: totaisOperacao.descontoValor,
+            totalFinal: totaisOperacao.totalFinal,
+            pagoAntes: totaisOperacao.pagoAntes,
+            pagoAgora: totaisOperacao.valorRecebido,
+            saldoApos: Number(dados.saldo_pendente || 0),
+            situacao: dados.status_financeiro || situacaoAposOperacao(Number(dados.saldo_pendente || 0))
+        };
+        cancelarRecebimentoPdv({ preservarResumo: true });
         atualizarDadosOsPdv();
-        cancelarRecebimentoPdv();
+        aplicarResumoOperacaoConcluidaPdv();
         await carregarCaixaDia();
         alternarAbaPdv('resumo');
     } catch (error) {
@@ -618,10 +747,20 @@ document.addEventListener('DOMContentLoaded', function() {
     exibirCardPdv(false);
     alternarAbaFluxo(ordemPendenteParaAbrir ? 'os' : 'caixa');
     alternarAbaPdv('busca');
+    atualizarModoRecebimentoUiPdv();
     carregarCaixaDia();
 
-    document.getElementById('pdvValorRecebidoAgora')?.addEventListener('input', atualizarResumoOperacaoPdv);
-    document.getElementById('pdvDescontoPercentual')?.addEventListener('input', atualizarResumoOperacaoPdv);
+    const campoRecebidoAgora = document.getElementById('pdvValorRecebidoAgora');
+    ['input', 'change', 'keyup'].forEach((evento) => campoRecebidoAgora?.addEventListener(evento, () => {
+        limparResumoOperacaoConcluidaPdv();
+        atualizarResumoOperacaoPdv();
+    }));
+    campoRecebidoAgora?.addEventListener('blur', () => formatarCampoMonetario('pdvValorRecebidoAgora'));
+    document.getElementById('pdvDescontoPercentual')?.addEventListener('input', () => {
+        limparResumoOperacaoConcluidaPdv();
+        atualizarResumoOperacaoPdv();
+    });
+    document.getElementById('pdvValorForma')?.addEventListener('blur', () => formatarCampoMonetario('pdvValorForma'));
     renderResultadosBuscaPdv();
     document.getElementById('pdvBuscaCliente')?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -648,6 +787,7 @@ window.buscarOrdemPdv = buscarOrdemPdv;
 window.selecionarOrdemBuscaPdv = selecionarOrdemBuscaPdv;
 window.preencherValorTotalRecebido = preencherValorTotalRecebido;
 window.limparValorRecebido = limparValorRecebido;
+window.selecionarModoRecebimentoPdv = selecionarModoRecebimentoPdv;
 window.adicionarFormaPagamentoPdv = adicionarFormaPagamentoPdv;
 window.removerFormaPagamentoPdv = removerFormaPagamentoPdv;
 window.salvarFaturamentoPdv = salvarFaturamentoPdv;

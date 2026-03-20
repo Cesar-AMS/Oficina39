@@ -39,6 +39,7 @@
 
         <div class="config-tabs">
             <button class="config-tab active" data-tab="geral" onclick="alternarAbaConfig('geral')">Geral</button>
+            <button class="config-tab" data-tab="personalizacao" onclick="alternarAbaConfig('personalizacao')">Personalização</button>
             <button class="config-tab" data-tab="profissionais" onclick="alternarAbaConfig('profissionais')">Profissionais</button>
             <button class="config-tab" data-tab="dados" onclick="alternarAbaConfig('dados')">Dados</button>
             <button class="config-tab" data-tab="integracoes" onclick="alternarAbaConfig('integracoes')">Integrações</button>
@@ -115,6 +116,51 @@
             <div class="button-group alinhar-esquerda config-footer-actions">
                 <button class="btn btn-salvar" onclick="salvarConfig()">Salvar Configurações</button>
             </div>
+        </section>
+
+        <section class="config-tab-panel" id="configTabPersonalizacao">
+            <section class="form-section config-section" id="secao-personalizacao-index">
+                <h3 class="section-titulo">Personalização da Tela Inicial</h3>
+                <p class="texto-ajuda">Defina o nome do cliente acima da logo e troque a imagem principal da index sempre que precisar.</p>
+
+                <div class="config-row">
+                    <div class="form-group">
+                        <label for="nomeExibicaoSistema">Nome acima da logo</label>
+                        <input type="text" id="nomeExibicaoSistema" placeholder="Ex: Oficina Centro Automotivo">
+                        <small class="texto-ajuda">Esse texto aparece no topo da área principal da tela inicial.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="logoIndexFormato">Formato da logo</label>
+                        <select id="logoIndexFormato">
+                            <option value="circulo">Círculo</option>
+                            <option value="quadrado">Quadrado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="config-row branding-row">
+                    <div class="form-group branding-upload-group">
+                        <label for="logoIndexArquivo">Imagem da logo</label>
+                        <input type="file" id="logoIndexArquivo" accept=".png,.jpg,.jpeg,.webp,.gif">
+                        <small class="texto-ajuda">Prefira imagem com fundo transparente e boa resolução.</small>
+                        <div class="button-group alinhar-esquerda branding-upload-actions">
+                            <button class="btn btn-salvar" type="button" onclick="enviarLogoIndex()">Enviar imagem</button>
+                        </div>
+                        <div class="button-group alinhar-esquerda branding-save-actions">
+                            <button class="btn btn-salvar" onclick="salvarPersonalizacao()">Salvar Personalização</button>
+                        </div>
+                    </div>
+                    <div class="branding-preview-card">
+                        <span class="branding-preview-label">Pré-visualização</span>
+                        <div class="branding-preview-frame circulo" id="brandingPreviewFrame">
+                            <img id="brandingPreviewImage" src="/static/images/picapau4.png" alt="Prévia da logo">
+                        </div>
+                        <p class="branding-preview-caption" id="brandingPreviewCaption">Sistema de Gerenciamento Oficina 39</p>
+                    </div>
+                </div>
+
+                <input type="hidden" id="logoIndexPath">
+            </section>
         </section>
 
         <section class="config-tab-panel" id="configTabProfissionais">
