@@ -32,20 +32,6 @@ function obterUrlRetornoFluxo() {
     return '/fluxo_caixa.html';
 }
 
-function limparPdvAntesDeSair() {
-    ordemPdv = null;
-    formasPagamentoPdv = [];
-    limparResumoOperacaoConcluidaPdv();
-    setValor('pdvFormaPagamento', '');
-    setValor('pdvValorForma', '');
-    setValor('pdvObservacaoForma', '');
-    setValor('pdvDebitoObservacao', '');
-    setValor('pdvDebitoVencimento', '');
-    exibirCardPdv(false);
-    atualizarDadosOsPdv();
-    alternarAbaPdv('dados');
-}
-
 function formatarValor(valor) {
     return 'R$ ' + (Number(valor || 0)).toFixed(2).replace('.', ',');
 }
@@ -67,6 +53,12 @@ function escaparHtml(texto) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+}
+
+function obterDescontoPercentualPdv() {
+    const campo = document.getElementById('pdvDescontoPercentual');
+    if (!campo) return Number(ordemPdv?.desconto_percentual || 0);
+    return Math.min(100, Math.max(0, lerValorMonetario(campo.value || ordemPdv?.desconto_percentual || 0)));
 }
 
 function lerValorMonetario(valor) {
@@ -96,9 +88,9 @@ function ehFormaReceberDepois(forma) {
 function obterTotaisPdv() {
     const totalBruto = Number(ordemPdv?.total_geral || 0);
     const pagoAntes = Number(ordemPdv?.total_pago || 0);
-    const descontoPercentual = Number(ordemPdv?.desconto_percentual || 0);
-    const descontoValor = Number(ordemPdv?.desconto_valor || 0);
-    const totalFinal = arredondarMoeda(Math.max(0, Number(ordemPdv?.total_cobrado ?? (totalBruto - descontoValor))));
+    const descontoPercentual = obterDescontoPercentualPdv();
+    const descontoValor = arredondarMoeda(totalBruto * (descontoPercentual / 100));
+    const totalFinal = arredondarMoeda(Math.max(0, totalBruto - descontoValor));
     const saldoBase = arredondarMoeda(Math.max(0, totalFinal - pagoAntes));
     const totalFormas = obterTotalFormasPdv();
     const totalReceberDepois = arredondarMoeda(
@@ -233,9 +225,13 @@ function atualizarDadosOsPdv() {
         setValor('pdvTotalOrdemField', formatarValor(0));
         setValor('pdvTotalPagoField', formatarValor(0));
         setValor('pdvStatusFinanceiroField', '');
-        setValor('pdvResumoTotalFinal', formatarValor(0));
-        setValor('pdvResumoPagoAgora', formatarValor(0));
-        setValor('pdvResumoSaldoApos', formatarValor(0));
+        setValor('pdvDescontoPercentual', '');
+        setValor('pdvTotalFinalVendaField', formatarValor(0));
+        setValor('pdvSaldoRestanteField', formatarValor(0));
+        setValor('pdvResumoValorBruto', formatarValor(0));
+        setValor('pdvResumoDescontoAplicado', formatarValor(0));
+        setValor('pdvResumoValorFinal', formatarValor(0));
+        setValor('pdvResumoPagoOperacao', formatarValor(0));
         setValor('pdvResumoSaldoDebito', formatarValor(0));
         setValor('pdvResumoVencimento', '');
         setValor('pdvResumoSituacao', '');
@@ -254,6 +250,7 @@ function atualizarDadosOsPdv() {
     setValor('pdvTotalOrdemField', formatarValor(ordemPdv.total_geral || 0));
     setValor('pdvTotalPagoField', formatarValor(ordemPdv.total_pago || 0));
     setValor('pdvStatusFinanceiroField', ordemPdv.status_financeiro || '');
+    setValor('pdvDescontoPercentual', Number(ordemPdv.desconto_percentual || 0) ? Number(ordemPdv.desconto_percentual || 0).toFixed(2).replace('.', ',') : '');
     atualizarModoRecebimentoUiPdv();
     atualizarResumoOperacaoPdv();
 }
@@ -271,11 +268,16 @@ function situacaoAposOperacao(saldoApos) {
 
 function atualizarResumoOperacaoPdv() {
     const totais = obterTotaisPdv();
+    const possuiDebitoResumo = totais.totalReceberDepois > 0.009;
+    const resumoDebitoWrap = document.getElementById('pdvResumoDebitoWrap');
+    if (resumoDebitoWrap) resumoDebitoWrap.hidden = !possuiDebitoResumo;
 
-    setValor('pdvResumoTotalFinal', formatarValor(totais.totalFinal));
-    setValor('pdvResumoPagoAgora', formatarValor(totais.valorRecebido));
-    setValor('pdvResumoSaldoApos', formatarValor(totais.saldoApos));
-    setValor('pdvResumoSaldoDebito', formatarValor(totais.totalReceberDepois));
+    setValor('pdvTotalFinalVendaField', formatarValor(totais.totalFinal));
+    setValor('pdvSaldoRestanteField', formatarValor(totais.saldoApos));
+    setValor('pdvResumoValorBruto', formatarValor(totais.totalBruto));
+    setValor('pdvResumoDescontoAplicado', formatarValor(totais.descontoValor));
+    setValor('pdvResumoValorFinal', formatarValor(totais.totalFinal));
+    setValor('pdvResumoPagoOperacao', formatarValor(totais.valorRecebido));
     setValor('pdvResumoSituacao', situacaoAposOperacao(totais.saldoApos));
     setValor('pdvDebitoValorGerado', formatarValor(totais.totalReceberDepois));
     setTexto('pdvTotalDistribuido', formatarValor(totais.totalFormas));
@@ -291,19 +293,24 @@ function atualizarResumoOperacaoPdv() {
     setTexto('pdvResumoTopoPagoAgora', formatarValor(totais.valorRecebido));
     setTexto('pdvResumoTopoSaldoApos', formatarValor(totais.totalReceberDepois));
     setTexto('pdvResumoFormasUsadas', resumoFormasPagamentoPdv());
-    setValor('pdvResumoVencimento', (document.getElementById('pdvDebitoVencimento')?.value || '').trim());
-    setValor('pdvResumoDebitoObservacao', (document.getElementById('pdvDebitoObservacao')?.value || '').trim());
+    setValor('pdvResumoVencimento', possuiDebitoResumo ? (document.getElementById('pdvDebitoVencimento')?.value || '').trim() : '');
+    setValor('pdvResumoDebitoObservacao', possuiDebitoResumo ? (document.getElementById('pdvDebitoObservacao')?.value || '').trim() : '');
     atualizarEstadoDebitoPdv();
     atualizarModoRecebimentoUiPdv();
 }
 
 function aplicarResumoOperacaoConcluidaPdv() {
     if (!ultimoResumoOperacaoPdv) return;
+    const possuiDebitoResumo = Number(ultimoResumoOperacaoPdv.saldoApos || 0) > 0.009;
+    const resumoDebitoWrap = document.getElementById('pdvResumoDebitoWrap');
+    if (resumoDebitoWrap) resumoDebitoWrap.hidden = !possuiDebitoResumo;
 
-    setValor('pdvResumoTotalFinal', formatarValor(ultimoResumoOperacaoPdv.totalFinal));
-    setValor('pdvResumoPagoAgora', formatarValor(ultimoResumoOperacaoPdv.pagoAgora));
-    setValor('pdvResumoSaldoApos', formatarValor(ultimoResumoOperacaoPdv.saldoApos));
-    setValor('pdvResumoSaldoDebito', formatarValor(ultimoResumoOperacaoPdv.saldoApos));
+    setValor('pdvTotalFinalVendaField', formatarValor(ultimoResumoOperacaoPdv.totalFinal));
+    setValor('pdvSaldoRestanteField', formatarValor(ultimoResumoOperacaoPdv.saldoApos));
+    setValor('pdvResumoValorBruto', formatarValor(ultimoResumoOperacaoPdv.totalBruto));
+    setValor('pdvResumoDescontoAplicado', formatarValor(ultimoResumoOperacaoPdv.descontoValor));
+    setValor('pdvResumoValorFinal', formatarValor(ultimoResumoOperacaoPdv.totalFinal));
+    setValor('pdvResumoPagoOperacao', formatarValor(ultimoResumoOperacaoPdv.pagoAgora));
     setValor('pdvResumoSituacao', ultimoResumoOperacaoPdv.situacao);
     setValor('pdvDebitoValorGerado', formatarValor(ultimoResumoOperacaoPdv.saldoApos));
     setTexto('pdvTotalDistribuido', formatarValor(obterTotalFormasPdv()));
@@ -319,8 +326,8 @@ function aplicarResumoOperacaoConcluidaPdv() {
     setTexto('pdvResumoTopoPagoAgora', formatarValor(ultimoResumoOperacaoPdv.pagoAgora));
     setTexto('pdvResumoTopoSaldoApos', formatarValor(ultimoResumoOperacaoPdv.saldoApos));
     setTexto('pdvResumoFormasUsadas', ultimoResumoOperacaoPdv.formas || 'Nenhuma forma informada.');
-    setValor('pdvResumoVencimento', ultimoResumoOperacaoPdv.vencimento || '');
-    setValor('pdvResumoDebitoObservacao', ultimoResumoOperacaoPdv.debitoObservacao || '');
+    setValor('pdvResumoVencimento', possuiDebitoResumo ? (ultimoResumoOperacaoPdv.vencimento || '') : '');
+    setValor('pdvResumoDebitoObservacao', possuiDebitoResumo ? (ultimoResumoOperacaoPdv.debitoObservacao || '') : '');
     atualizarModoRecebimentoUiPdv();
 }
 
@@ -430,6 +437,7 @@ function cancelarRecebimentoPdv(opcoes = {}) {
     setValor('pdvDebitoObservacao', ordemPdv?.debito_observacao || '');
     const vencimento = document.getElementById('pdvDebitoVencimento');
     if (vencimento) vencimento.value = ordemPdv?.debito_vencimento || '';
+    setValor('pdvDescontoPercentual', Number(ordemPdv?.desconto_percentual || 0) ? Number(ordemPdv.desconto_percentual || 0).toFixed(2).replace('.', ',') : '');
     atualizarModoRecebimentoUiPdv();
     if (!opcoes.preservarResumo) {
         limparResumoOperacaoConcluidaPdv();
@@ -473,7 +481,7 @@ async function salvarFaturamentoPdv() {
                 valor: item.valor,
                 observacao: item.observacao
             })),
-            desconto_percentual: 0,
+            desconto_percentual: obterDescontoPercentualPdv(),
             debito_vencimento: (document.getElementById('pdvDebitoVencimento')?.value || '').trim(),
             debito_observacao: (document.getElementById('pdvDebitoObservacao')?.value || '').trim()
         };
@@ -491,7 +499,6 @@ async function salvarFaturamentoPdv() {
             : 'Recebimento concluído e OS quitada.');
 
         await carregarCaixaDia();
-        limparPdvAntesDeSair();
         window.location.assign(obterUrlRetornoFluxo());
     } catch (error) {
         alertErro(error.message);
@@ -637,6 +644,16 @@ document.addEventListener('DOMContentLoaded', function() {
     carregarCaixaDia();
     document.getElementById('pdvValorForma')?.addEventListener('blur', () => formatarCampoMonetario('pdvValorForma'));
     document.getElementById('pdvValorForma')?.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        e.target.blur();
+    }, { passive: false });
+    document.getElementById('pdvDescontoPercentual')?.addEventListener('input', atualizarResumoOperacaoPdv);
+    document.getElementById('pdvDescontoPercentual')?.addEventListener('change', atualizarResumoOperacaoPdv);
+    document.getElementById('pdvDescontoPercentual')?.addEventListener('blur', () => {
+        formatarCampoMonetario('pdvDescontoPercentual');
+        atualizarResumoOperacaoPdv();
+    });
+    document.getElementById('pdvDescontoPercentual')?.addEventListener('wheel', (e) => {
         e.preventDefault();
         e.target.blur();
     }, { passive: false });

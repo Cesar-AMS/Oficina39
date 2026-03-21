@@ -143,6 +143,20 @@
                                     <div class="pdv-sec-head">
                                         <span class="pdv-sec-kicker">Pagamento</span>
                                     </div>
+                                <div class="form-row pdv-fechamento-row">
+                                    <div class="form-group">
+                                        <label for="pdvDescontoPercentual">Desconto (%)</label>
+                                        <input type="text" id="pdvDescontoPercentual" inputmode="decimal" autocomplete="off" placeholder="0,00">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Valor final da venda</label>
+                                        <input type="text" id="pdvTotalFinalVendaField" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Saldo restante</label>
+                                        <input type="text" id="pdvSaldoRestanteField" readonly>
+                                    </div>
+                                </div>
                                 <div id="pdvFormasPagamentoWrap">
                                 <div class="form-row pdv-formas-row">
                                     <div class="form-group">
@@ -248,38 +262,43 @@
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
+                                        <label>Valor bruto da venda</label>
+                                        <input type="text" id="pdvResumoValorBruto" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Desconto aplicado</label>
+                                        <input type="text" id="pdvResumoDescontoAplicado" readonly>
+                                    </div>
+                                    <div class="form-group">
                                         <label>Valor final da venda</label>
-                                        <input type="text" id="pdvResumoTotalFinal" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Pago nesta operação</label>
-                                        <input type="text" id="pdvResumoPagoAgora" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Saldo para débito</label>
-                                        <input type="text" id="pdvResumoSaldoApos" readonly>
+                                        <input type="text" id="pdvResumoValorFinal" readonly>
                                     </div>
                                 </div>
-
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label>Formas usadas</label>
-                                        <div class="pdv-resumo-formas" id="pdvResumoFormasUsadas">Nenhuma forma informada.</div>
+                                        <label>Pago nesta operação</label>
+                                        <input type="text" id="pdvResumoPagoOperacao" readonly>
                                     </div>
                                     <div class="form-group">
                                         <label>Saldo para débito</label>
                                         <input type="text" id="pdvResumoSaldoDebito" readonly>
                                     </div>
                                     <div class="form-group">
-                                        <label>Vencimento</label>
-                                        <input type="text" id="pdvResumoVencimento" readonly>
+                                        <label>Formas usadas</label>
+                                        <div class="pdv-resumo-formas" id="pdvResumoFormasUsadas">Nenhuma forma informada.</div>
                                     </div>
                                 </div>
-
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>Situação final</label>
                                         <input type="text" id="pdvResumoSituacao" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="form-row" id="pdvResumoDebitoWrap" hidden>
+                                    <div class="form-group">
+                                        <label>Vencimento</label>
+                                        <input type="text" id="pdvResumoVencimento" readonly>
                                     </div>
                                     <div class="form-group">
                                         <label>Observação do débito</label>
