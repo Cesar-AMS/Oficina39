@@ -28,8 +28,14 @@ class ConfigContador(db.Model):
     placa_api_key_secundaria = db.Column(db.String(255))
     whatsapp_orcamento = db.Column(db.String(30))
     nome_exibicao_sistema = db.Column(db.String(120))
+    empresa_nome = db.Column(db.String(120))
+    empresa_email = db.Column(db.String(120))
+    empresa_telefone = db.Column(db.String(30))
+    empresa_endereco = db.Column(db.String(180))
     logo_index_path = db.Column(db.String(255))
     logo_index_formato = db.Column(db.String(20), default='circulo')
+    qrcode_1_path = db.Column(db.String(255))
+    qrcode_2_path = db.Column(db.String(255))
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     created_at = db.Column(db.DateTime, default=datetime.now)  # ← ADICIONADO para consistência
     
@@ -51,8 +57,14 @@ class ConfigContador(db.Model):
             'placa_provider_secundario': self.placa_provider_secundario,
             'whatsapp_orcamento': self.whatsapp_orcamento,
             'nome_exibicao_sistema': self.nome_exibicao_sistema,
+            'empresa_nome': self.empresa_nome,
+            'empresa_email': self.empresa_email,
+            'empresa_telefone': self.empresa_telefone,
+            'empresa_endereco': self.empresa_endereco,
             'logo_index_path': self.logo_index_path,
             'logo_index_formato': self.logo_index_formato or 'circulo',
+            'qrcode_1_path': self.qrcode_1_path,
+            'qrcode_2_path': self.qrcode_2_path,
             'updated_at': self.updated_at.strftime('%d/%m/%Y %H:%M') if self.updated_at else None,
             'created_at': self.created_at.strftime('%d/%m/%Y %H:%M') if self.created_at else None
         }

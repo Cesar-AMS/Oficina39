@@ -55,7 +55,13 @@ def salvar_config_contador(dados):
     config.placa_api_key_secundaria = valor_opcional('placa_api_key_secundaria', config.placa_api_key_secundaria)
     config.whatsapp_orcamento = valor_opcional('whatsapp_orcamento', config.whatsapp_orcamento)
     config.nome_exibicao_sistema = valor_opcional('nome_exibicao_sistema', config.nome_exibicao_sistema)
+    config.empresa_nome = valor_opcional('empresa_nome', config.empresa_nome)
+    config.empresa_email = valor_opcional('empresa_email', config.empresa_email)
+    config.empresa_telefone = valor_opcional('empresa_telefone', config.empresa_telefone)
+    config.empresa_endereco = valor_opcional('empresa_endereco', config.empresa_endereco)
     config.logo_index_path = valor_opcional('logo_index_path', config.logo_index_path)
+    config.qrcode_1_path = valor_opcional('qrcode_1_path', config.qrcode_1_path)
+    config.qrcode_2_path = valor_opcional('qrcode_2_path', config.qrcode_2_path)
     if 'logo_index_formato' in dados:
         config.logo_index_formato = (dados.get('logo_index_formato') or 'circulo').strip() or 'circulo'
     elif not config.logo_index_formato:

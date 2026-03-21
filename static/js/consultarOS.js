@@ -198,7 +198,7 @@ async function finalizarOrdem(id) {
         ? await window.ui.confirmAsync('Encaminhar esta ordem para finalização no caixa?')
         : (window.ui ? window.ui.confirm('Encaminhar esta ordem para finalização no caixa?') : confirm('Encaminhar esta ordem para finalização no caixa?'));
     if (!confirmado) return;
-    window.location.assign(`/fluxo_caixa.html?ordem_id=${id}`);
+    window.location.assign(`/fluxo_caixa.html?ordem_id=${id}&origem=consultar_os`);
 }
 
 async function ativarGarantia(id) {

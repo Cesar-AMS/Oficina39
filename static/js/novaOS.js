@@ -541,7 +541,7 @@ window.finalizarNoCaixa = async function() {
     const resultado = await criarOrdemNoServidor(dados);
     if (!resultado) return;
 
-    window.location.assign(`/fluxo_caixa.html?ordem_id=${resultado.id}`);
+    window.location.assign(`/fluxo_caixa.html?ordem_id=${resultado.id}&origem=nova_os`);
 };
 
 window.salvarEImprimir = async function() {

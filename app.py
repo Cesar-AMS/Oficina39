@@ -174,8 +174,14 @@ def create_app():
                 print("Coluna whatsapp_orcamento adicionada em config_contador")
             novas_colunas_branding = {
                 'nome_exibicao_sistema': "ALTER TABLE config_contador ADD COLUMN nome_exibicao_sistema VARCHAR(120)",
+                'empresa_nome': "ALTER TABLE config_contador ADD COLUMN empresa_nome VARCHAR(120)",
+                'empresa_email': "ALTER TABLE config_contador ADD COLUMN empresa_email VARCHAR(120)",
+                'empresa_telefone': "ALTER TABLE config_contador ADD COLUMN empresa_telefone VARCHAR(30)",
+                'empresa_endereco': "ALTER TABLE config_contador ADD COLUMN empresa_endereco VARCHAR(180)",
                 'logo_index_path': "ALTER TABLE config_contador ADD COLUMN logo_index_path VARCHAR(255)",
-                'logo_index_formato': "ALTER TABLE config_contador ADD COLUMN logo_index_formato VARCHAR(20)"
+                'logo_index_formato': "ALTER TABLE config_contador ADD COLUMN logo_index_formato VARCHAR(20)",
+                'qrcode_1_path': "ALTER TABLE config_contador ADD COLUMN qrcode_1_path VARCHAR(255)",
+                'qrcode_2_path': "ALTER TABLE config_contador ADD COLUMN qrcode_2_path VARCHAR(255)"
             }
             for nome_coluna, sql in novas_colunas_branding.items():
                 if nome_coluna not in colunas_config:

@@ -121,7 +121,7 @@
         <section class="config-tab-panel" id="configTabPersonalizacao">
             <section class="form-section config-section" id="secao-personalizacao-index">
                 <h3 class="section-titulo">Personalização da Tela Inicial</h3>
-                <p class="texto-ajuda">Defina o nome do cliente acima da logo e troque a imagem principal da index sempre que precisar.</p>
+                <p class="texto-ajuda">Defina a identidade visual e os dados da empresa para refletir na tela inicial e também na nota impressa ou enviada ao cliente.</p>
 
                 <div class="config-row">
                     <div class="form-group">
@@ -138,16 +138,34 @@
                     </div>
                 </div>
 
+                <div class="branding-company-grid">
+                    <div class="form-group">
+                        <label for="empresaNome">Nome da empresa</label>
+                        <input type="text" id="empresaNome" placeholder="Ex: Centro Automotivo Exemplo LTDA">
+                        <small class="texto-ajuda">Usado no cabeçalho da nota e como identificação principal da empresa.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="empresaTelefone">Telefone da empresa</label>
+                        <input type="text" id="empresaTelefone" placeholder="Ex: (11) 99999-9999">
+                    </div>
+                    <div class="form-group">
+                        <label for="empresaEmail">E-mail da empresa</label>
+                        <input type="email" id="empresaEmail" placeholder="Ex: contato@empresa.com.br">
+                    </div>
+                    <div class="form-group">
+                        <label for="empresaEndereco">Endereço da empresa</label>
+                        <input type="text" id="empresaEndereco" placeholder="Ex: Rua Exemplo, 123 - Cidade - UF">
+                    </div>
+                </div>
+
                 <div class="config-row branding-row">
                     <div class="form-group branding-upload-group">
                         <label for="logoIndexArquivo">Imagem da logo</label>
                         <input type="file" id="logoIndexArquivo" accept=".png,.jpg,.jpeg,.webp,.gif">
                         <small class="texto-ajuda">Prefira imagem com fundo transparente e boa resolução.</small>
+                        <p class="branding-upload-copy">Depois de escolher o arquivo, envie a imagem para atualizar a pré-visualização. A mudança só fica definitiva no sistema quando você salvar a personalização no rodapé da aba.</p>
                         <div class="button-group alinhar-esquerda branding-upload-actions">
                             <button class="btn btn-salvar" type="button" onclick="enviarLogoIndex()">Enviar imagem</button>
-                        </div>
-                        <div class="button-group alinhar-esquerda branding-save-actions">
-                            <button class="btn btn-salvar" onclick="salvarPersonalizacao()">Salvar Personalização</button>
                         </div>
                     </div>
                     <div class="branding-preview-card">
@@ -156,10 +174,55 @@
                             <img id="brandingPreviewImage" src="/static/images/picapau4.png" alt="Prévia da logo">
                         </div>
                         <p class="branding-preview-caption" id="brandingPreviewCaption">Sistema de Gerenciamento Oficina 39</p>
+                        <div class="branding-preview-company" id="brandingPreviewCompany">
+                            <p id="brandingPreviewCompanyName">Oficina 39</p>
+                            <p id="brandingPreviewCompanyContact">(11) 99209-2341</p>
+                            <p id="brandingPreviewCompanyEmail">oficina39ca@gmail.com</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="branding-qrcode-grid">
+                    <div class="form-group branding-upload-group">
+                        <label for="qrcode1Arquivo">QR Code 1</label>
+                        <input type="file" id="qrcode1Arquivo" accept=".png,.jpg,.jpeg,.webp,.gif">
+                        <small class="texto-ajuda">Use QR code nítido e quadrado. Exemplo: WhatsApp ou Instagram.</small>
+                        <div class="button-group alinhar-esquerda branding-upload-actions">
+                            <button class="btn btn-salvar" type="button" onclick="enviarQrCode('qrcode1')">Enviar QR Code 1</button>
+                        </div>
+                    </div>
+                    <div class="form-group branding-upload-group">
+                        <label for="qrcode2Arquivo">QR Code 2</label>
+                        <input type="file" id="qrcode2Arquivo" accept=".png,.jpg,.jpeg,.webp,.gif">
+                        <small class="texto-ajuda">Opcional. O sistema suporta no máximo dois QR codes no cabeçalho da nota.</small>
+                        <div class="button-group alinhar-esquerda branding-upload-actions">
+                            <button class="btn btn-salvar" type="button" onclick="enviarQrCode('qrcode2')">Enviar QR Code 2</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="branding-qrcode-preview-grid">
+                    <div class="branding-preview-card branding-preview-card-qrcode">
+                        <span class="branding-preview-label">Prévia QR Code 1</span>
+                        <div class="branding-preview-frame branding-preview-frame-qrcode quadrado">
+                            <img id="brandingPreviewQr1" src="/static/images/qrcodewhatsapp.jpeg" alt="Prévia do QR Code 1">
+                        </div>
+                    </div>
+                    <div class="branding-preview-card branding-preview-card-qrcode">
+                        <span class="branding-preview-label">Prévia QR Code 2</span>
+                        <div class="branding-preview-frame branding-preview-frame-qrcode quadrado">
+                            <img id="brandingPreviewQr2" src="/static/images/qrcodeinstagram.jpeg" alt="Prévia do QR Code 2">
+                        </div>
                     </div>
                 </div>
 
                 <input type="hidden" id="logoIndexPath">
+                <input type="hidden" id="qrcode1Path">
+                <input type="hidden" id="qrcode2Path">
+
+                <div class="button-group alinhar-esquerda config-footer-actions branding-footer-actions">
+                    <button class="btn btn-salvar" onclick="salvarPersonalizacao()">Salvar Personalização</button>
+                </div>
             </section>
         </section>
 

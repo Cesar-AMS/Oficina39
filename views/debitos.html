@@ -22,17 +22,6 @@
             </div>
         </div>
 
-        <div class="resumo-debitos">
-            <div class="resumo-item">
-                <span class="label">Clientes/OS pendentes</span>
-                <strong id="resumoQuantidade">0</strong>
-            </div>
-            <div class="resumo-item">
-                <span class="label">Saldo total pendente</span>
-                <strong id="resumoSaldo">R$ 0,00</strong>
-            </div>
-        </div>
-
         <div class="table-container">
             <table class="tabela-debitos">
                 <thead>
@@ -53,46 +42,6 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
-    </div>
-
-    <div class="modal" id="modalPagamentoDebito">
-        <div class="modal-content modal-debito">
-            <h2 class="modal-titulo">Receber Pagamento</h2>
-
-            <div class="debito-resumo-card">
-                <div><strong>OS:</strong> <span id="debitoOsNumero">-</span></div>
-                <div><strong>Cliente:</strong> <span id="debitoClienteNome">-</span></div>
-                <div><strong>Saldo pendente:</strong> <span id="debitoSaldoPendente">R$ 0,00</span></div>
-            </div>
-
-            <div class="table-container">
-                <table class="tabela-pagamentos-modal">
-                    <thead>
-                        <tr>
-                            <th>Forma</th>
-                            <th>Valor</th>
-                            <th>Observação</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="corpoPagamentosDebito"></tbody>
-                </table>
-            </div>
-
-            <div class="acoes-modal-debito">
-                <button class="btn btn-salvar btn-compact" onclick="adicionarLinhaPagamentoDebito()">Adicionar Pagamento</button>
-            </div>
-
-            <div class="resumo-modal-debito">
-                <div><strong>Total lançado:</strong> <span id="totalLancadoDebito">R$ 0,00</span></div>
-                <div><strong>Saldo após lançamento:</strong> <span id="saldoAposDebito">R$ 0,00</span></div>
-            </div>
-
-            <div class="modal-actions">
-                <button class="btn btn-cancelar" onclick="fecharModalDebito()">Cancelar</button>
-                <button class="btn btn-salvar" onclick="salvarPagamentosDebito()">Salvar Pagamento</button>
-            </div>
         </div>
     </div>
 

@@ -81,27 +81,45 @@ def enviar_relatorio_teste():
 
 @config_bp.route('/branding/logo-upload', methods=['POST'])
 def upload_logo_branding():
-    """Recebe a logo de personalização da index."""
+    """Recebe a logo ou QR code de personalização."""
     try:
         arquivo = request.files.get('arquivo')
+        destino = (request.form.get('destino') or 'logo').strip().lower()
         if not arquivo or not arquivo.filename:
             return jsonify({'erro': 'Selecione uma imagem para enviar.'}), 400
 
         if not _arquivo_permitido(arquivo.filename):
             return jsonify({'erro': 'Formato inválido. Use PNG, JPG, JPEG, WEBP ou GIF.'}), 400
 
+        if destino not in {'logo', 'qrcode1', 'qrcode2'}:
+            return jsonify({'erro': 'Destino de upload inválido.'}), 400
+
         nome_original = secure_filename(arquivo.filename)
         extensao = os.path.splitext(nome_original)[1].lower()
-        nome_final = f"cliente_logo_{uuid.uuid4().hex[:12]}{extensao}"
+        prefixo = {
+            'logo': 'cliente_logo',
+            'qrcode1': 'cliente_qrcode_1',
+            'qrcode2': 'cliente_qrcode_2'
+        }[destino]
+        nome_final = f"{prefixo}_{uuid.uuid4().hex[:12]}{extensao}"
         pasta_destino = current_app.config['BRANDING_UPLOAD_FOLDER']
         os.makedirs(pasta_destino, exist_ok=True)
         caminho_destino = os.path.join(pasta_destino, nome_final)
         arquivo.save(caminho_destino)
 
-        return jsonify({
-            'mensagem': 'Logo enviada com sucesso.',
-            'logo_index_path': f"/static/uploads/branding/{nome_final}"
-        })
+        caminho_publico = f"/static/uploads/branding/{nome_final}"
+        resposta = {
+            'mensagem': 'Imagem enviada com sucesso.',
+            'destino': destino,
+            'arquivo_path': caminho_publico
+        }
+        if destino == 'logo':
+            resposta['logo_index_path'] = caminho_publico
+        elif destino == 'qrcode1':
+            resposta['qrcode_1_path'] = caminho_publico
+        else:
+            resposta['qrcode_2_path'] = caminho_publico
+        return jsonify(resposta)
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
 

@@ -3,6 +3,8 @@
 let profissionaisCadastrados = [];
 const CHAVE_PROF_ENVIO_AUTO = 'config_profissional_envio_auto';
 const LOGO_INDEX_PADRAO = '/static/images/picapau4.png';
+const QRCODE_1_PADRAO = '/static/images/qrcodewhatsapp.jpeg';
+const QRCODE_2_PADRAO = '/static/images/qrcodeinstagram.jpeg';
 
 function alertErro(mensagem) {
     if (window.ui) return window.ui.error(mensagem);
@@ -57,12 +59,27 @@ function atualizarPreviewBranding() {
 
     const formato = (getEl('logoIndexFormato')?.value || 'circulo').trim() || 'circulo';
     const logoPath = (getEl('logoIndexPath')?.value || '').trim() || LOGO_INDEX_PADRAO;
-    const nome = (getEl('nomeExibicaoSistema')?.value || '').trim() || 'Sistema de Gerenciamento Oficina 39';
+    const nome = (getEl('nomeExibicaoSistema')?.value || '').trim()
+        || (getEl('empresaNome')?.value || '').trim()
+        || 'Sistema de Gerenciamento Oficina 39';
+    const empresaNome = (getEl('empresaNome')?.value || '').trim() || 'Oficina 39';
+    const empresaTelefone = (getEl('empresaTelefone')?.value || '').trim() || '(11) 99209-2341';
+    const empresaEmail = (getEl('empresaEmail')?.value || '').trim() || 'oficina39ca@gmail.com';
+    const empresaNomePreview = getEl('brandingPreviewCompanyName');
+    const empresaContatoPreview = getEl('brandingPreviewCompanyContact');
+    const empresaEmailPreview = getEl('brandingPreviewCompanyEmail');
+    const qr1 = getEl('brandingPreviewQr1');
+    const qr2 = getEl('brandingPreviewQr2');
 
     frame.classList.toggle('circulo', formato === 'circulo');
     frame.classList.toggle('quadrado', formato === 'quadrado');
     imagem.src = logoPath;
     legenda.textContent = nome;
+    if (empresaNomePreview) empresaNomePreview.textContent = empresaNome;
+    if (empresaContatoPreview) empresaContatoPreview.textContent = empresaTelefone;
+    if (empresaEmailPreview) empresaEmailPreview.textContent = empresaEmail;
+    if (qr1) qr1.src = (getEl('qrcode1Path')?.value || '').trim() || QRCODE_1_PADRAO;
+    if (qr2) qr2.src = (getEl('qrcode2Path')?.value || '').trim() || QRCODE_2_PADRAO;
 }
 
 function validarCnpj(cnpj) {
@@ -162,8 +179,14 @@ function preencherCampos(config) {
     if (config.placa_api_key_secundaria) getEl('placaApiKeySecundaria').value = config.placa_api_key_secundaria;
     if (config.whatsapp_orcamento) getEl('whatsappOrcamento').value = formatarWhatsapp(config.whatsapp_orcamento);
     if (config.nome_exibicao_sistema) getEl('nomeExibicaoSistema').value = config.nome_exibicao_sistema;
+    if (config.empresa_nome) getEl('empresaNome').value = config.empresa_nome;
+    if (config.empresa_email) getEl('empresaEmail').value = config.empresa_email;
+    if (config.empresa_telefone) getEl('empresaTelefone').value = config.empresa_telefone;
+    if (config.empresa_endereco) getEl('empresaEndereco').value = config.empresa_endereco;
     if (config.logo_index_path) getEl('logoIndexPath').value = config.logo_index_path;
     if (config.logo_index_formato) getEl('logoIndexFormato').value = config.logo_index_formato;
+    if (config.qrcode_1_path) getEl('qrcode1Path').value = config.qrcode_1_path;
+    if (config.qrcode_2_path) getEl('qrcode2Path').value = config.qrcode_2_path;
     atualizarPreviewBranding();
 
     const selectProf = getEl('profissionalEnvioAuto');
@@ -217,8 +240,14 @@ async function salvarConfig() {
         placa_api_key_secundaria: (getEl('placaApiKeySecundaria')?.value || '').trim(),
         whatsapp_orcamento: soDigitos(getEl('whatsappOrcamento')?.value || ''),
         nome_exibicao_sistema: (getEl('nomeExibicaoSistema')?.value || '').trim(),
+        empresa_nome: (getEl('empresaNome')?.value || '').trim(),
+        empresa_email: (getEl('empresaEmail')?.value || '').trim(),
+        empresa_telefone: (getEl('empresaTelefone')?.value || '').trim(),
+        empresa_endereco: (getEl('empresaEndereco')?.value || '').trim(),
         logo_index_path: (getEl('logoIndexPath')?.value || '').trim(),
-        logo_index_formato: (getEl('logoIndexFormato')?.value || 'circulo').trim()
+        logo_index_formato: (getEl('logoIndexFormato')?.value || 'circulo').trim(),
+        qrcode_1_path: (getEl('qrcode1Path')?.value || '').trim(),
+        qrcode_2_path: (getEl('qrcode2Path')?.value || '').trim()
     };
 
     try {
@@ -239,8 +268,14 @@ async function salvarConfig() {
 async function salvarPersonalizacao() {
     const payload = {
         nome_exibicao_sistema: (getEl('nomeExibicaoSistema')?.value || '').trim(),
+        empresa_nome: (getEl('empresaNome')?.value || '').trim(),
+        empresa_email: (getEl('empresaEmail')?.value || '').trim(),
+        empresa_telefone: (getEl('empresaTelefone')?.value || '').trim(),
+        empresa_endereco: (getEl('empresaEndereco')?.value || '').trim(),
         logo_index_path: (getEl('logoIndexPath')?.value || '').trim(),
-        logo_index_formato: (getEl('logoIndexFormato')?.value || 'circulo').trim()
+        logo_index_formato: (getEl('logoIndexFormato')?.value || 'circulo').trim(),
+        qrcode_1_path: (getEl('qrcode1Path')?.value || '').trim(),
+        qrcode_2_path: (getEl('qrcode2Path')?.value || '').trim()
     };
 
     try {
@@ -256,7 +291,21 @@ async function salvarPersonalizacao() {
 }
 
 async function enviarLogoIndex() {
-    const inputArquivo = getEl('logoIndexArquivo');
+    await enviarArquivoBranding('logo');
+}
+
+async function enviarQrCode(slot) {
+    await enviarArquivoBranding(slot);
+}
+
+async function enviarArquivoBranding(destino) {
+    const mapa = {
+        logo: { input: 'logoIndexArquivo', path: 'logoIndexPath', mensagem: 'Imagem enviada. Agora salve a personalização para aplicar na tela inicial.' },
+        qrcode1: { input: 'qrcode1Arquivo', path: 'qrcode1Path', mensagem: 'QR Code 1 enviado. Agora salve a personalização para aplicar na nota.' },
+        qrcode2: { input: 'qrcode2Arquivo', path: 'qrcode2Path', mensagem: 'QR Code 2 enviado. Agora salve a personalização para aplicar na nota.' }
+    };
+    const config = mapa[destino];
+    const inputArquivo = getEl(config?.input);
     if (!inputArquivo?.files?.length) {
         alertErro('Selecione uma imagem antes de enviar.');
         return;
@@ -264,6 +313,7 @@ async function enviarLogoIndex() {
 
     const formData = new FormData();
     formData.append('arquivo', inputArquivo.files[0]);
+    formData.append('destino', destino);
 
     try {
         const response = await fetch('/api/config/branding/logo-upload', {
@@ -275,9 +325,12 @@ async function enviarLogoIndex() {
             throw new Error(dados.erro || 'Falha ao enviar a imagem.');
         }
 
-        getEl('logoIndexPath').value = dados.logo_index_path || '';
+        const pathField = getEl(config.path);
+        if (pathField) {
+            pathField.value = dados.arquivo_path || dados.logo_index_path || dados.qrcode_1_path || dados.qrcode_2_path || '';
+        }
         atualizarPreviewBranding();
-        alertSucesso('Imagem enviada. Agora salve a personalização para aplicar na tela inicial.');
+        alertSucesso(config.mensagem);
     } catch (error) {
         alertErro(error.message);
     }
@@ -511,6 +564,11 @@ document.addEventListener('DOMContentLoaded', () => {
         nomeExibicaoInput.addEventListener('input', atualizarPreviewBranding);
     }
 
+    ['empresaNome', 'empresaEmail', 'empresaTelefone'].forEach((id) => {
+        const campo = getEl(id);
+        if (campo) campo.addEventListener('input', atualizarPreviewBranding);
+    });
+
     const formatoLogoSelect = getEl('logoIndexFormato');
     if (formatoLogoSelect) {
         formatoLogoSelect.addEventListener('change', atualizarPreviewBranding);
@@ -529,6 +587,21 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.readAsDataURL(arquivo);
         });
     }
+
+    ['qrcode1', 'qrcode2'].forEach((slot) => {
+        const input = getEl(`${slot}Arquivo`);
+        const previewId = slot === 'qrcode1' ? 'brandingPreviewQr1' : 'brandingPreviewQr2';
+        input?.addEventListener('change', () => {
+            const arquivo = input.files?.[0];
+            if (!arquivo) return;
+            const reader = new FileReader();
+            reader.onload = (evento) => {
+                const imagem = getEl(previewId);
+                if (imagem) imagem.src = evento.target?.result || (slot === 'qrcode1' ? QRCODE_1_PADRAO : QRCODE_2_PADRAO);
+            };
+            reader.readAsDataURL(arquivo);
+        });
+    });
 
     const cnpjCadastroInput = getEl('cnpjProfissionalCadastro');
     if (cnpjCadastroInput) {
@@ -555,5 +628,6 @@ window.exportarDados = exportarDados;
 window.importarDados = importarDados;
 window.alternarAbaConfig = alternarAbaConfig;
 window.enviarLogoIndex = enviarLogoIndex;
+window.enviarQrCode = enviarQrCode;
 window.salvarPersonalizacao = salvarPersonalizacao;
 

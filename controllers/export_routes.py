@@ -18,6 +18,7 @@ try:
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
     from reportlab.lib.units import mm
+    from reportlab.lib.utils import ImageReader
     PDF_AVAILABLE = True
 except ImportError as e:
     PDF_AVAILABLE = False
@@ -25,6 +26,79 @@ except ImportError as e:
     print("Para instalar: pip install reportlab")
 
 export_bp = Blueprint('export', __name__, url_prefix='/api/export')
+
+
+def _obter_branding_empresa():
+    from models import ConfigContador
+
+    config = ConfigContador.query.first()
+    logo_padrao = os.path.join('static', 'images', 'picapau4.png')
+    logo_path = logo_padrao
+    empresa_nome = 'OFICINA 39'
+    empresa_telefone = '(11) 99209-2341'
+    empresa_email = 'oficina39ca@gmail.com'
+    empresa_endereco = 'Rua Noel Rosa, 39 - Poá - SP'
+    qrcode_1_path = os.path.join('static', 'images', 'qrcodewhatsapp.jpeg')
+    qrcode_2_path = os.path.join('static', 'images', 'qrcodeinstagram.jpeg')
+
+    if config:
+        empresa_nome = (
+            (config.empresa_nome or '').strip()
+            or (config.nome_exibicao_sistema or '').strip()
+            or empresa_nome
+        )
+        empresa_telefone = (config.empresa_telefone or '').strip() or empresa_telefone
+        empresa_email = (config.empresa_email or '').strip() or empresa_email
+        empresa_endereco = (config.empresa_endereco or '').strip() or empresa_endereco
+
+        logo_salva = (config.logo_index_path or '').strip()
+        if logo_salva:
+            logo_relativa = logo_salva.lstrip('/').replace('/', os.sep)
+            caminho_logo = os.path.abspath(logo_relativa)
+            if os.path.exists(caminho_logo):
+                logo_path = caminho_logo
+        for chave, atual in (('qrcode_1_path', qrcode_1_path), ('qrcode_2_path', qrcode_2_path)):
+            valor = (getattr(config, chave, None) or '').strip()
+            if valor:
+                caminho_qr = os.path.abspath(valor.lstrip('/').replace('/', os.sep))
+                if os.path.exists(caminho_qr):
+                    if chave == 'qrcode_1_path':
+                        qrcode_1_path = caminho_qr
+                    else:
+                        qrcode_2_path = caminho_qr
+
+    return {
+        'logo_path': logo_path,
+        'empresa_nome': empresa_nome,
+        'empresa_telefone': empresa_telefone,
+        'empresa_email': empresa_email,
+        'empresa_endereco': empresa_endereco,
+        'qrcode_1_path': qrcode_1_path,
+        'qrcode_2_path': qrcode_2_path,
+    }
+
+
+def _criar_logo_pdf(caminho_logo, largura_max, altura_max):
+    if not os.path.exists(caminho_logo):
+        return None
+
+    try:
+        leitor = ImageReader(caminho_logo)
+        largura_img, altura_img = leitor.getSize()
+        if not largura_img or not altura_img:
+            raise ValueError('Imagem inválida')
+
+        proporcao = min(float(largura_max) / float(largura_img), float(altura_max) / float(altura_img))
+        largura_final = largura_img * proporcao
+        altura_final = altura_img * proporcao
+
+        logo = Image(caminho_logo, width=largura_final, height=altura_final)
+        logo.hAlign = 'LEFT'
+        return logo
+    except Exception:
+        logo = Image(caminho_logo, width=largura_max, height=altura_max)
+        logo.hAlign = 'LEFT'
+        return logo
 
 
 @export_bp.route('/gerar-pdf/<int:id>')
@@ -171,18 +245,17 @@ def gerar_pdf_ordem(id):
         # ===========================================
         cabecalho_linha1 = []
 
-        # LOGO
-        logo_path = os.path.join('static', 'images', 'picapau4.png')
+        branding = _obter_branding_empresa()
+        logo_path = branding['logo_path']
         if os.path.exists(logo_path):
-            logo = Image(logo_path, width=logo_size, height=logo_size)
-            logo.hAlign = 'LEFT'
+            logo = _criar_logo_pdf(logo_path, logo_size, logo_size)
             logo_bloco = Table([[logo]], colWidths=[logo_size], hAlign='LEFT')
             logo_bloco.setStyle(TableStyle([
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('LEFTPADDING', (0, 0), (-1, -1), 0),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-                ('TOPPADDING', (0, 0), (-1, -1), -22),
+                ('TOPPADDING', (0, 0), (-1, -1), 0),
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
             ]))
             cabecalho_linha1.append(logo_bloco)
@@ -191,11 +264,11 @@ def gerar_pdf_ordem(id):
                 Paragraph("OF39", ParagraphStyle('Logo', fontSize=18)))
 
         # DADOS DA EMPRESA (bloco com hierarquia visual mais profissional)
-        empresa_nome = Paragraph("OFICINA 39", estilo_nome_empresa)
+        empresa_nome = Paragraph(branding['empresa_nome'], estilo_nome_empresa)
         empresa_dados = Paragraph(
-            "<b>Contato:</b> (11) 99209-2341<br/>"
-            "<b>E-mail:</b> oficina39ca@gmail.com<br/>"
-            "<b>Endereço:</b> Rua Noel Rosa, 39 - Poá - SP",
+            f"<b>Contato:</b> {branding['empresa_telefone']}<br/>"
+            f"<b>E-mail:</b> {branding['empresa_email']}<br/>"
+            f"<b>Endereço:</b> {branding['empresa_endereco']}",
             estilo_dados_empresa
         )
         empresa_bloco = Table(
@@ -214,17 +287,9 @@ def gerar_pdf_ordem(id):
 
         # QR CODES
         qr_imagens = []
-        qr_insta_path = os.path.join(
-            'static', 'images', 'qrcodeinstagram.jpeg')
-        qr_whats_path = os.path.join('static', 'images', 'qrcodewhatsapp.jpeg')
-
-        if os.path.exists(qr_insta_path):
-            qr_insta = Image(qr_insta_path, width=qr_size, height=qr_size)
-            qr_imagens.append(qr_insta)
-
-        if os.path.exists(qr_whats_path):
-            qr_whats = Image(qr_whats_path, width=qr_size, height=qr_size)
-            qr_imagens.append(qr_whats)
+        for caminho_qr in [branding['qrcode_1_path'], branding['qrcode_2_path']]:
+            if os.path.exists(caminho_qr):
+                qr_imagens.append(_criar_logo_pdf(caminho_qr, qr_size, qr_size))
 
         if qr_imagens:
             if len(qr_imagens) == 2:

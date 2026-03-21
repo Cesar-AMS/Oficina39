@@ -154,64 +154,38 @@ html, body {
     background: #000000;
 }
 
-.imagem-container::before {
-    content: '';
-    position: absolute;
-    width: 465px;        /* Tamanho do círculo */
-    height: 465px;       /* Tamanho do círculo */
-    border: 4px solid var(--accent);  /* Borda vermelha */
-    background: transparent;  /* Fundo transparente */
-    box-shadow: 0 4px 15px rgba(196, 69, 54, 0.3);  /* Brilho */
-    z-index: 5;
-    pointer-events: none;  /* Não atrapalha cliques */
-    transform: translateX(-5px);
+.logo-stage {
+    width: min(465px, 56vh);
+    aspect-ratio: 1 / 1;
+    border: 4px solid var(--accent);
+    background: rgba(255, 255, 255, 0.01);
+    box-shadow: 0 4px 15px rgba(196, 69, 54, 0.3);
     border-radius: 50%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    position: relative;
+    z-index: 6;
+    padding: 34px;
+    box-sizing: border-box;
 }
 
-.imagem-container.logo-shape-square::before {
+.logo-stage.logo-shape-square {
     border-radius: 36px;
 }
 
-/* Ajuste da imagem para ficar sobre o círculo */
 .imagem-destaque {
-    max-width: 100%;
-    max-height: 100vh;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    transform: scale(1.7) translateY(-40px) !important;
+    object-position: center;
     position: relative;
     z-index: 10;
     border: none !important;
     outline: none !important;
-    filter: brightness(1.05);
-}
-
-/* =========================================== */
-/* IMAGEM - VERSÃO COM CORREÇÃO DA LINHA BRANCA */
-/* =========================================== */
-.imagem-destaque {
-    max-width: 95%;
-    max-height: 95vh;
-    object-fit: contain;
-    transform: scale(3) translateY(-40px);
-    
-    /* Remove completamente qualquer borda */
-    border: none !important;
-    outline: none !important;
     box-shadow: none !important;
-    
-    /* 🔥 CORREÇÃO RADICAL PARA LINHA BRANCA */
-    filter: brightness(1.02) contrast(1.1) drop-shadow(0 0 0 black);
-    scale: 1.02;
-    image-rendering: crisp-edges;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    
-    /* Remove qualquer brilho residual */
+    filter: brightness(1.02) contrast(1.04);
     background: transparent;
-}
-
-.imagem-container.logo-shape-square .imagem-destaque {
-    transform: scale(2.45) translateY(-34px);
 }
 
 /* Texto sobre a imagem */
@@ -276,6 +250,16 @@ html, body {
     
     .subtexto-oficina {
         font-size: 0.9rem;
+    }
+
+    .logo-stage {
+        width: min(360px, 60vw);
+        padding: 26px;
+    }
+
+    .imagem-destaque {
+        width: 100%;
+        height: 100%;
     }
 }
 

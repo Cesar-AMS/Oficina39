@@ -200,6 +200,12 @@
     gap: 18px;
 }
 
+.branding-company-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 18px;
+}
+
 #secao-personalizacao-index .section-titulo {
     margin-bottom: 0;
 }
@@ -207,8 +213,16 @@
 .branding-row {
     display: grid;
     grid-template-columns: minmax(0, 1.4fr) 320px;
-    align-items: stretch;
+    align-items: start;
     gap: 18px;
+}
+
+.branding-qrcode-grid,
+.branding-qrcode-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    align-items: start;
 }
 
 .branding-upload-group {
@@ -237,16 +251,10 @@
     margin-bottom: 10px;
 }
 
-.branding-upload-actions .btn,
-.branding-save-actions .btn {
+.branding-upload-actions .btn {
     width: 240px;
     min-width: 240px;
     min-height: 42px;
-}
-
-.branding-save-actions {
-    justify-content: flex-start;
-    padding-top: 0;
 }
 
 .branding-preview-card {
@@ -258,6 +266,8 @@
     gap: 14px;
     padding: 18px;
     min-height: 100%;
+    height: 100%;
+    align-self: start;
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(10, 49, 71, 0.03), var(--bg-hover));
@@ -302,6 +312,39 @@
     object-fit: contain;
 }
 
+.branding-preview-frame-qrcode {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+    border-radius: 22px;
+    padding: 18px;
+    background: #fff;
+}
+
+.branding-preview-card-qrcode {
+    justify-content: flex-start;
+    min-height: 100%;
+    height: 100%;
+    align-self: start;
+}
+
+.branding-qrcode-grid .branding-upload-group,
+.branding-qrcode-preview-grid .branding-preview-card {
+    min-height: 100%;
+    height: 100%;
+}
+
+.branding-qrcode-grid .branding-upload-group .texto-ajuda {
+    min-height: 38px;
+}
+
+.branding-upload-copy {
+    margin: 8px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
 .branding-preview-caption {
     margin: 0;
     text-align: center;
@@ -315,10 +358,41 @@
     justify-content: center;
 }
 
+.branding-preview-company {
+    width: 100%;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: 6px;
+}
+
+.branding-preview-company p {
+    margin: 0;
+    text-align: center;
+    color: var(--text-secondary);
+    line-height: 1.35;
+}
+
+#brandingPreviewCompanyName {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
 #secao-personalizacao-index .config-footer-actions {
     margin-top: 4px;
     margin-bottom: 0;
     justify-content: flex-start;
+}
+
+.branding-footer-actions {
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+}
+
+.branding-footer-actions .btn {
+    width: 240px;
+    min-width: 240px;
+    min-height: 42px;
 }
 
 #secao-personalizacao-index > .texto-ajuda {
@@ -329,7 +403,7 @@
 #secao-personalizacao-index > .config-row:first-of-type {
     display: grid;
     grid-template-columns: minmax(0, 1.4fr) minmax(220px, 280px);
-    align-items: end;
+    align-items: start;
     gap: 18px;
     margin-bottom: 0;
 }
@@ -337,6 +411,8 @@
 #secao-personalizacao-index > .config-row:first-of-type .form-group {
     min-width: 0;
     margin-bottom: 0;
+    display: grid;
+    align-content: start;
 }
 
 #secao-personalizacao-index > .config-row:first-of-type .form-group label,
@@ -348,9 +424,66 @@
 
 #secao-personalizacao-index .branding-upload-group input[type="file"] {
     min-height: 42px;
+    display: block;
+    margin: 10px auto 0;
+    text-align: center;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+#secao-personalizacao-index .branding-upload-group input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 9px 14px;
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.18s ease, transform 0.18s ease;
+}
+
+#secao-personalizacao-index .branding-upload-group input[type="file"]::-webkit-file-upload-button {
+    margin-right: 12px;
+    padding: 9px 14px;
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#secao-personalizacao-index .branding-upload-group input[type="file"]:hover::file-selector-button,
+#secao-personalizacao-index .branding-upload-group input[type="file"]:hover::-webkit-file-upload-button {
+    filter: brightness(1.06);
+}
+
+#secao-personalizacao-index .branding-upload-group input[type="file"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(10, 49, 71, 0.12);
+}
+
+#logoIndexArquivo {
+    margin-top: 14px;
+}
+
+#qrcode1Arquivo,
+#qrcode2Arquivo {
+    margin-top: 12px;
 }
 
 #secao-personalizacao-index .branding-upload-group .texto-ajuda {
+    min-height: 38px;
+}
+
+#secao-personalizacao-index > .config-row:first-of-type .form-group .texto-ajuda {
     min-height: 38px;
 }
 
@@ -558,12 +691,15 @@
     }
 
     .branding-row,
+    .branding-company-grid,
+    .branding-qrcode-grid,
+    .branding-qrcode-preview-grid,
     #secao-personalizacao-index > .config-row:first-of-type {
         grid-template-columns: 1fr;
     }
 
     .branding-upload-actions .btn,
-    .branding-save-actions .btn {
+    .branding-footer-actions .btn {
         width: 100%;
         min-width: 0;
     }

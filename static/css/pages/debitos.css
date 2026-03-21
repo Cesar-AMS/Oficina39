@@ -5,7 +5,7 @@
 }
 
 .debitos-container {
-    max-width: 1400px;
+    max-width: 1460px;
     margin: 0 auto;
 }
 
@@ -23,42 +23,65 @@
     align-items: center;
 }
 
-.resumo-debitos {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin: 20px 0;
-}
-
-.resumo-item {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
+.table-container {
     border-radius: var(--radius-lg);
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    overflow: hidden;
 }
 
-.resumo-item .label {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+.tabela-debitos {
+    width: 100%;
+    table-layout: fixed;
 }
 
-.resumo-item strong {
-    font-size: 1.5rem;
-    color: var(--accent);
-}
-
-.tabela-debitos th,
-.tabela-pagamentos-modal th {
+.tabela-debitos th {
     text-align: center;
     vertical-align: middle;
+    white-space: nowrap;
 }
 
-.tabela-debitos td,
-.tabela-pagamentos-modal td {
+.tabela-debitos td {
     vertical-align: middle;
+    padding: 10px 8px;
+}
+
+.tabela-debitos th:nth-child(1),
+.tabela-debitos td:nth-child(1) {
+    width: 64px;
+    text-align: center;
+}
+
+.tabela-debitos th:nth-child(2),
+.tabela-debitos td:nth-child(2) {
+    width: 210px;
+    text-align: left;
+}
+
+.tabela-debitos th:nth-child(3),
+.tabela-debitos td:nth-child(3) {
+    width: 220px;
+    text-align: left;
+}
+
+.tabela-debitos th:nth-child(4),
+.tabela-debitos td:nth-child(4),
+.tabela-debitos th:nth-child(5),
+.tabela-debitos td:nth-child(5),
+.tabela-debitos th:nth-child(6),
+.tabela-debitos td:nth-child(6) {
+    width: 106px;
+    text-align: center;
+}
+
+.tabela-debitos th:nth-child(7),
+.tabela-debitos td:nth-child(7) {
+    width: 150px;
+    text-align: center;
+}
+
+.tabela-debitos th:nth-child(8),
+.tabela-debitos td:nth-child(8) {
+    width: 190px;
+    text-align: center;
 }
 
 .cliente-bloco {
@@ -73,15 +96,15 @@
 
 .cliente-bloco .cliente-detalhe {
     color: var(--text-secondary);
-    font-size: 0.88rem;
+    font-size: 0.82rem;
 }
 
 .status-financeiro {
     display: inline-flex;
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 999px;
     font-weight: 700;
-    font-size: 0.84rem;
+    font-size: 0.78rem;
 }
 
 .status-financeiro.em-aberto {
@@ -100,36 +123,31 @@
 }
 
 .acoes-debito {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.modal-debito {
-    max-width: 920px;
-    width: 100%;
-}
-
-.debito-resumo-card,
-.resumo-modal-debito {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px;
-    background: var(--bg-hover);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 14px;
-    margin-bottom: 16px;
-}
-
-.acoes-modal-debito {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 12px;
-}
-
-.input-valor-pagamento,
-.select-forma-pagamento,
-.input-observacao-pagamento {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
     width: 100%;
+}
+
+.acoes-debito .btn {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding: 0 10px;
+    font-size: 0.78rem;
+}
+
+.tabela-debitos td:nth-child(2) .cliente-nome,
+.tabela-debitos td:nth-child(3) {
+    word-break: break-word;
+}
+
+@media (max-width: 1200px) {
+    .tabela-debitos {
+        table-layout: auto;
+    }
+
+    .acoes-debito {
+        grid-template-columns: 1fr;
+    }
 }

@@ -202,12 +202,15 @@
 
 #fluxoTabOs .pdv-card {
     padding: 10px;
-    max-height: calc(100vh - 170px);
-    overflow: hidden;
+    max-height: none;
+    overflow: visible;
 }
 
 #pdvTabPagamento {
-    overflow: hidden;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
 }
 
 #fluxoTabOs .pdv-box {
@@ -319,7 +322,9 @@
 #fluxoTabOs #pdvTabPagamento .pdv-box {
     padding: 10px;
     min-height: 0;
-    overflow: hidden;
+    height: auto;
+    max-height: none;
+    overflow: visible;
     background:
         linear-gradient(180deg, rgba(255,255,255,0.03), transparent 28%),
         var(--bg-body);
@@ -336,6 +341,9 @@
     border-radius: 12px;
     background: rgba(10, 49, 71, 0.03);
     margin-bottom: 8px;
+    height: auto;
+    max-height: none;
+    overflow: visible;
 }
 
 #fluxoTabOs #pdvTabPagamento .pdv-pagamento-sec:last-child {
@@ -408,8 +416,8 @@
 }
 
 #fluxoTabOs #pdvTabPagamento .pdv-step-actions-interno {
-    margin-top: 2px;
-    padding-top: 2px;
+    margin-top: 0;
+    padding-top: 4px;
     width: 100%;
     box-sizing: border-box;
     border-top: 1px solid rgba(10, 49, 71, 0.12);
@@ -418,12 +426,12 @@
 
 #fluxoTabOs #pdvTabPagamento .pdv-step-actions-apos-formas {
     justify-content: flex-end;
-    margin-top: 2px;
+    margin-top: 0;
     margin-left: 0;
     margin-right: 0;
     padding-left: 0;
     padding-right: 0;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
@@ -555,6 +563,11 @@
     box-shadow: 0 10px 24px rgba(10, 49, 71, 0.18);
 }
 
+.pdv-tab-indicador {
+    cursor: default;
+    pointer-events: none;
+}
+
 .pdv-tab:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -641,6 +654,30 @@
     color: #123247;
 }
 
+#fluxoTabOs #pdvTabPagamento .pdv-box-topo {
+    margin-bottom: 6px;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-box-subtitulo {
+    display: none;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-pagamento-sec {
+    padding: 8px 10px;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-sec-head {
+    margin-bottom: 4px;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-sec-kicker {
+    font-size: 0.7rem;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-sec-title {
+    font-size: 0.92rem;
+}
+
 .form-group-entrada-principal input {
     border-width: 2px;
     border-color: rgba(39, 174, 96, 0.5);
@@ -648,49 +685,30 @@
     font-weight: 700;
 }
 
-.pdv-painel-rapido {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-    margin-bottom: 8px;
+.form-group-entrada-principal input.campo-bloqueado {
+    background: rgba(10, 49, 71, 0.04);
+    border-color: rgba(10, 49, 71, 0.10);
+    color: var(--text-primary);
+    cursor: default;
+    pointer-events: none;
+    box-shadow: none;
 }
 
-.pdv-painel-item {
-    padding: 8px 10px;
-    border: 1px solid var(--border);
+.pdv-recebimento-modo {
+    margin-bottom: 2px;
+    padding: 5px 7px;
+    border: 1px solid rgba(10, 49, 71, 0.1);
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.45);
-    min-height: 54px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    background: rgba(255, 255, 255, 0.22);
 }
 
-.pdv-painel-item-destaque {
-    border-color: rgba(196, 69, 54, 0.45);
-    background: rgba(196, 69, 54, 0.12);
-}
-
-.pdv-painel-label {
-    display: block;
+.pdv-subtabs-label {
     font-size: 0.76rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--text-secondary);
-    margin-bottom: 2px;
-}
-
-.pdv-painel-item strong {
-    font-size: 0.98rem;
-    color: var(--text-primary);
-}
-
-.pdv-recebimento-modo {
-    margin-bottom: 8px;
-    padding: 8px 10px;
-    border: 1px solid rgba(10, 49, 71, 0.12);
-    border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.38);
+    margin-bottom: 6px;
+    font-weight: 700;
 }
 
 .pdv-recebimento-modo-label {
@@ -703,10 +721,9 @@
 }
 
 .pdv-recebimento-modo-opcoes {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
 }
 
 .pdv-modo-btn {
@@ -725,64 +742,111 @@
     background: var(--secondary);
     border-color: var(--secondary);
     color: #fff;
-    box-shadow: 0 8px 20px rgba(10, 49, 71, 0.16);
-}
-
-.pdv-recebimento-modo-ajuda {
-    margin: 6px 0 0;
-    color: var(--text-secondary);
-    font-size: 0.78rem;
-}
-
-.pdv-parcial-box {
-    margin-bottom: 6px;
-    padding: 6px 8px;
-    border: 1px solid rgba(196, 69, 54, 0.24);
-    border-radius: var(--radius-md);
-    background: rgba(196, 69, 54, 0.08);
-}
-
-.pdv-parcial-resumo {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-}
-
-.pdv-parcial-item {
-    padding: 6px 8px;
-    border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.35);
-    border: 1px solid rgba(196, 69, 54, 0.18);
-    min-height: 50px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.pdv-parcial-item span {
-    display: block;
-    font-size: 0.74rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-secondary);
-    margin-bottom: 2px;
-}
-
-.pdv-parcial-item strong {
-    font-size: 1rem;
-    color: var(--text-primary);
-}
-
-.pdv-parcial-texto {
-    margin: 6px 0 0;
-    font-size: 0.74rem;
-    color: var(--text-secondary);
+    box-shadow: 0 4px 12px rgba(10, 49, 71, 0.12);
 }
 
 #fluxoTabOs #pdvTabPagamento .pdv-pagamento-atual-row,
 #fluxoTabOs #pdvTabPagamento .pdv-formas-row {
     row-gap: 4px;
-    overflow: hidden;
+    overflow: visible;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-pagamento-atual-row {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-formas-resumo-lista {
+    display: grid;
+    gap: 6px;
+    margin-top: 6px;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-formas-rodape {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 6px;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-formas-rodape-item {
+    padding: 7px 9px;
+    border: 1px solid rgba(10, 49, 71, 0.12);
+    border-radius: 10px;
+    background: rgba(10, 49, 71, 0.04);
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-formas-rodape-item span {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-formas-rodape-item strong {
+    color: var(--text-primary);
+    font-size: 0.96rem;
+}
+
+#pdvFaltaDistribuir.valor-positivo {
+    color: var(--success);
+}
+
+#pdvFaltaDistribuir.valor-pendente {
+    color: var(--danger);
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-forma-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 9px;
+    border: 1px solid rgba(10, 49, 71, 0.12);
+    border-radius: 10px;
+    background: rgba(10, 49, 71, 0.04);
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-forma-item-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-forma-item-main strong {
+    color: var(--text-primary);
+    font-size: 0.88rem;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-forma-item-main span,
+#fluxoTabOs #pdvTabPagamento .pdv-forma-item-side small {
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-forma-item-side {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-forma-item-side .btn {
+    min-width: 92px;
+    height: 30px;
+}
+
+#fluxoTabOs #pdvTabPagamento .pdv-forma-vazia {
+    padding: 8px 10px;
+    border: 1px dashed rgba(10, 49, 71, 0.18);
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    text-align: center;
 }
 
 .pdv-resumo-topo {
@@ -800,8 +864,8 @@
 }
 
 .pdv-resumo-topo-item-alerta {
-    border-color: rgba(196, 69, 54, 0.45);
-    background: rgba(196, 69, 54, 0.12);
+    border-color: rgba(10, 49, 71, 0.18);
+    background: rgba(10, 49, 71, 0.06);
 }
 
 .pdv-resumo-topo-item span {
@@ -816,6 +880,16 @@
 .pdv-resumo-topo-item strong {
     font-size: 1.2rem;
     color: var(--text-primary);
+}
+
+.pdv-resumo-formas {
+    min-height: 40px;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: rgba(10, 49, 71, 0.04);
+    color: var(--text-primary);
+    line-height: 1.4;
 }
 
 .resumo-item {
@@ -1224,12 +1298,10 @@
     background: rgba(255, 255, 255, 0.03);
 }
 
-[data-theme="dark"] .pdv-parcial-box {
-    background: rgba(196, 69, 54, 0.14);
-}
-
-[data-theme="dark"] .pdv-parcial-item {
-    background: rgba(255, 255, 255, 0.04);
+[data-theme="dark"] #fluxoTabOs #pdvTabPagamento .pdv-formas-rodape-item,
+[data-theme="dark"] .pdv-resumo-topo-item-alerta {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.03);
 }
 
 [data-theme="dark"] .valor-positivo {
@@ -1410,7 +1482,7 @@
 
 @media (max-height: 860px) {
     #fluxoTabOs .pdv-card {
-        max-height: calc(100vh - 140px);
+        max-height: none;
     }
 
     #fluxoTabOs .pdv-box {

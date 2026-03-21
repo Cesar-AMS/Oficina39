@@ -10,9 +10,12 @@ async function carregarPersonalizacaoIndex() {
         const titulo = document.getElementById('indexTituloSistema');
         const imagem = document.getElementById('indexLogoImagem');
         const container = document.querySelector('.imagem-container');
+        const stage = document.getElementById('indexLogoStage');
 
         if (titulo) {
-            titulo.textContent = (config.nome_exibicao_sistema || '').trim() || INDEX_TITULO_PADRAO;
+            titulo.textContent = (config.nome_exibicao_sistema || '').trim()
+                || (config.empresa_nome || '').trim()
+                || INDEX_TITULO_PADRAO;
         }
 
         if (imagem) {
@@ -22,6 +25,9 @@ async function carregarPersonalizacaoIndex() {
         if (container) {
             const formato = (config.logo_index_formato || 'circulo').trim();
             container.classList.toggle('logo-shape-square', formato === 'quadrado');
+            if (stage) {
+                stage.classList.toggle('logo-shape-square', formato === 'quadrado');
+            }
         }
     } catch (error) {
         console.error('Falha ao carregar personalização da index:', error);
