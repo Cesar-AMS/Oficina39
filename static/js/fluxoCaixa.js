@@ -5,6 +5,9 @@ const origemFluxoCaixa = (paramsCaixa.get('origem') || '').trim();
 let ordemPdv = null;
 let formasPagamentoPdv = [];
 let ultimoResumoOperacaoPdv = null;
+let whatsappOrcamentoConfiguradoPdv = '';
+let movimentacoesCaixaDia = [];
+let filtroMovimentacaoCaixa = 'todas';
 
 function alternarAbaFluxo(nomeAba) {
     document.querySelectorAll('.fluxo-tab').forEach((aba) => {
@@ -36,6 +39,10 @@ function formatarValor(valor) {
     return 'R$ ' + (Number(valor || 0)).toFixed(2).replace('.', ',');
 }
 
+function normalizarWhatsapp(valor) {
+    return String(valor || '').replace(/\D/g, '');
+}
+
 function setTexto(id, valor) {
     const el = document.getElementById(id);
     if (el) el.textContent = valor;
@@ -53,6 +60,57 @@ function escaparHtml(texto) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+}
+
+async function carregarWhatsappPdv() {
+    try {
+        const response = await fetch('/api/config/contador');
+        const dados = await response.json().catch(() => ({}));
+        if (!response.ok) return;
+        const numero = normalizarWhatsapp(dados?.whatsapp_orcamento || '');
+        if (numero) {
+            whatsappOrcamentoConfiguradoPdv = numero;
+        }
+    } catch {
+        // Sem bloqueio do fluxo se a configuração não carregar.
+    }
+}
+
+function montarMensagemRecebimentoPdv(ordem, totaisOperacao) {
+    const cliente = ordem?.cliente || {};
+    const valorBruto = Number(ordem?.total_geral || 0);
+    const descontoValor = Number(totaisOperacao?.descontoValor || 0);
+    const valorFinal = Number(totaisOperacao?.totalFinal || 0);
+    const pagoAgora = Number(totaisOperacao?.valorRecebido || 0);
+    const saldoDebito = Number(ordem?.saldo_pendente || 0);
+    const situacao = ordem?.status_financeiro || situacaoAposOperacao(saldoDebito);
+    const vencimento = ordem?.debito_vencimento || '';
+    const formas = formasPagamentoPdv.length
+        ? formasPagamentoPdv.map((item) => `${item.forma_pagamento}: ${formatarValor(item.valor)}`).join(' | ')
+        : 'Não informado';
+
+    return [
+        `Recebimento da OS #${ordem?.id || '---'}`,
+        `Cliente: ${ordem?.cliente_nome || cliente?.nome_cliente || '---'}`,
+        `Telefone do cliente: ${cliente?.telefone || 'não informado'}`,
+        `Valor bruto: ${formatarValor(valorBruto)}`,
+        `Desconto aplicado: ${formatarValor(descontoValor)}`,
+        `Valor final da venda: ${formatarValor(valorFinal)}`,
+        `Pago nesta operação: ${formatarValor(pagoAgora)}`,
+        `Saldo para débito: ${formatarValor(saldoDebito)}`,
+        `Situação final: ${situacao}`,
+        `Formas usadas: ${formas}`,
+        saldoDebito > 0.009 && vencimento ? `Vencimento do débito: ${vencimento}` : ''
+    ].filter(Boolean).join('\n\n');
+}
+
+function abrirWhatsappRecebimentoPdv(ordem, totaisOperacao) {
+    const numeroWhatsapp = normalizarWhatsapp(whatsappOrcamentoConfiguradoPdv);
+    if (!numeroWhatsapp) return false;
+    const mensagem = encodeURIComponent(montarMensagemRecebimentoPdv(ordem, totaisOperacao));
+    const url = `https://wa.me/${numeroWhatsapp}?text=${mensagem}`;
+    window.open(url, '_blank', 'noopener');
+    return true;
 }
 
 function obterDescontoPercentualPdv() {
@@ -191,6 +249,70 @@ function atualizarResumoTopo(dados) {
     }
 }
 
+function normalizarTextoMovimentacao(valor, fallback = '---') {
+    const texto = String(valor ?? '').trim();
+    return texto || fallback;
+}
+
+function montarMovimentacoesDia(dados) {
+    const entradas = (Array.isArray(dados?.entradas) ? dados.entradas : []).map((item) => ({
+        horario: item.hora || '--:--',
+        tipo: 'Entrada',
+        origem: normalizarTextoMovimentacao(item.origem, 'Recebimento'),
+        forma: normalizarTextoMovimentacao(item.forma_pagamento),
+        valor: Number(item.total || 0),
+        observacao: normalizarTextoMovimentacao(item.observacao || item.cliente_nome, 'Sem observação'),
+        dataHora: item.data_hora_iso || ''
+    }));
+
+    const saidas = (Array.isArray(dados?.saidas) ? dados.saidas : []).map((item) => ({
+        horario: item.hora || '--:--',
+        tipo: 'Saída',
+        origem: normalizarTextoMovimentacao(item.origem, 'Saída manual'),
+        forma: normalizarTextoMovimentacao(item.forma_pagamento, '---'),
+        valor: Number(item.valor || 0),
+        observacao: normalizarTextoMovimentacao(item.observacao || item.descricao, 'Sem observação'),
+        dataHora: item.data_hora_iso || ''
+    }));
+
+    return [...entradas, ...saidas].sort((a, b) => String(b.dataHora).localeCompare(String(a.dataHora)));
+}
+
+function renderMovimentacoesDia() {
+    const tbody = document.getElementById('caixaMovimentacoesBody');
+    if (!tbody) return;
+
+    const lista = movimentacoesCaixaDia.filter((item) => {
+        if (filtroMovimentacaoCaixa === 'entradas') return item.tipo === 'Entrada';
+        if (filtroMovimentacaoCaixa === 'saidas') return item.tipo === 'Saída';
+        return true;
+    });
+
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="mensagem-carregando">Nenhuma movimentação no filtro selecionado.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = lista.map((item) => `
+        <tr>
+            <td>${item.horario}</td>
+            <td><span class="caixa-tipo-badge ${item.tipo === 'Entrada' ? 'entrada' : 'saida'}">${item.tipo}</span></td>
+            <td>${escaparHtml(item.origem)}</td>
+            <td>${escaparHtml(item.forma)}</td>
+            <td class="${item.tipo === 'Entrada' ? 'valor-positivo' : 'valor-negativo'}">${formatarValor(item.valor)}</td>
+            <td>${escaparHtml(item.observacao)}</td>
+        </tr>
+    `).join('');
+}
+
+function aplicarFiltroMovimentacao(filtro) {
+    filtroMovimentacaoCaixa = filtro;
+    document.querySelectorAll('.caixa-filtro-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.filtro === filtro);
+    });
+    renderMovimentacoesDia();
+}
+
 function atualizarEstadoDebitoPdv() {
     const vencimento = document.getElementById('pdvDebitoVencimento');
     const observacao = document.getElementById('pdvDebitoObservacao');
@@ -206,6 +328,8 @@ async function carregarCaixaDia() {
         if (!response.ok) throw new Error(`Erro HTTP ${response.status}`);
         const dados = await response.json();
         atualizarResumoTopo(dados);
+        movimentacoesCaixaDia = montarMovimentacoesDia(dados);
+        renderMovimentacoesDia();
 
         if (ordemPendenteParaAbrir) {
             alternarAbaFluxo('os');
@@ -350,13 +474,17 @@ function renderFormasPagamentoPdv() {
     } else {
         lista.innerHTML = formasPagamentoPdv.map((item, index) => `
             <div class="pdv-forma-item">
-                <div class="pdv-forma-item-main">
+                <div class="pdv-forma-col pdv-forma-col-forma">
                     <strong>${item.forma_pagamento}</strong>
+                </div>
+                <div class="pdv-forma-col pdv-forma-col-valor">
                     <span>${formatarValor(item.valor)}</span>
                 </div>
-                <div class="pdv-forma-item-side">
-                    <small>${item.observacao || 'Sem observação'}</small>
-                    <button type="button" class="btn btn-cancelar btn-compact" onclick="removerFormaPagamentoPdv(${index})">Excluir</button>
+                <div class="pdv-forma-col pdv-forma-col-obs">
+                    <small class="pdv-forma-observacao">${item.observacao || 'Sem observação'}</small>
+                </div>
+                <div class="pdv-forma-col pdv-forma-col-acao">
+                    <button type="button" class="btn btn-cancelar btn-compact pdv-forma-btn-excluir" onclick="removerFormaPagamentoPdv(${index})">Excluir</button>
                 </div>
             </div>
         `).join('');
@@ -498,6 +626,7 @@ async function salvarFaturamentoPdv() {
             ? 'Recebimento parcial registrado e débito atualizado.'
             : 'Recebimento concluído e OS quitada.');
 
+        abrirWhatsappRecebimentoPdv(dados, totaisOperacao);
         await carregarCaixaDia();
         window.location.assign(obterUrlRetornoFluxo());
     } catch (error) {
@@ -641,6 +770,7 @@ document.addEventListener('DOMContentLoaded', function() {
     alternarAbaFluxo('os');
     alternarAbaPdv('dados');
     atualizarModoRecebimentoUiPdv();
+    carregarWhatsappPdv();
     carregarCaixaDia();
     document.getElementById('pdvValorForma')?.addEventListener('blur', () => formatarCampoMonetario('pdvValorForma'));
     document.getElementById('pdvValorForma')?.addEventListener('wheel', (e) => {
@@ -683,6 +813,7 @@ window.abrirModalSaida = abrirModalSaida;
 window.fecharModalSaida = fecharModalSaida;
 window.salvarSaida = salvarSaida;
 window.excluirSaida = excluirSaida;
+window.aplicarFiltroMovimentacao = aplicarFiltroMovimentacao;
 window.abrirModalCalculadora = abrirModalCalculadora;
 window.fecharModalCalculadora = fecharModalCalculadora;
 window.adicionarCalculadora = adicionarCalculadora;

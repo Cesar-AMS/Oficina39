@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="/static/css/components/modals.css">
     
     <!-- CSS ESPECÍFICO DA PÁGINA -->
-    <link rel="stylesheet" href="/static/css/pages/fluxoCaixa.css?v=20260321a">
+    <link rel="stylesheet" href="/static/css/pages/fluxoCaixa.css?v=20260321f">
     
 </head>
 
@@ -56,8 +56,8 @@
                     </div>
                 </div>
 
-                <div class="pdv-hint-box">
-                    <strong>Uso:</strong> esta aba concentra o saldo do dia. Use <strong>Nova Saída</strong> para despesas e <strong>Calculadora</strong> para apoio rápido no atendimento.
+                <div class="pdv-hint-box pdv-hint-box-discreto">
+                    Caixa vivo do dia: acompanhe entradas, saídas e registre despesas operacionais quando necessário.
                 </div>
 
                 <div class="nova-saida-container">
@@ -68,6 +68,40 @@
                         <button class="btn btn-calculadora" onclick="abrirModalCalculadora()">
                             Calculadora
                         </button>
+                    </div>
+                </div>
+
+                <div class="pdv-box caixa-historico-box">
+                    <div class="pdv-box-topo caixa-historico-topo">
+                        <div>
+                            <h4 class="pdv-box-titulo">Movimentações do dia</h4>
+                            <p class="pdv-box-subtitulo">Histórico operacional do caixa com origem, forma e observações.</p>
+                        </div>
+                        <div class="caixa-filtros">
+                            <button type="button" class="caixa-filtro-btn active" data-filtro="todas" onclick="aplicarFiltroMovimentacao('todas')">Todas</button>
+                            <button type="button" class="caixa-filtro-btn" data-filtro="entradas" onclick="aplicarFiltroMovimentacao('entradas')">Entradas</button>
+                            <button type="button" class="caixa-filtro-btn" data-filtro="saidas" onclick="aplicarFiltroMovimentacao('saidas')">Saídas</button>
+                        </div>
+                    </div>
+
+                    <div class="table-container caixa-movimentacoes-wrap">
+                        <table class="tabela-estilizada caixa-movimentacoes-tabela">
+                            <thead>
+                                <tr>
+                                    <th>Horário</th>
+                                    <th>Tipo</th>
+                                    <th>Origem</th>
+                                    <th>Forma</th>
+                                    <th>Valor</th>
+                                    <th>Observação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="caixaMovimentacoesBody">
+                                <tr>
+                                    <td colspan="6" class="mensagem-carregando">Nenhuma movimentação no dia.</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -181,7 +215,7 @@
                                     </div>
                                     <div class="form-group pdv-form-group-acao">
                                         <label>&nbsp;</label>
-                                        <button class="btn btn-salvar btn-compact pdv-btn-full" onclick="adicionarFormaPagamentoPdv()">Adicionar forma de pagamento</button>
+                                        <button class="btn btn-salvar btn-compact pdv-btn-full" onclick="adicionarFormaPagamentoPdv()">Adicionar</button>
                                     </div>
                                 </div>
 
@@ -311,7 +345,7 @@
                         <div class="pdv-final-actions pdv-final-actions-simples">
                             <div class="pdv-final-actions-direita">
                                 <button class="btn btn-voltar btn-compact" onclick="irParaEtapaPdv('pagamento')">Voltar</button>
-                                <button class="btn btn-salvar btn-compact" onclick="salvarFaturamentoPdv()">Concluir recebimento</button>
+                                <button class="btn btn-salvar btn-compact" onclick="salvarFaturamentoPdv()">Concluir e enviar</button>
                             </div>
                         </div>
                     </div>
@@ -408,7 +442,7 @@
 
     <!-- SCRIPTS -->
     <script src="/static/js/ui.js"></script>
-    <script src="/static/js/fluxoCaixa.js?v=20260321a"></script>
+    <script src="/static/js/fluxoCaixa.js?v=20260321f"></script>
     <script src="/static/js/tema.js"></script>
 </body>
 

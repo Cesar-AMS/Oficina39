@@ -27,10 +27,16 @@ def _veiculo_cliente(cliente):
 def _serializar_entrada_pagamento(pagamento):
     ordem = pagamento.ordem
     cliente = ordem.cliente if ordem else None
+    pagamento_anterior = max(0.0, float((ordem.total_pago or 0)) - float(pagamento.valor or 0)) if ordem else 0.0
+    origem = 'Recebimento de débito' if pagamento_anterior > 0.009 else 'Recebimento de OS'
     return {
         'id': pagamento.id,
         'ordem_id': ordem.id if ordem else None,
         'data': pagamento.data_pagamento.strftime('%d/%m/%Y'),
+        'hora': pagamento.data_pagamento.strftime('%H:%M') if pagamento.data_pagamento else '--:--',
+        'data_hora_iso': pagamento.data_pagamento.isoformat() if pagamento.data_pagamento else None,
+        'tipo': 'Entrada',
+        'origem': origem,
         'cliente_nome': cliente.nome_cliente if cliente else '---',
         'veiculo': _veiculo_cliente(cliente),
         'placa': cliente.placa if cliente else '---',
@@ -48,6 +54,12 @@ def _serializar_saida(saida):
     return {
         'id': saida.id,
         'data': saida.data.strftime('%d/%m/%Y') if saida.data else None,
+        'hora': saida.data.strftime('%H:%M') if saida.data else '--:--',
+        'data_hora_iso': saida.data.isoformat() if saida.data else None,
+        'tipo': 'Saída',
+        'origem': 'Saída manual',
+        'forma_pagamento': '---',
+        'observacao': saida.descricao,
         'descricao': saida.descricao,
         'categoria': saida.categoria or 'Outros',
         'valor': float(saida.valor or 0)
