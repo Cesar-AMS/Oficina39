@@ -180,6 +180,9 @@ def create_app():
                 'empresa_endereco': "ALTER TABLE config_contador ADD COLUMN empresa_endereco VARCHAR(180)",
                 'logo_index_path': "ALTER TABLE config_contador ADD COLUMN logo_index_path VARCHAR(255)",
                 'logo_index_formato': "ALTER TABLE config_contador ADD COLUMN logo_index_formato VARCHAR(20)",
+                'logo_index_escala': "ALTER TABLE config_contador ADD COLUMN logo_index_escala FLOAT DEFAULT 1.0",
+                'logo_index_offset_x': "ALTER TABLE config_contador ADD COLUMN logo_index_offset_x FLOAT DEFAULT 0.0",
+                'logo_index_offset_y': "ALTER TABLE config_contador ADD COLUMN logo_index_offset_y FLOAT DEFAULT 0.0",
                 'qrcode_1_path': "ALTER TABLE config_contador ADD COLUMN qrcode_1_path VARCHAR(255)",
                 'qrcode_2_path': "ALTER TABLE config_contador ADD COLUMN qrcode_2_path VARCHAR(255)"
             }

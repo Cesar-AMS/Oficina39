@@ -66,6 +66,30 @@ def salvar_config_contador(dados):
         config.logo_index_formato = (dados.get('logo_index_formato') or 'circulo').strip() or 'circulo'
     elif not config.logo_index_formato:
         config.logo_index_formato = 'circulo'
+    if 'logo_index_escala' in dados:
+        try:
+            escala = float(dados.get('logo_index_escala') or 1.0)
+        except (TypeError, ValueError):
+            escala = 1.0
+        config.logo_index_escala = min(1.15, max(0.7, escala))
+    elif not config.logo_index_escala:
+        config.logo_index_escala = 1.0
+    if 'logo_index_offset_x' in dados:
+        try:
+            offset_x = float(dados.get('logo_index_offset_x') or 0.0)
+        except (TypeError, ValueError):
+            offset_x = 0.0
+        config.logo_index_offset_x = min(30.0, max(-30.0, offset_x))
+    elif config.logo_index_offset_x is None:
+        config.logo_index_offset_x = 0.0
+    if 'logo_index_offset_y' in dados:
+        try:
+            offset_y = float(dados.get('logo_index_offset_y') or 0.0)
+        except (TypeError, ValueError):
+            offset_y = 0.0
+        config.logo_index_offset_y = min(30.0, max(-30.0, offset_y))
+    elif config.logo_index_offset_y is None:
+        config.logo_index_offset_y = 0.0
 
     if not config.id:
         db.session.add(config)

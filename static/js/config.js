@@ -1,10 +1,54 @@
 // config.js
 
 let profissionaisCadastrados = [];
+let previewLogoTemporaria = '';
+let previewQrTemporario = { qrcode1: '', qrcode2: '' };
 const CHAVE_PROF_ENVIO_AUTO = 'config_profissional_envio_auto';
-const LOGO_INDEX_PADRAO = '/static/images/picapau4.png';
-const QRCODE_1_PADRAO = '/static/images/qrcodewhatsapp.jpeg';
-const QRCODE_2_PADRAO = '/static/images/qrcodeinstagram.jpeg';
+const BRANDING_LOGO_PADRAO = '/static/images/picapau4.png';
+const BRANDING_QRCODE_1_PADRAO = '/static/images/qrcodewhatsapp.jpeg';
+const BRANDING_QRCODE_2_PADRAO = '/static/images/qrcodeinstagram.jpeg';
+
+function obterEscalaLogoBranding() {
+    const valor = Number(getEl('logoIndexEscala')?.value || 100);
+    return Math.min(115, Math.max(70, Number.isFinite(valor) ? valor : 100));
+}
+
+function obterOffsetLogoBranding(id) {
+    const valor = Number(getEl(id)?.value || 0);
+    return Math.min(30, Math.max(-30, Number.isFinite(valor) ? valor : 0));
+}
+
+function definirAjusteLogoBranding({ escala = 100, offsetX = 0, offsetY = 0 } = {}) {
+    const campoEscala = getEl('logoIndexEscala');
+    const campoOffsetX = getEl('logoIndexOffsetX');
+    const campoOffsetY = getEl('logoIndexOffsetY');
+    if (campoEscala) campoEscala.value = String(Math.min(115, Math.max(70, Number(escala) || 100)));
+    if (campoOffsetX) campoOffsetX.value = String(Math.min(30, Math.max(-30, Number(offsetX) || 0)));
+    if (campoOffsetY) campoOffsetY.value = String(Math.min(30, Math.max(-30, Number(offsetY) || 0)));
+    atualizarPreviewBranding();
+}
+
+function centralizarLogoBranding() {
+    definirAjusteLogoBranding({
+        escala: obterEscalaLogoBranding(),
+        offsetX: 0,
+        offsetY: 0
+    });
+}
+
+function resetarAjusteLogoBranding() {
+    definirAjusteLogoBranding({ escala: 100, offsetX: 0, offsetY: 0 });
+}
+
+function aplicarPresetLogoBranding(preset) {
+    const presets = {
+        ajustado: { escala: 92, offsetX: 0, offsetY: 0 },
+        maior: { escala: 108, offsetX: 0, offsetY: 0 },
+        topo: { escala: 100, offsetX: 0, offsetY: -12 },
+        base: { escala: 100, offsetX: 0, offsetY: 12 }
+    };
+    definirAjusteLogoBranding(presets[preset] || presets.ajustado);
+}
 
 function alertErro(mensagem) {
     if (window.ui) return window.ui.error(mensagem);
@@ -58,7 +102,10 @@ function atualizarPreviewBranding() {
     if (!frame || !imagem || !legenda) return;
 
     const formato = (getEl('logoIndexFormato')?.value || 'circulo').trim() || 'circulo';
-    const logoPath = (getEl('logoIndexPath')?.value || '').trim() || LOGO_INDEX_PADRAO;
+    const logoPath = previewLogoTemporaria || (getEl('logoIndexPath')?.value || '').trim() || BRANDING_LOGO_PADRAO;
+    const escala = obterEscalaLogoBranding();
+    const offsetX = obterOffsetLogoBranding('logoIndexOffsetX');
+    const offsetY = obterOffsetLogoBranding('logoIndexOffsetY');
     const nome = (getEl('nomeExibicaoSistema')?.value || '').trim()
         || (getEl('empresaNome')?.value || '').trim()
         || 'Sistema de Gerenciamento Oficina 39';
@@ -70,16 +117,21 @@ function atualizarPreviewBranding() {
     const empresaEmailPreview = getEl('brandingPreviewCompanyEmail');
     const qr1 = getEl('brandingPreviewQr1');
     const qr2 = getEl('brandingPreviewQr2');
+    const escalaBadge = getEl('brandingEscalaBadge');
 
     frame.classList.toggle('circulo', formato === 'circulo');
     frame.classList.toggle('quadrado', formato === 'quadrado');
+    frame.style.setProperty('--branding-logo-scale', (escala / 100).toFixed(2));
+    frame.style.setProperty('--branding-logo-offset-x', `${offsetX}%`);
+    frame.style.setProperty('--branding-logo-offset-y', `${offsetY}%`);
     imagem.src = logoPath;
     legenda.textContent = nome;
+    if (escalaBadge) escalaBadge.textContent = `${escala}%`;
     if (empresaNomePreview) empresaNomePreview.textContent = empresaNome;
     if (empresaContatoPreview) empresaContatoPreview.textContent = empresaTelefone;
     if (empresaEmailPreview) empresaEmailPreview.textContent = empresaEmail;
-    if (qr1) qr1.src = (getEl('qrcode1Path')?.value || '').trim() || QRCODE_1_PADRAO;
-    if (qr2) qr2.src = (getEl('qrcode2Path')?.value || '').trim() || QRCODE_2_PADRAO;
+    if (qr1) qr1.src = previewQrTemporario.qrcode1 || (getEl('qrcode1Path')?.value || '').trim() || BRANDING_QRCODE_1_PADRAO;
+    if (qr2) qr2.src = previewQrTemporario.qrcode2 || (getEl('qrcode2Path')?.value || '').trim() || BRANDING_QRCODE_2_PADRAO;
 }
 
 function validarCnpj(cnpj) {
@@ -185,6 +237,9 @@ function preencherCampos(config) {
     if (config.empresa_endereco) getEl('empresaEndereco').value = config.empresa_endereco;
     if (config.logo_index_path) getEl('logoIndexPath').value = config.logo_index_path;
     if (config.logo_index_formato) getEl('logoIndexFormato').value = config.logo_index_formato;
+    if (config.logo_index_escala) getEl('logoIndexEscala').value = Math.round(Number(config.logo_index_escala) * 100);
+    if (config.logo_index_offset_x != null) getEl('logoIndexOffsetX').value = Math.round(Number(config.logo_index_offset_x));
+    if (config.logo_index_offset_y != null) getEl('logoIndexOffsetY').value = Math.round(Number(config.logo_index_offset_y));
     if (config.qrcode_1_path) getEl('qrcode1Path').value = config.qrcode_1_path;
     if (config.qrcode_2_path) getEl('qrcode2Path').value = config.qrcode_2_path;
     atualizarPreviewBranding();
@@ -246,6 +301,9 @@ async function salvarConfig() {
         empresa_endereco: (getEl('empresaEndereco')?.value || '').trim(),
         logo_index_path: (getEl('logoIndexPath')?.value || '').trim(),
         logo_index_formato: (getEl('logoIndexFormato')?.value || 'circulo').trim(),
+        logo_index_escala: obterEscalaLogoBranding() / 100,
+        logo_index_offset_x: obterOffsetLogoBranding('logoIndexOffsetX'),
+        logo_index_offset_y: obterOffsetLogoBranding('logoIndexOffsetY'),
         qrcode_1_path: (getEl('qrcode1Path')?.value || '').trim(),
         qrcode_2_path: (getEl('qrcode2Path')?.value || '').trim()
     };
@@ -266,7 +324,16 @@ async function salvarConfig() {
 }
 
 async function salvarPersonalizacao() {
-    const payload = {
+    try {
+        await persistirPersonalizacaoAtual();
+        alertSucesso('Personalização salva com sucesso.');
+    } catch (error) {
+        alertErro(error.message);
+    }
+}
+
+function montarPayloadPersonalizacao() {
+    return {
         nome_exibicao_sistema: (getEl('nomeExibicaoSistema')?.value || '').trim(),
         empresa_nome: (getEl('empresaNome')?.value || '').trim(),
         empresa_email: (getEl('empresaEmail')?.value || '').trim(),
@@ -274,20 +341,20 @@ async function salvarPersonalizacao() {
         empresa_endereco: (getEl('empresaEndereco')?.value || '').trim(),
         logo_index_path: (getEl('logoIndexPath')?.value || '').trim(),
         logo_index_formato: (getEl('logoIndexFormato')?.value || 'circulo').trim(),
+        logo_index_escala: obterEscalaLogoBranding() / 100,
+        logo_index_offset_x: obterOffsetLogoBranding('logoIndexOffsetX'),
+        logo_index_offset_y: obterOffsetLogoBranding('logoIndexOffsetY'),
         qrcode_1_path: (getEl('qrcode1Path')?.value || '').trim(),
         qrcode_2_path: (getEl('qrcode2Path')?.value || '').trim()
     };
+}
 
-    try {
-        await requestJson('/api/config/contador', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        alertSucesso('Personalização salva com sucesso.');
-    } catch (error) {
-        alertErro(error.message);
-    }
+async function persistirPersonalizacaoAtual() {
+    return requestJson('/api/config/contador', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(montarPayloadPersonalizacao())
+    });
 }
 
 async function enviarLogoIndex() {
@@ -329,8 +396,15 @@ async function enviarArquivoBranding(destino) {
         if (pathField) {
             pathField.value = dados.arquivo_path || dados.logo_index_path || dados.qrcode_1_path || dados.qrcode_2_path || '';
         }
+        if (destino === 'logo') {
+            previewLogoTemporaria = '';
+        } else {
+            previewQrTemporario[destino] = '';
+        }
         atualizarPreviewBranding();
-        alertSucesso(config.mensagem);
+        await persistirPersonalizacaoAtual();
+        inputArquivo.value = '';
+        alertSucesso(`${config.mensagem} A imagem já foi aplicada no sistema.`);
     } catch (error) {
         alertErro(error.message);
     }
@@ -573,6 +647,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (formatoLogoSelect) {
         formatoLogoSelect.addEventListener('change', atualizarPreviewBranding);
     }
+    const escalaLogoInput = getEl('logoIndexEscala');
+    if (escalaLogoInput) {
+        escalaLogoInput.addEventListener('input', atualizarPreviewBranding);
+        escalaLogoInput.addEventListener('change', atualizarPreviewBranding);
+    }
+    const offsetXInput = getEl('logoIndexOffsetX');
+    if (offsetXInput) {
+        offsetXInput.addEventListener('input', atualizarPreviewBranding);
+        offsetXInput.addEventListener('change', atualizarPreviewBranding);
+    }
+    const offsetYInput = getEl('logoIndexOffsetY');
+    if (offsetYInput) {
+        offsetYInput.addEventListener('input', atualizarPreviewBranding);
+        offsetYInput.addEventListener('change', atualizarPreviewBranding);
+    }
 
     const arquivoLogoInput = getEl('logoIndexArquivo');
     if (arquivoLogoInput) {
@@ -582,7 +671,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const reader = new FileReader();
             reader.onload = (evento) => {
                 const imagem = getEl('brandingPreviewImage');
-                if (imagem) imagem.src = evento.target?.result || LOGO_INDEX_PADRAO;
+                previewLogoTemporaria = evento.target?.result || '';
+                if (imagem) imagem.src = previewLogoTemporaria || BRANDING_LOGO_PADRAO;
             };
             reader.readAsDataURL(arquivo);
         });
@@ -597,7 +687,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const reader = new FileReader();
             reader.onload = (evento) => {
                 const imagem = getEl(previewId);
-                if (imagem) imagem.src = evento.target?.result || (slot === 'qrcode1' ? QRCODE_1_PADRAO : QRCODE_2_PADRAO);
+                previewQrTemporario[slot] = evento.target?.result || '';
+                if (imagem) imagem.src = previewQrTemporario[slot] || (slot === 'qrcode1' ? BRANDING_QRCODE_1_PADRAO : BRANDING_QRCODE_2_PADRAO);
             };
             reader.readAsDataURL(arquivo);
         });
@@ -618,6 +709,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('dadosAtualizados', carregarHistorico);
 });
+
+window.centralizarLogoBranding = centralizarLogoBranding;
+window.resetarAjusteLogoBranding = resetarAjusteLogoBranding;
+window.aplicarPresetLogoBranding = aplicarPresetLogoBranding;
 
 window.salvarConfig = salvarConfig;
 window.cadastrarProfissional = cadastrarProfissional;

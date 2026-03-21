@@ -23,6 +23,25 @@
     align-items: center;
 }
 
+.debitos-busca-box {
+    margin: 16px 0 18px;
+    padding: 18px;
+}
+
+.debitos-busca-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.debitos-busca-row {
+    display: grid;
+    grid-template-columns: minmax(0, 420px);
+    gap: 14px;
+}
+
 .table-container {
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -145,6 +164,10 @@
 @media (max-width: 1200px) {
     .tabela-debitos {
         table-layout: auto;
+    }
+
+    .debitos-busca-row {
+        grid-template-columns: 1fr;
     }
 
     .acoes-debito {

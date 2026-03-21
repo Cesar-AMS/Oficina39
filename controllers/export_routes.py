@@ -32,14 +32,19 @@ def _obter_branding_empresa():
     from models import ConfigContador
 
     config = ConfigContador.query.first()
-    logo_padrao = os.path.join('static', 'images', 'picapau4.png')
-    logo_path = logo_padrao
+    # Arquivos padrão do sistema: entram apenas como fallback quando o cliente ainda não enviou branding próprio.
+    logo_padrao_sistema = os.path.join('static', 'images', 'picapau4.png')
+    qrcode_1_padrao_sistema = os.path.join('static', 'images', 'qrcodewhatsapp.jpeg')
+    qrcode_2_padrao_sistema = os.path.join('static', 'images', 'qrcodeinstagram.jpeg')
+
+    logo_path = logo_padrao_sistema
     empresa_nome = 'OFICINA 39'
     empresa_telefone = '(11) 99209-2341'
     empresa_email = 'oficina39ca@gmail.com'
     empresa_endereco = 'Rua Noel Rosa, 39 - Poá - SP'
-    qrcode_1_path = os.path.join('static', 'images', 'qrcodewhatsapp.jpeg')
-    qrcode_2_path = os.path.join('static', 'images', 'qrcodeinstagram.jpeg')
+    qrcode_1_path = qrcode_1_padrao_sistema
+    qrcode_2_path = qrcode_2_padrao_sistema
+    logo_escala = 1.0
 
     if config:
         empresa_nome = (
@@ -52,6 +57,10 @@ def _obter_branding_empresa():
         empresa_endereco = (config.empresa_endereco or '').strip() or empresa_endereco
 
         logo_salva = (config.logo_index_path or '').strip()
+        try:
+            logo_escala = min(1.15, max(0.7, float(config.logo_index_escala or 1.0)))
+        except (TypeError, ValueError):
+            logo_escala = 1.0
         if logo_salva:
             logo_relativa = logo_salva.lstrip('/').replace('/', os.sep)
             caminho_logo = os.path.abspath(logo_relativa)
@@ -75,12 +84,18 @@ def _obter_branding_empresa():
         'empresa_endereco': empresa_endereco,
         'qrcode_1_path': qrcode_1_path,
         'qrcode_2_path': qrcode_2_path,
+        'logo_escala': logo_escala,
     }
 
 
-def _criar_logo_pdf(caminho_logo, largura_max, altura_max):
+def _criar_logo_pdf(caminho_logo, largura_max, altura_max, escala=1.0):
     if not os.path.exists(caminho_logo):
         return None
+
+    try:
+        escala = min(1.15, max(0.7, float(escala or 1.0)))
+    except (TypeError, ValueError):
+        escala = 1.0
 
     try:
         leitor = ImageReader(caminho_logo)
@@ -88,7 +103,9 @@ def _criar_logo_pdf(caminho_logo, largura_max, altura_max):
         if not largura_img or not altura_img:
             raise ValueError('Imagem inválida')
 
-        proporcao = min(float(largura_max) / float(largura_img), float(altura_max) / float(altura_img))
+        largura_alvo = float(largura_max) * escala
+        altura_alvo = float(altura_max) * escala
+        proporcao = min(largura_alvo / float(largura_img), altura_alvo / float(altura_img))
         largura_final = largura_img * proporcao
         altura_final = altura_img * proporcao
 
@@ -96,7 +113,7 @@ def _criar_logo_pdf(caminho_logo, largura_max, altura_max):
         logo.hAlign = 'LEFT'
         return logo
     except Exception:
-        logo = Image(caminho_logo, width=largura_max, height=altura_max)
+        logo = Image(caminho_logo, width=largura_max * escala, height=altura_max * escala)
         logo.hAlign = 'LEFT'
         return logo
 
@@ -248,7 +265,7 @@ def gerar_pdf_ordem(id):
         branding = _obter_branding_empresa()
         logo_path = branding['logo_path']
         if os.path.exists(logo_path):
-            logo = _criar_logo_pdf(logo_path, logo_size, logo_size)
+            logo = _criar_logo_pdf(logo_path, logo_size, logo_size, branding.get('logo_escala', 1.0))
             logo_bloco = Table([[logo]], colWidths=[logo_size], hAlign='LEFT')
             logo_bloco.setStyle(TableStyle([
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),

@@ -34,6 +34,9 @@ class ConfigContador(db.Model):
     empresa_endereco = db.Column(db.String(180))
     logo_index_path = db.Column(db.String(255))
     logo_index_formato = db.Column(db.String(20), default='circulo')
+    logo_index_escala = db.Column(db.Float, default=1.0)
+    logo_index_offset_x = db.Column(db.Float, default=0.0)
+    logo_index_offset_y = db.Column(db.Float, default=0.0)
     qrcode_1_path = db.Column(db.String(255))
     qrcode_2_path = db.Column(db.String(255))
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
@@ -63,6 +66,9 @@ class ConfigContador(db.Model):
             'empresa_endereco': self.empresa_endereco,
             'logo_index_path': self.logo_index_path,
             'logo_index_formato': self.logo_index_formato or 'circulo',
+            'logo_index_escala': float(self.logo_index_escala or 1.0),
+            'logo_index_offset_x': float(self.logo_index_offset_x or 0.0),
+            'logo_index_offset_y': float(self.logo_index_offset_y or 0.0),
             'qrcode_1_path': self.qrcode_1_path,
             'qrcode_2_path': self.qrcode_2_path,
             'updated_at': self.updated_at.strftime('%d/%m/%Y %H:%M') if self.updated_at else None,

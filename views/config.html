@@ -164,6 +164,7 @@
                         <input type="file" id="logoIndexArquivo" accept=".png,.jpg,.jpeg,.webp,.gif">
                         <small class="texto-ajuda">Prefira imagem com fundo transparente e boa resolução.</small>
                         <p class="branding-upload-copy">Depois de escolher o arquivo, envie a imagem para atualizar a pré-visualização. A mudança só fica definitiva no sistema quando você salvar a personalização no rodapé da aba.</p>
+                        <p class="branding-upload-copy branding-upload-copy-secundario">Remoção real de fundo não está disponível nesta versão. Para melhor resultado, use PNG com fundo transparente.</p>
                         <div class="button-group alinhar-esquerda branding-upload-actions">
                             <button class="btn btn-salvar" type="button" onclick="enviarLogoIndex()">Enviar imagem</button>
                         </div>
@@ -172,6 +173,37 @@
                         <span class="branding-preview-label">Pré-visualização</span>
                         <div class="branding-preview-frame circulo" id="brandingPreviewFrame">
                             <img id="brandingPreviewImage" src="/static/images/picapau4.png" alt="Prévia da logo">
+                        </div>
+                        <div class="branding-ajuste-painel">
+                            <div class="branding-ajuste-head">
+                                <span class="branding-preview-label">Ajuste da logo</span>
+                                <div class="branding-escala-badge" id="brandingEscalaBadge">100%</div>
+                            </div>
+                            <div class="branding-ajuste-grid">
+                                <div class="form-group">
+                                    <label for="logoIndexEscala">Tamanho</label>
+                                    <input type="range" id="logoIndexEscala" min="70" max="115" step="1" value="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="logoIndexOffsetX">Horizontal</label>
+                                    <input type="range" id="logoIndexOffsetX" min="-30" max="30" step="1" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="logoIndexOffsetY">Vertical</label>
+                                    <input type="range" id="logoIndexOffsetY" min="-30" max="30" step="1" value="0">
+                                </div>
+                            </div>
+                            <div class="branding-ajuste-actions">
+                                <button class="btn btn-voltar btn-compact" type="button" onclick="centralizarLogoBranding()">Centralizar</button>
+                                <button class="btn btn-cancelar btn-compact" type="button" onclick="resetarAjusteLogoBranding()">Resetar ajuste</button>
+                            </div>
+                            <div class="branding-ajuste-presets">
+                                <button class="btn btn-compact branding-preset-btn" type="button" onclick="aplicarPresetLogoBranding('ajustado')">Ajustado</button>
+                                <button class="btn btn-compact branding-preset-btn" type="button" onclick="aplicarPresetLogoBranding('maior')">Maior</button>
+                                <button class="btn btn-compact branding-preset-btn" type="button" onclick="aplicarPresetLogoBranding('topo')">Topo</button>
+                                <button class="btn btn-compact branding-preset-btn" type="button" onclick="aplicarPresetLogoBranding('base')">Base</button>
+                            </div>
+                            <p class="branding-ajuste-copy">Ajuste como em um recorte de rede social: aumente, reduza e reposicione a arte dentro do círculo ou quadrado.</p>
                         </div>
                         <p class="branding-preview-caption" id="brandingPreviewCaption">Sistema de Gerenciamento Oficina 39</p>
                         <div class="branding-preview-company" id="brandingPreviewCompany">

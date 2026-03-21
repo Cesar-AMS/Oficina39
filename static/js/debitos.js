@@ -1,4 +1,5 @@
 let debitos = [];
+let debitosFiltrados = [];
 
 function alertErro(mensagem) {
     if (window.ui) return window.ui.error(mensagem);
@@ -11,6 +12,42 @@ function formatarValor(valor) {
 
 function classeStatusFinanceiro(status) {
     return (status || '').toLowerCase().replace(/\s+/g, '-');
+}
+
+function normalizarBusca(valor) {
+    return String(valor || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+}
+
+function soDigitos(valor) {
+    return String(valor || '').replace(/\D/g, '');
+}
+
+function filtrarDebitos(termo) {
+    const texto = normalizarBusca(termo);
+    const digitos = soDigitos(termo);
+
+    if (!texto && !digitos) {
+        debitosFiltrados = [...debitos];
+        renderTabelaDebitos(debitosFiltrados);
+        return;
+    }
+
+    debitosFiltrados = debitos.filter((ordem) => {
+        const clienteNome = normalizarBusca(ordem.cliente_nome || ordem.cliente?.nome_cliente || '');
+        const cpf = soDigitos(ordem.cliente?.cpf || '');
+        const placa = normalizarBusca(ordem.cliente?.placa || '');
+        return (
+            clienteNome.includes(texto)
+            || (!!digitos && cpf.includes(digitos))
+            || placa.includes(texto)
+        );
+    });
+
+    renderTabelaDebitos(debitosFiltrados);
 }
 
 function renderTabelaDebitos(lista) {
@@ -52,13 +89,18 @@ async function carregarDebitos() {
         const dados = await response.json();
         if (!response.ok) throw new Error(dados.erro || 'Erro ao carregar débitos.');
         debitos = Array.isArray(dados) ? dados : [];
-        renderTabelaDebitos(debitos);
+        debitosFiltrados = [...debitos];
+        renderTabelaDebitos(debitosFiltrados);
     } catch (error) {
         alertErro(error.message);
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const campoBusca = document.getElementById('buscaDebitos');
+    if (campoBusca) {
+        campoBusca.addEventListener('input', (event) => filtrarDebitos(event.target.value || ''));
+    }
     carregarDebitos();
 });
 
