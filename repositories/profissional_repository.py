@@ -1,4 +1,5 @@
 from models import Profissional
+from extensions import db
 
 
 def listar(ativos_apenas=True):
@@ -9,7 +10,7 @@ def listar(ativos_apenas=True):
 
 
 def buscar_por_id(profissional_id):
-    return Profissional.query.get(profissional_id)
+    return db.session.get(Profissional, profissional_id)
 
 
 def buscar_por_nome(nome):

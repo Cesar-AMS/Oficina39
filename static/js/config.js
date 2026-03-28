@@ -10,7 +10,7 @@ const BRANDING_QRCODE_2_PADRAO = '/static/images/qrcodeinstagram.jpeg';
 
 function obterEscalaLogoBranding() {
     const valor = Number(getEl('logoIndexEscala')?.value || 100);
-    return Math.min(115, Math.max(70, Number.isFinite(valor) ? valor : 100));
+    return Math.min(300, Math.max(70, Number.isFinite(valor) ? valor : 100));
 }
 
 function obterOffsetLogoBranding(id) {
@@ -22,7 +22,7 @@ function definirAjusteLogoBranding({ escala = 100, offsetX = 0, offsetY = 0 } = 
     const campoEscala = getEl('logoIndexEscala');
     const campoOffsetX = getEl('logoIndexOffsetX');
     const campoOffsetY = getEl('logoIndexOffsetY');
-    if (campoEscala) campoEscala.value = String(Math.min(115, Math.max(70, Number(escala) || 100)));
+    if (campoEscala) campoEscala.value = String(Math.min(300, Math.max(70, Number(escala) || 100)));
     if (campoOffsetX) campoOffsetX.value = String(Math.min(30, Math.max(-30, Number(offsetX) || 0)));
     if (campoOffsetY) campoOffsetY.value = String(Math.min(30, Math.max(-30, Number(offsetY) || 0)));
     atualizarPreviewBranding();
@@ -62,6 +62,77 @@ function alertSucesso(mensagem) {
 
 function getEl(id) {
     return document.getElementById(id);
+}
+
+function reorganizarSecaoPersonalizacao() {
+    const secao = getEl('secao-personalizacao-index');
+    if (!secao) return;
+
+    const topo = secao.querySelector('.config-row');
+    const campoNome = getEl('nomeExibicaoSistema')?.closest('.form-group');
+    if (topo) topo.classList.add('branding-top-row');
+    if (campoNome) campoNome.classList.add('branding-top-field');
+
+    const campoFormato = getEl('logoIndexFormato')?.closest('.form-group');
+    const previewCard = secao.querySelector('.branding-preview-card');
+    const previewFrame = getEl('brandingPreviewFrame');
+
+    if (campoFormato && previewCard && previewFrame) {
+        let toolbar = previewCard.querySelector('.branding-preview-toolbar');
+        if (!toolbar) {
+            toolbar = document.createElement('div');
+            toolbar.className = 'branding-preview-toolbar';
+            previewCard.insertBefore(toolbar, previewFrame);
+        }
+
+        let intro = toolbar.querySelector('.branding-preview-intro');
+        if (!intro) {
+            intro = document.createElement('div');
+            intro.className = 'branding-preview-intro';
+            toolbar.prepend(intro);
+        }
+
+        const labelPreview = Array.from(previewCard.children).find((elemento) =>
+            elemento.classList?.contains('branding-preview-label')
+        );
+        if (labelPreview) {
+            intro.prepend(labelPreview);
+            labelPreview.textContent = 'PrÃ©-visualizaÃ§Ã£o da logo';
+        }
+
+        if (labelPreview) labelPreview.textContent = 'Preview da logo';
+
+        let helper = intro.querySelector('.branding-preview-helper');
+        if (!helper) {
+            helper = document.createElement('p');
+            helper.className = 'branding-preview-helper';
+            helper.textContent = 'Formato e imagem ficam juntos para facilitar o ajuste visual.';
+            intro.appendChild(helper);
+        }
+
+        campoFormato.classList.add('branding-toolbar-field');
+        toolbar.appendChild(campoFormato);
+    }
+
+    const gridUploadsQr = secao.querySelector('.branding-qrcode-grid');
+    const gridPreviewsQr = secao.querySelector('.branding-qrcode-preview-grid');
+    if (gridUploadsQr && gridPreviewsQr && !secao.querySelector('.branding-qrcode-pairs')) {
+        const uploads = Array.from(gridUploadsQr.children);
+        const previews = Array.from(gridPreviewsQr.children);
+        const pares = document.createElement('div');
+        pares.className = 'branding-qrcode-pairs';
+
+        uploads.forEach((upload, index) => {
+            const item = document.createElement('div');
+            item.className = 'branding-qrcode-item';
+            item.appendChild(upload);
+            if (previews[index]) item.appendChild(previews[index]);
+            pares.appendChild(item);
+        });
+
+        gridUploadsQr.replaceWith(pares);
+        gridPreviewsQr.remove();
+    }
 }
 
 function alternarAbaConfig(nomeAba) {
@@ -621,6 +692,7 @@ async function carregarHistorico() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    reorganizarSecaoPersonalizacao();
     alternarAbaConfig('geral');
     carregarConfig();
     carregarHistorico();
@@ -725,4 +797,3 @@ window.alternarAbaConfig = alternarAbaConfig;
 window.enviarLogoIndex = enviarLogoIndex;
 window.enviarQrCode = enviarQrCode;
 window.salvarPersonalizacao = salvarPersonalizacao;
-

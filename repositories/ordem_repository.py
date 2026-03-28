@@ -1,6 +1,7 @@
 from sqlalchemy import func, or_
 
 from models import Cliente, Ordem, OrdemAnexo, OrdemStatusLog, Profissional
+from extensions import db
 
 
 def listar_todas():
@@ -8,7 +9,7 @@ def listar_todas():
 
 
 def buscar_por_id(ordem_id):
-    return Ordem.query.get(ordem_id)
+    return db.session.get(Ordem, ordem_id)
 
 
 def listar_logs_status(ordem_id):
@@ -40,7 +41,7 @@ def buscar_por_filtros(cliente=None, status=None, profissional=None, forma_pagam
     query = Ordem.query
 
     if cliente:
-        termo = cliente.strip()
+        termo = (cliente or '').strip()
         termo_numerico = ''.join(ch for ch in termo if ch.isdigit())
         cpf_sem_mascara = func.replace(func.replace(func.replace(Cliente.cpf, '.', ''), '-', ''), '/', '')
 

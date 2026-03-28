@@ -11,7 +11,7 @@ async function carregarPersonalizacaoIndex() {
         const imagem = document.getElementById('indexLogoImagem');
         const container = document.querySelector('.imagem-container');
         const stage = document.getElementById('indexLogoStage');
-        const escala = Math.min(1.15, Math.max(0.7, Number(config.logo_index_escala || 1)));
+    const escala = Math.min(3.0, Math.max(0.7, Number(config.logo_index_escala || 1)));
         const offsetX = Math.min(30, Math.max(-30, Number(config.logo_index_offset_x || 0)));
         const offsetY = Math.min(30, Math.max(-30, Number(config.logo_index_offset_y || 0)));
 

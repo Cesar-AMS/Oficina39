@@ -3,6 +3,7 @@
 # ===========================================
 
 from .cliente import Cliente
+from .cliente_draft import ClienteDraft
 from .ordem import Ordem
 from .servico import ItemServico
 from .peca import ItemPeca
@@ -29,7 +30,9 @@ __all__ = [
     'OrdemAnexo',
     'AuditoriaEvento',
     'OrdemPagamento'
+    ,'ClienteDraft'
 ]
 
-# Opcional: print para debug
-print("Models carregados:", ', '.join(__all__))
+import logging
+logger = logging.getLogger(__name__)
+logger.debug("Models carregados: %s", ', '.join(__all__))

@@ -98,6 +98,7 @@ def consultar_placa(placa):
         return {
             'fonte': 'cadastro_local',
             'tipo_preenchimento': 'completo',
+            'cliente_id': cliente_local.id,
             'nome_cliente': cliente_local.nome_cliente or '',
             'cpf': cliente_local.cpf or '',
             'telefone': cliente_local.telefone or '',

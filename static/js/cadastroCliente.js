@@ -1,6 +1,8 @@
 // cadastroCliente.js - Cadastro e edição de cliente
 
 let clienteEdicaoId = null;
+let wizardStep = 1;
+const WIZARD_STEPS = 3;
 
 function alertErro(mensagem) {
     if (window.ui) return window.ui.error(mensagem);
@@ -113,27 +115,172 @@ async function buscarCep() {
 }
 
 function preencherDadosVeiculo(dados) {
+    // Preencher apenas campos do veículo (não sobrescrever dados do cliente ou endereço)
     const mapeamento = {
         placa: 'placa',
-        nome_cliente: 'nome_cliente',
-        cpf: 'cpf',
-        telefone: 'telefone',
-        email: 'email',
-        endereco: 'endereco',
-        cidade: 'cidade',
-        estado: 'estado',
-        cep: 'cep',
         fabricante: 'fabricante',
         modelo: 'modelo',
         ano: 'ano',
         cor: 'cor',
         combustivel: 'combustivel',
-        motor: 'motor'
+        motor: 'motor',
+        tanque: 'tanque',
+        km: 'km',
+        direcao: 'direcao',
+        ar: 'ar'
     };
     Object.entries(mapeamento).forEach(([origem, destino]) => {
         const campo = document.getElementById(destino);
-        if (campo && dados[origem]) campo.value = dados[origem];
+        if (campo && (dados[origem] !== undefined && dados[origem] !== null)) campo.value = dados[origem];
     });
+}
+
+/* ====== WIZARD: gerenciamento de passos, validação e saves parciais ====== */
+function showStep(n) {
+    wizardStep = n;
+    document.querySelectorAll('.step-content').forEach(el => {
+        el.style.display = Number(el.getAttribute('data-step')) === n ? '' : 'none';
+    });
+    document.querySelectorAll('#stepper .step').forEach(el => {
+        const s = Number(el.getAttribute('data-step'));
+        el.classList.toggle('active', s === n);
+        el.classList.toggle('completed', s < n);
+    });
+    document.getElementById('btnVoltar').style.display = n > 1 ? '' : 'none';
+    document.getElementById('btnAvancar').style.display = n < WIZARD_STEPS ? '' : 'none';
+    document.getElementById('btnSalvarCliente').style.display = n === WIZARD_STEPS ? '' : 'none';
+}
+
+function wizardPrev() {
+    if (wizardStep > 1) showStep(wizardStep - 1);
+}
+
+async function wizardNext() {
+    // valida o passo atual antes de avançar
+    const ok = await validateAndSaveStep(wizardStep);
+    if (!ok) return;
+    if (wizardStep < WIZARD_STEPS) showStep(wizardStep + 1);
+}
+
+async function validateAndSaveStep(step) {
+    try {
+        if (step === 1) {
+            // Step 1: vehicle data. Plate is optional. If provided, try to query external API to fill vehicle fields.
+            const placa = (document.getElementById('placa')?.value || '').trim();
+            if (placa) {
+                try {
+                    const response = await fetch(`/api/integracoes/placa/${encodeURIComponent(placa)}`);
+                    const dados = await response.json();
+                    if (response.ok) {
+                        // Only fill vehicle fields. If the API returns cliente_id, keep it to support editing but do not auto-fill client inputs.
+                        preencherDadosVeiculo(dados);
+                        if (dados.cliente_id) clienteEdicaoId = dados.cliente_id;
+                    }
+                } catch (e) {
+                    // consulta externa falhou, não bloqueia
+                }
+            }
+            // Salva apenas os campos do veículo como rascunho
+            const payload = {
+                placa: document.getElementById('placa')?.value || '',
+                fabricante: document.getElementById('fabricante')?.value || '',
+                modelo: document.getElementById('modelo')?.value || '',
+                ano: document.getElementById('ano')?.value || '',
+                cor: document.getElementById('cor')?.value || '',
+                motor: document.getElementById('motor')?.value || '',
+                combustivel: document.getElementById('combustivel')?.value || '',
+                tanque: document.getElementById('tanque')?.value || '',
+                km: document.getElementById('km')?.value ? parseInt(document.getElementById('km').value, 10) : 0,
+                direcao: document.getElementById('direcao')?.value || '',
+                ar: document.getElementById('ar')?.value || ''
+            };
+            if (clienteEdicaoId) payload.id = clienteEdicaoId;
+            await saveDraft(payload);
+            return true;
+        }
+        if (step === 2) {
+            // Validações do cliente: nome e contato obrigatórios
+            const nome = (document.getElementById('nome_cliente')?.value || '').trim();
+            const telefone = (document.getElementById('telefone')?.value || '').trim();
+            if (!nome) {
+                alertErro('Nome do cliente é obrigatório para prosseguir.');
+                document.getElementById('nome_cliente')?.focus();
+                return false;
+            }
+            if (!telefone) {
+                alertErro('Contato (telefone) é obrigatório para prosseguir.');
+                document.getElementById('telefone')?.focus();
+                return false;
+            }
+            // salva rascunho (cliente)
+            const payloadCliente = {
+                nome_cliente: document.getElementById('nome_cliente')?.value || '',
+                cpf: (document.getElementById('cpf')?.value || '').replace(/\D/g, ''),
+                telefone: document.getElementById('telefone')?.value || '',
+                email: document.getElementById('email')?.value || ''
+            };
+            if (clienteEdicaoId) payloadCliente.id = clienteEdicaoId;
+            await saveDraft(payloadCliente);
+            return true;
+        }
+        if (step === 3) {
+            // Validação mínima de endereço: rua/cidade/estado ou busca por CEP
+            const endereco = (document.getElementById('endereco')?.value || '').trim();
+            const cidade = (document.getElementById('cidade')?.value || '').trim();
+            const estado = (document.getElementById('estado')?.value || '').trim();
+            const cep = (document.getElementById('cep')?.value || '').replace(/\D/g, '');
+            if (!cep && (!endereco || !cidade || !estado)) {
+                alertErro('Preencha CEP ou endereço, cidade e estado antes de concluir.');
+                return false;
+            }
+            // salva apenas os campos de endereço
+            const payloadEndereco = {
+                endereco: document.getElementById('endereco')?.value || '',
+                cidade: document.getElementById('cidade')?.value || '',
+                estado: document.getElementById('estado')?.value || '',
+                cep: document.getElementById('cep')?.value || ''
+            };
+            if (clienteEdicaoId) payloadEndereco.id = clienteEdicaoId;
+            await saveDraft(payloadEndereco);
+            return true;
+        }
+        return true;
+    } catch (e) {
+        alertErro('Erro durante validação: ' + (e.message || e));
+        return false;
+    }
+}
+
+async function saveDraft() {
+    // saveDraft can receive an optional payload argument (partial data). If none provided, fall back to full form.
+    const args = Array.from(arguments);
+    const provided = args[0];
+    const payload = provided || obterClienteFormulario();
+    try {
+        const resp = await fetch('/api/clientes/draft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.erro || 'Falha ao salvar rascunho');
+        clienteEdicaoId = data.id;
+        return true;
+    } catch (err) {
+        console.error('Erro ao salvar rascunho', err);
+        alertErro('Não foi possível salvar rascunho localmente. Você pode prosseguir, mas seu progresso não será salvo.');
+        return false;
+    }
+}
+
+async function salvarFinal() {
+    // valida todos os passos antes de enviar final
+    for (let s = 1; s <= WIZARD_STEPS; s++) {
+        const ok = await validateAndSaveStep(s);
+        if (!ok) return;
+    }
+    // Ao final, reuse a função salvar() padrão para submissão final (que faz validações completas)
+    salvar();
 }
 
 async function consultarPlaca() {
@@ -251,7 +398,7 @@ async function cancelar() {
         ? await window.ui.confirmAsync('Deseja realmente cancelar? Os dados não serão salvos.')
         : (window.ui ? window.ui.confirm('Deseja realmente cancelar? Os dados não serão salvos.') : confirm('Deseja realmente cancelar? Os dados não serão salvos.'));
     if (!confirmado) return;
-    voltarTelaCliente();
+    window.location.assign('/');
 }
 
 function limparFormularioCadastro() {
@@ -337,6 +484,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!clienteEdicaoId) {
         document.getElementById('placa')?.focus();
     }
+    // inicializa stepper
+    showStep(1);
 });
 
 document.addEventListener('keydown', function(e) {
@@ -350,4 +499,3 @@ document.addEventListener('keydown', function(e) {
 window.voltarTelaCliente = voltarTelaCliente;
 window.buscarCep = buscarCep;
 window.consultarPlaca = consultarPlaca;
-

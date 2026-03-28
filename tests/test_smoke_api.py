@@ -1,3 +1,6 @@
+import os
+os.environ['TESTING'] = '1'
+
 import unittest
 from datetime import datetime
 
@@ -9,7 +12,7 @@ from models import Cliente, Profissional
 class SmokeApiTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.app = create_app()
+        cls.app = create_app(testing=True)
         cls.client = cls.app.test_client()
 
     def _criar_cliente_teste(self):

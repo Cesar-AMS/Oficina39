@@ -71,9 +71,11 @@ def salvar_config_contador(dados):
             escala = float(dados.get('logo_index_escala') or 1.0)
         except (TypeError, ValueError):
             escala = 1.0
-        config.logo_index_escala = min(1.15, max(0.7, escala))
-    elif not config.logo_index_escala:
-        config.logo_index_escala = 1.0
+        # Permitir escala até 3.0 (300%) — armazenamos como fator (1.0 = 100%)
+        config.logo_index_escala = min(3.0, max(0.7, escala))
+    else:
+        if not config.logo_index_escala:
+            config.logo_index_escala = 1.0
     if 'logo_index_offset_x' in dados:
         try:
             offset_x = float(dados.get('logo_index_offset_x') or 0.0)

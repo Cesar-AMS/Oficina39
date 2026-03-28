@@ -1,20 +1,23 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.utils.hooks import collect_all, collect_submodules
 
 hiddenimports = []
 hiddenimports += collect_submodules('webview')
+webview_datas, webview_binaries, webview_hiddenimports = collect_all('webview')
+hiddenimports += webview_hiddenimports
 
 datas = [
     ('views', 'views'),
     ('static', 'static'),
     ('database.db', '.'),
 ]
+datas += webview_datas
 
 a = Analysis(
     ['desktop_app.py'],
     pathex=[],
-    binaries=[],
+    binaries=webview_binaries,
     datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],

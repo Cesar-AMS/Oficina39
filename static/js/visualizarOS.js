@@ -1,8 +1,9 @@
-// visualizarOS.js
+﻿// visualizarOS.js
 
 const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
 const origem = params.get("origem") || '';
+const autoPrint = params.get("autoprint") === '1';
 
 let ordem = null;
 
@@ -23,7 +24,7 @@ function alertErro(mensagem) {
 }
 
 // ===========================================
-// FUNÇÕES DE FORMATAÇÃO
+// FUNÃ‡Ã•ES DE FORMATAÃ‡ÃƒO
 // ===========================================
 
 function formatarValor(valor) {
@@ -57,12 +58,12 @@ function getStatusBadge(status) {
     else if (statusLower.includes('conclu')) classe = 'status-concluido';
     else if (statusLower.includes('garantia')) classe = 'status-garantia';
     
-    const statusExibicao = status === 'Concluído' ? 'Finalizado' : (status || 'Não definido');
+    const statusExibicao = status === 'ConcluÃ­do' ? 'Finalizado' : (status || 'NÃ£o definido');
     return `<span class="status-badge ${classe}">${statusExibicao}</span>`;
 }
 
 // ===========================================
-// FUNÇÃO AUXILIAR PARA SETAR VALOR
+// FUNÃ‡ÃƒO AUXILIAR PARA SETAR VALOR
 // ===========================================
 
 function setValue(id, valor, tipo = 'input') {
@@ -113,7 +114,7 @@ function preencherCampos() {
     setValue('status_financeiro', ordem.status_financeiro || '---');
     setValue('debito_valor_restante', formatarValor(ordem.saldo_pendente || 0));
     setValue('debito_vencimento', ordem.debito_vencimento || '---');
-    setValue('debito_observacao', ordem.debito_observacao || (Number(ordem.saldo_pendente || 0) > 0 ? 'Pagamento pendente sem observação.' : 'Sem débito pendente.'));
+    setValue('debito_observacao', ordem.debito_observacao || (Number(ordem.saldo_pendente || 0) > 0 ? 'Pagamento pendente sem observaÃ§Ã£o.' : 'Sem dÃ©bito pendente.'));
     
     setValue('data_entrada', formatarData(ordem.data_entrada));
     setValue('data_emissao', formatarData(ordem.data_emissao));
@@ -134,7 +135,7 @@ function preencherCampos() {
             });
             tbodyServicos.innerHTML = html;
         } else {
-            tbodyServicos.innerHTML = `<tr><td colspan="3" class="text-center mensagem-vazia">Nenhum serviço registrado</td></tr>`;
+            tbodyServicos.innerHTML = `<tr><td colspan="3" class="text-center mensagem-vazia">Nenhum serviÃ§o registrado</td></tr>`;
         }
     }
     
@@ -149,7 +150,6 @@ function preencherCampos() {
                         <td>${p.codigo_peca || '---'}</td>
                         <td>${p.descricao_peca || ''}</td>
                         <td>${p.quantidade || 0}</td>
-                        <td>${(p.percentual_lucro || 0).toFixed(2)}%</td>
                         <td>${formatarValor(p.valor_unitario)}</td>
                         <td>${formatarValor(total)}</td>
                     </tr>
@@ -157,7 +157,7 @@ function preencherCampos() {
             });
             tbodyPecas.innerHTML = html;
         } else {
-            tbodyPecas.innerHTML = `<tr><td colspan="6" class="text-center mensagem-vazia">Nenhuma peça registrada</td></tr>`;
+            tbodyPecas.innerHTML = `<tr><td colspan="5" class="text-center mensagem-vazia">Nenhuma peÃ§a registrada</td></tr>`;
         }
     }
     
@@ -197,7 +197,7 @@ function renderTimelineStatus(logs) {
     el.innerHTML = logs.map((log) => `
         <div class="timeline-item">
             <div class="timeline-cabecalho">
-                <strong>${log.status_anterior || '---'} → ${log.status_novo}</strong>
+                <strong>${log.status_anterior || '---'} â†’ ${log.status_novo}</strong>
                 <span>${log.data_evento || '---'}</span>
             </div>
             <div class="timeline-detalhes">
@@ -216,7 +216,7 @@ function renderTimelineStatus(logs) {
 function mostrarErro(mensagem) {
     const container = document.querySelector('.container');
     container.innerHTML = `
-        <h1 style="color: var(--danger); text-align: center; margin: 50px 0;">❌ ${mensagem}</h1>
+        <h1 style="color: var(--danger); text-align: center; margin: 50px 0;">âŒ ${mensagem}</h1>
         <div style="text-align: center;">
             <button class="btn btn-voltar" onclick="voltar()">Voltar</button>
         </div>
@@ -229,29 +229,30 @@ function mostrarErro(mensagem) {
 
 async function carregarOrdem() {
     if (!id) {
-        mostrarErro("ID da ordem não informado");
-        return;
+        mostrarErro("ID da ordem nao informado");
+        return false;
     }
 
     try {
         const response = await fetch(`/api/ordens/${id}`);
-        
+
         if (!response.ok) {
             if (response.status === 404) {
-                mostrarErro(`Ordem #${id} não encontrada`);
+                mostrarErro(`Ordem #${id} nao encontrada`);
             } else {
                 mostrarErro("Erro ao carregar ordem");
             }
-            return;
+            return false;
         }
 
         ordem = await response.json();
         preencherCampos();
         carregarTimelineStatus();
-        
+        return true;
     } catch (error) {
-        console.error('❌ Erro:', error);
-        mostrarErro("Erro de conexão com o servidor");
+        console.error('Erro:', error);
+        mostrarErro("Erro de conexao com o servidor");
+        return false;
     }
 }
 
@@ -271,7 +272,7 @@ async function carregarTimelineStatus() {
 }
 
 // ===========================================
-// FUNÇÕES DE NAVEGAÇÃO
+// FUNÃ‡Ã•ES DE NAVEGAÃ‡ÃƒO
 // ===========================================
 
 function voltar() {
@@ -291,12 +292,14 @@ function editarOrdem() {
 
 function imprimirOrdem() {
     const ordemId = document.getElementById('ordemId').textContent;
-    
-    if (ordemId) {
-        window.open(`/api/export/gerar-pdf/${ordemId}`, '_blank');
-    } else {
-        alertErro('ID da ordem não encontrado.');
+
+    if (!ordemId) {
+        alertErro('ID da ordem nao encontrado.');
+        return;
     }
+
+    const destinoPdf = `/api/export/gerar-pdf/${ordemId}?inline=1`;
+    window.location.assign(destinoPdf);
 }
 
 // ===========================================
@@ -316,11 +319,17 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ===========================================
-// INICIALIZAÇÃO
+// INICIALIZAÃ‡ÃƒO
 // ===========================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     atualizarLinksVoltar();
-    carregarOrdem();
+    const carregou = await carregarOrdem();
+    if (carregou && autoPrint) {
+        setTimeout(() => {
+            imprimirOrdem();
+        }, 250);
+    }
 });
+
 

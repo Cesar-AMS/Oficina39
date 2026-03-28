@@ -1,4 +1,6 @@
+import os
 import socket
+import sys
 import threading
 import webbrowser
 from contextlib import closing
@@ -31,35 +33,54 @@ class _ServidorThread(threading.Thread):
         self._server.shutdown()
 
 
-def main():
-    try:
-        import webview
-    except Exception:
-        app = create_app()
-        host = "127.0.0.1"
-        porta = _porta_livre(5000)
-        url = f"http://{host}:{porta}"
-        print("pywebview nao instalado. Abrindo no navegador...")
-        threading.Timer(1.0, lambda: webbrowser.open(url)).start()
-        app.run(host=host, port=porta, debug=False, use_reloader=False)
-        return
+def _abrir_no_navegador(app, host, porta, motivo=None):
+    url = f"http://{host}:{porta}"
+    if motivo:
+        print(f"Modo navegador ativado: {motivo}")
+    threading.Timer(1.0, lambda: webbrowser.open(url)).start()
+    app.run(host=host, port=porta, debug=False, use_reloader=False)
 
+
+def _usar_webview():
+    if os.environ.get("OFICINA39_USE_WEBVIEW") == "1":
+        return True
+    if getattr(sys, "frozen", False):
+        return False
+    return True
+
+
+def main():
     app = create_app()
     host = "127.0.0.1"
     porta = _porta_livre(5000)
-    url = f"http://{host}:{porta}"
 
+    if not _usar_webview():
+        _abrir_no_navegador(app, host, porta, "executavel configurado para abrir no navegador")
+        return
+
+    try:
+        import webview
+    except Exception as exc:
+        _abrir_no_navegador(app, host, porta, f"pywebview indisponivel ({exc})")
+        return
+
+    url = f"http://{host}:{porta}"
     servidor = _ServidorThread(app, host, porta)
     servidor.start()
 
-    webview.create_window(
-        "Oficina 39",
-        url=url,
-        width=1400,
-        height=900,
-        min_size=(1024, 700),
-    )
-    webview.start()
+    try:
+        webview.create_window(
+            "Oficina 39",
+            url=url,
+            width=1400,
+            height=900,
+            min_size=(1024, 700),
+        )
+        webview.start()
+    except Exception as exc:
+        servidor.stop()
+        _abrir_no_navegador(app, host, porta, f"falha ao iniciar janela desktop ({exc})")
+        return
 
     servidor.stop()
 

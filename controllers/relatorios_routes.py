@@ -944,7 +944,7 @@ def exportar_excel_producao_pagamentos():
             cliente_nome = '---'
             placa = '---'
             if o.cliente_id:
-                cli = Cliente.query.get(o.cliente_id)
+                cli = db.session.get(Cliente, o.cliente_id)
                 if cli:
                     cliente_nome = cli.nome_cliente or '---'
                     placa = cli.placa or '---'

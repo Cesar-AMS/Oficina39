@@ -13,6 +13,8 @@ from .relatorios_routes import relatorios_bp
 from .paginas_routes import paginas_bp
 from .integracoes_routes import integracoes_bp
 
+import logging
+
 # Lista de todos os blueprints para registrar no app.py
 blueprints = [
     clientes_bp,
@@ -27,6 +29,7 @@ blueprints = [
     integracoes_bp
 ]
 
-print(f"Blueprints carregados: {len(blueprints)}")
+logger = logging.getLogger(__name__)
+logger.debug(f"Blueprints carregados: {len(blueprints)}")
 for bp in blueprints:
-    print(f"   - {bp.name}")
+    logger.debug(f"   - {bp.name}")

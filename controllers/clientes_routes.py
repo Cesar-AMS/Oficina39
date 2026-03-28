@@ -42,6 +42,19 @@ def criar_cliente():
         from models import Cliente
         dados = request.json or {}
         
+        # If a draft_id is provided, promote the draft to a final Cliente
+        draft_id = dados.get('draft_id')
+        if draft_id:
+            from models import ClienteDraft
+            draft = db.session.get(ClienteDraft, draft_id)
+            if not draft:
+                return jsonify({'erro': 'Rascunho não encontrado'}), 404
+            # merge draft fields into dados so validations below apply
+            for f in ['nome_cliente','cpf','telefone','email','endereco','cidade','estado','cep',
+                      'placa','fabricante','modelo','ano','motor','combustivel','cor','tanque','km','direcao','ar']:
+                if getattr(draft, f, None) is not None and f not in dados:
+                    dados[f] = getattr(draft, f)
+
         if not texto_limpo(dados.get('nome_cliente')):
             return jsonify({'erro': 'Nome é obrigatório'}), 400
         if not texto_limpo(dados.get('cpf')):
@@ -78,7 +91,18 @@ def criar_cliente():
         
         db.session.add(cliente)
         db.session.commit()
-        
+
+        # If we promoted from a draft, remove the draft to keep DB tidy
+        if draft_id:
+            try:
+                draft = db.session.get(ClienteDraft, draft_id)
+                if draft:
+                    db.session.delete(draft)
+                    db.session.commit()
+            except Exception:
+                # non-fatal: ignore deletion errors but don't fail creation
+                db.session.rollback()
+
         return jsonify(cliente.to_dict()), 201
         
     except Exception as e:
@@ -182,5 +206,69 @@ def buscar_clientes():
         clientes = cliente_repository.buscar_por_termo(termo)
         
         return jsonify([c.to_dict() for c in clientes])
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+# ===========================================
+# SALVAR RASCUNHO / DADOS PARCIAIS (sem validações obrigatórias)
+# ===========================================
+@clientes_bp.route('/draft', methods=['POST'])
+def salvar_rascunho():
+    try:
+        # Persistir rascunhos em tabela separada ClienteDraft
+        from models import ClienteDraft
+        dados = request.json or {}
+
+        draft_id = dados.get('id')
+        if draft_id:
+            draft = db.session.get(ClienteDraft, draft_id)
+            # se não existir, criamos um novo rascunho
+            if not draft:
+                draft = ClienteDraft()
+        else:
+            draft = ClienteDraft()
+
+        # Atribui apenas os campos recebidos (sem validação estrita)
+        campos = ['nome_cliente', 'cpf', 'telefone', 'email', 'endereco', 'cidade', 'estado', 'cep',
+                  'placa', 'fabricante', 'modelo', 'ano', 'motor', 'combustivel', 'cor', 'tanque', 'km', 'direcao', 'ar']
+        for campo in campos:
+            if campo in dados:
+                setattr(draft, campo, dados.get(campo))
+
+        # Garantir flag de rascunho
+        draft.is_draft = True
+
+        if not draft.id:
+            db.session.add(draft)
+
+        db.session.commit()
+        return jsonify(draft.to_dict())
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'erro': str(e)}), 500
+
+
+# ===========================================
+# ROTAS PARA RASCUNHOS
+# ===========================================
+@clientes_bp.route('/drafts', methods=['GET'])
+def listar_rascunhos():
+    try:
+        from models import ClienteDraft
+        drafts = ClienteDraft.query.order_by(ClienteDraft.updated_at.desc()).all()
+        return jsonify([d.to_dict() for d in drafts])
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+@clientes_bp.route('/draft/<int:id>', methods=['GET'])
+def obter_rascunho(id):
+    try:
+        from models import ClienteDraft
+        draft = db.session.get(ClienteDraft, id)
+        if not draft:
+            return jsonify({'erro': 'Rascunho não encontrado'}), 404
+        return jsonify(draft.to_dict())
     except Exception as e:
         return jsonify({'erro': str(e)}), 500

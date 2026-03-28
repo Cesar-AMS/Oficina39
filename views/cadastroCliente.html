@@ -18,6 +18,12 @@
 
     <!-- CONTAINER PRINCIPAL -->
     <div class="container cliente-container">
+        <!-- STEPPER -->
+        <div class="stepper" id="stepper">
+            <div class="step" data-step="1">1<br><span>Veículo</span></div>
+            <div class="step" data-step="2">2<br><span>Cliente</span></div>
+            <div class="step" data-step="3">3<br><span>Endereço</span></div>
+        </div>
         <!-- CABEÇALHO COM BOTÃO VOLTAR -->
         <div class="cabecalho-duplo">
             <div>
@@ -29,13 +35,13 @@
             </div>
         </div>
 
-        <div class="form-section">
-            <h3 class="section-titulo">1. Consulta Inicial por Placa</h3>
-            <p class="subtitulo-secao">Use a placa como gatilho do cadastro. Se ela já existir no sistema ou for encontrada na API, os campos abaixo serão preenchidos quando houver dados disponíveis.</p>
+    <div class="form-section step-content" data-step="1">
+            <h3 class="section-titulo">1. Veículo</h3>
+            <p class="subtitulo-secao">Preencha os dados do veículo manualmente ou consulte pela placa para preencher automaticamente os dados do veículo.</p>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="placa">Consultar placa</label>
+                    <label for="placa">Placa (opcional)</label>
                     <div class="campo-com-acao">
                         <input type="text" id="placa" placeholder="ABC-1234" maxlength="8">
                         <button type="button" class="btn-campo-acao" onclick="consultarPlaca()">Consultar Placa</button>
@@ -45,15 +51,10 @@
                 <div class="form-group">
                     <label>&nbsp;</label>
                     <div class="ajuda-consulta-placa">
-                        Se a consulta falhar, siga normalmente com o preenchimento manual nas seções abaixo.
+                        Se a consulta falhar, preencha os campos do veículo manualmente e prossiga.
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="form-section">
-            <h3 class="section-titulo">2. Dados do Veículo</h3>
-            <p class="subtitulo-secao">Esses dados representam o objeto principal do cadastro e devem vir logo após a consulta inicial por placa.</p>
 
             <div class="form-row">
                 <div class="form-group">
@@ -112,11 +113,11 @@
                     <input type="text" id="ar" placeholder="Sim / Não">
                 </div>
             </div>
-        </div>
+    </div>
 
-        <div class="form-section">
-            <h3 class="section-titulo">3. Dados Pessoais</h3>
-            <p class="subtitulo-secao">Aqui ficam os dados do dono, proprietário ou responsável pelo veículo.</p>
+    <div class="form-section step-content" data-step="2" style="display:none;">
+            <h3 class="section-titulo">2. Cliente</h3>
+            <p class="subtitulo-secao">Dados do proprietário ou responsável (preencha manualmente).</p>
 
             <div class="form-row">
                 <div class="form-group">
@@ -143,8 +144,8 @@
             </div>
         </div>
 
-        <div class="form-section">
-            <h3 class="section-titulo">4. Endereço</h3>
+        <div class="form-section step-content" data-step="3" style="display:none;">
+            <h3 class="section-titulo">3. Endereço</h3>
             <p class="subtitulo-secao">Use o CEP para preenchimento assistido. Se a consulta não responder, o endereço pode ser completado manualmente.</p>
 
             <div class="form-row">
@@ -175,10 +176,12 @@
             </div>
         </div>
 
-        <!-- BOTÕES -->
+        <!-- BOTÕES DO WIZARD -->
         <div class="button-group button-group-final">
-            <button class="btn btn-cancelar btn-final" onclick="cancelar()">✕ Cancelar</button>
-            <button class="btn btn-salvar btn-final" id="btnSalvarCliente" onclick="salvar()">✓ Salvar Cliente</button>
+            <button class="btn btn-cancelar btn-final" id="btnCancelar" onclick="cancelar()">✕ Cancelar</button>
+            <button class="btn btn-terciary" id="btnVoltar" onclick="wizardPrev()" style="display:none;">← Voltar</button>
+            <button class="btn btn-primary" id="btnAvancar" onclick="wizardNext()">Próximo →</button>
+            <button class="btn btn-salvar btn-final" id="btnSalvarCliente" onclick="salvarFinal()" style="display:none;">✓ Concluir e Salvar</button>
         </div>
     </div>
 

@@ -1,6 +1,7 @@
 from sqlalchemy import func, or_
 
 from models import Cliente
+from extensions import db
 
 
 def listar_todos():
@@ -8,7 +9,7 @@ def listar_todos():
 
 
 def buscar_por_id(cliente_id):
-    return Cliente.query.get(cliente_id)
+    return db.session.get(Cliente, cliente_id)
 
 
 def buscar_por_cpf(cpf):

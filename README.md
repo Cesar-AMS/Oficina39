@@ -1,23 +1,21 @@
 # Oficina 39 System
 
-Sistema de gestão para oficina mecânica, desenvolvido com foco em operação local no Windows, controle de ordens de serviço, fluxo de caixa, relatórios e emissão de PDF.
+Sistema de gestao para oficina mecanica, com operacao local no Windows, ordens de servico, fluxo de caixa, relatorios e emissao de PDF.
 
-## Visão geral
+## Visao geral
 
-O projeto foi pensado para uso prático no dia a dia da oficina:
-
-- cadastro de clientes e veículos
-- abertura, edição e consulta de ordens de serviço
+- cadastro de clientes e veiculos
+- abertura, edicao e consulta de ordens de servico
 - controle de profissionais cadastrados
-- fluxo de caixa com entradas e saídas
-- relatórios operacionais e por profissional
-- exportação e importação de dados
-- geração de recibo/ordem em PDF
-- execução no navegador ou em janela própria via executável
+- fluxo de caixa com entradas e saidas
+- relatorios operacionais e por profissional
+- exportacao e importacao de dados
+- geracao de recibo/ordem em PDF
+- execucao em janela propria via executavel
 
 ## Stack
 
-- Python 3.13
+- Python 3.13+
 - Flask
 - SQLAlchemy
 - SQLite
@@ -29,29 +27,28 @@ O projeto foi pensado para uso prático no dia a dia da oficina:
 ## Estrutura do projeto
 
 ```text
-app.py                  # Inicialização da aplicação Flask
-desktop_app.py          # Execução em janela própria
-extensions.py           # Extensões e scheduler
-controllers/            # Controllers Flask (APIs e páginas)
+app.py                  # Inicializacao da aplicacao Flask
+desktop_app.py          # Execucao em janela propria
+extensions.py           # Extensoes e scheduler
+controllers/            # Controllers Flask (APIs e paginas)
 models/                 # Modelos de dados
-repositories/           # Consultas e filtros reutilizáveis
-services/               # Regras de negócio
-integrations/           # Integrações externas
-utils/                  # Formatação e normalização
-infrastructure/         # Suporte técnico (email, backup, PDF, log)
-views/                  # Páginas HTML
+repositories/           # Consultas e filtros reutilizaveis
+services/               # Regras de negocio
+integrations/           # Integracoes externas
+utils/                  # Formatacao e normalizacao
+infrastructure/         # Suporte tecnico (email, backup, PDF, log)
+views/                  # Paginas HTML
 static/                 # CSS, JS e imagens
 tests/                  # Testes automatizados
 scripts/                # Scripts de build
-installer/              # Arquivos do instalador Windows
-docs/                   # Documentação complementar
-artifacts/              # Saída de builds e instaladores
+docs/                   # Documentacao complementar
+artifacts/              # Saida dos builds
 ```
 
 ## Requisitos
 
 - Windows 10 ou 11
-- Python 3.13 instalado
+- Python instalado
 - Ambiente virtual em `.venv`
 
 ## Como rodar em desenvolvimento
@@ -70,67 +67,37 @@ http://localhost:5000
 
 ## Como iniciar pelo atalho local
 
-Também é possível iniciar com:
+Tambem e possivel iniciar com:
 
 ```text
 INICIAR_OFICINA.bat
 ```
 
-Esse arquivo prioriza o executável empacotado quando ele existe em `artifacts/release/Oficina39`.
+Esse arquivo procura o executavel empacotado em `artifacts/release/Oficina39`.
 
-## Como gerar o executável
+## Como gerar o executavel
 
 ```powershell
 .\scripts\build_windows.ps1
 ```
 
-Saída esperada:
+Saida esperada:
 
 ```text
 artifacts\release\Oficina39\Oficina39.exe
 ```
 
-Para gerar executável + instalador:
-
-```powershell
-.\scripts\build_windows.ps1 -WithInstaller
-```
-
-Saída adicional:
-
-```text
-artifacts\installer\
-```
-
 ## Testes
-
-Para rodar os testes automatizados:
 
 ```powershell
 .venv\Scripts\python.exe -m unittest tests/test_smoke_api.py
 ```
 
-## O que não sobe para o GitHub
+## Documentacao adicional
 
-O repositório foi preparado para não versionar arquivos locais ou gerados:
-
-- banco `database.db`
-- ambiente virtual `.venv`
-- pasta `artifacts`
-- uploads
-- backups
-- arquivos temporários
-
-## Documentação adicional
-
-Arquivos úteis na pasta [docs](./docs):
+Arquivos uteis na pasta [docs](./docs):
 
 - `EMPACOTAMENTO_WINDOWS.md`
 - `INSTALACAO_PENDRIVE_WINDOWS.md`
 - `OPERACAO_DIARIA_BACKUP_RESTORE.md`
 - `HOMOLOGACAO_RELEASE.md`
-
-## Autor
-
-Desenvolvido por Cesar Augusto  
-Formação: Análise e Desenvolvimento de Sistemas

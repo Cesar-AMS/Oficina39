@@ -6,7 +6,10 @@ import csv
 import json
 import io
 import os
-import pandas as pd
+try:
+    import pandas as pd
+except Exception:
+    pd = None
 from datetime import datetime
 from extensions import db
 from models import Cliente, Ordem, Saida
@@ -125,21 +128,24 @@ class ExportService:
         Returns:
             BytesIO: Conteúdo do arquivo Excel
         """
+        if pd is None:
+            raise RuntimeError('pandas não instalado. Instale pandas (e suas dependências) para usar exportação Excel.')
+
         output = io.BytesIO()
         engine_excel = ExportService._excel_engine_disponivel()
         if not engine_excel:
             raise RuntimeError('Biblioteca para Excel não instalada. Instale openpyxl ou xlsxwriter.')
-        
+
         with pd.ExcelWriter(output, engine=engine_excel) as writer:
             if tipo in ['completo', 'clientes']:
                 ExportService._escrever_clientes_excel(writer)
-            
+
             if tipo in ['completo', 'ordens']:
                 ExportService._escrever_ordens_excel(writer)
-            
+
             if tipo in ['completo', 'financeiro']:
                 ExportService._escrever_saidas_excel(writer)
-        
+
         output.seek(0)
         return output
 
@@ -168,6 +174,8 @@ class ExportService:
                 'TANQUE': c.tanque,
                 'KM': c.km
             })
+        if pd is None:
+            raise RuntimeError('pandas não instalado. Não é possível gerar Excel.')
         df_clientes = pd.DataFrame(dados_clientes)
         df_clientes.to_excel(writer, sheet_name='Clientes', index=False)
     
@@ -185,6 +193,8 @@ class ExportService:
                 'TOTAL_PECAS': o.total_pecas,
                 'TOTAL_GERAL': o.total_geral
             })
+        if pd is None:
+            raise RuntimeError('pandas não instalado. Não é possível gerar Excel.')
         df_ordens = pd.DataFrame(dados_ordens)
         df_ordens.to_excel(writer, sheet_name='Ordens', index=False)
     
@@ -200,6 +210,8 @@ class ExportService:
                 'CATEGORIA': s.categoria,
                 'VALOR': s.valor
             })
+        if pd is None:
+            raise RuntimeError('pandas não instalado. Não é possível gerar Excel.')
         df_saidas = pd.DataFrame(dados_saidas)
         df_saidas.to_excel(writer, sheet_name='Saidas', index=False)
     
@@ -299,6 +311,8 @@ class ExportService:
     @staticmethod
     def importar_tabular(df, tipo):
         resultados = {'clientes': 0, 'ordens': 0, 'saidas': 0}
+        if pd is None:
+            raise RuntimeError('pandas não instalado. Não é possível importar tabelas.')
         linhas = ExportService._normalizar_linhas(df)
 
         if tipo == 'clientes':

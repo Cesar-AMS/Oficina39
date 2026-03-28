@@ -1,6 +1,7 @@
 from sqlalchemy import func
 
 from models import Saida
+from extensions import db
 
 
 def listar_todas():
@@ -8,7 +9,7 @@ def listar_todas():
 
 
 def buscar_por_id(saida_id):
-    return Saida.query.get(saida_id)
+    return db.session.get(Saida, saida_id)
 
 
 def listar_por_periodo(data_inicio, data_fim):

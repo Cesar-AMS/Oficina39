@@ -13,7 +13,7 @@ from infrastructure.backup_service import criar_backup_database
 # ===========================================
 # CRIAR A APLICAÇÃO
 # ===========================================
-def create_app():
+def create_app(testing: bool = False):
     # Caminho absoluto para a pasta static
     basedir = os.path.abspath(os.path.dirname(__file__))
     static_dir = os.path.join(basedir, 'static')
@@ -26,17 +26,30 @@ def create_app():
                 static_folder=static_dir,
                 static_url_path='/static')
     
+    # Carregar variáveis de ambiente (opcional .env)
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except Exception:
+        # python-dotenv é opcional; se não disponível, seguimos com env vars do sistema
+        pass
+
     # Configurações
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
+    # Permitir modo de teste com banco em memória para os testes automatizados
+    if testing or os.environ.get('TESTING') == '1':
+        app.config['TESTING'] = True
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
-    # Configurações de e-mail
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-    app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USERNAME'] = ''
-    app.config['MAIL_PASSWORD'] = ''
-    app.config['MAIL_DEFAULT_SENDER'] = ''
+    # Configurações de e-mail (preferir variáveis de ambiente)
+    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', '587'))
+    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True').lower() in ('1', 'true', 'yes')
+    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '')
+    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '')
+    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', '')
     
     # Configurações de upload
     UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
@@ -59,13 +72,14 @@ def create_app():
     with app.app_context():
         # Importar TODOS os models DENTRO do contexto
         # Isso força o SQLAlchemy a registrar as tabelas
-        print("Importando models...")
+        import logging as _logging
+        _logger = _logging.getLogger(__name__)
+        _logger.debug("Importando models...")
         from models import Cliente, Ordem, ItemServico, ItemPeca, Saida, ConfigContador, EnvioRelatorio, Profissional, OrdemStatusLog, OrdemAnexo, AuditoriaEvento
-        print("Models importados com sucesso!")
-        
+        _logger.debug("Models importados com sucesso!")
         # Criar todas as tabelas
         db.create_all()
-        print("Banco de dados inicializado com todas as tabelas!")
+        _logger.debug("Banco de dados inicializado com todas as tabelas!")
 
         # Migração leve para bancos SQLite já existentes (sem Alembic)
         inspector = inspect(db.engine)
@@ -76,43 +90,43 @@ def create_app():
                     text("ALTER TABLE ordens ADD COLUMN profissional_responsavel VARCHAR(120)")
                 )
                 db.session.commit()
-                print("Coluna profissional_responsavel adicionada em ordens")
+                _logger.info("Coluna profissional_responsavel adicionada em ordens")
             if 'forma_pagamento' not in colunas_ordens:
                 db.session.execute(
                     text("ALTER TABLE ordens ADD COLUMN forma_pagamento VARCHAR(30)")
                 )
                 db.session.commit()
-                print("Coluna forma_pagamento adicionada em ordens")
+                _logger.info("Coluna forma_pagamento adicionada em ordens")
             if 'observacao_interna' not in colunas_ordens:
                 db.session.execute(
                     text("ALTER TABLE ordens ADD COLUMN observacao_interna TEXT")
                 )
                 db.session.commit()
-                print("Coluna observacao_interna adicionada em ordens")
+                _logger.info("Coluna observacao_interna adicionada em ordens")
             if 'debito_vencimento' not in colunas_ordens:
                 db.session.execute(
                     text("ALTER TABLE ordens ADD COLUMN debito_vencimento DATE")
                 )
                 db.session.commit()
-                print("Coluna debito_vencimento adicionada em ordens")
+                _logger.info("Coluna debito_vencimento adicionada em ordens")
             if 'debito_observacao' not in colunas_ordens:
                 db.session.execute(
                     text("ALTER TABLE ordens ADD COLUMN debito_observacao VARCHAR(255)")
                 )
                 db.session.commit()
-                print("Coluna debito_observacao adicionada em ordens")
+                _logger.info("Coluna debito_observacao adicionada em ordens")
             if 'desconto_percentual' not in colunas_ordens:
                 db.session.execute(
                     text("ALTER TABLE ordens ADD COLUMN desconto_percentual FLOAT DEFAULT 0")
                 )
                 db.session.commit()
-                print("Coluna desconto_percentual adicionada em ordens")
+                _logger.info("Coluna desconto_percentual adicionada em ordens")
             if 'desconto_valor' not in colunas_ordens:
                 db.session.execute(
                     text("ALTER TABLE ordens ADD COLUMN desconto_valor FLOAT DEFAULT 0")
                 )
                 db.session.commit()
-                print("Coluna desconto_valor adicionada em ordens")
+                _logger.info("Coluna desconto_valor adicionada em ordens")
 
         if 'servicos' in inspector.get_table_names():
             colunas_servicos = {c['name'] for c in inspector.get_columns('servicos')}
@@ -121,7 +135,7 @@ def create_app():
                     text("ALTER TABLE servicos ADD COLUMN nome_profissional VARCHAR(120)")
                 )
                 db.session.commit()
-                print("Coluna nome_profissional adicionada em servicos")
+                _logger.info("Coluna nome_profissional adicionada em servicos")
 
         if 'config_contador' in inspector.get_table_names():
             colunas_config = {c['name'] for c in inspector.get_columns('config_contador')}
@@ -130,7 +144,7 @@ def create_app():
                     text("ALTER TABLE config_contador ADD COLUMN profissional_envio_auto VARCHAR(120)")
                 )
                 db.session.commit()
-                print("Coluna profissional_envio_auto adicionada em config_contador")
+                _logger.info("Coluna profissional_envio_auto adicionada em config_contador")
             novas_colunas_config = {
                 'cep_provider_ativo': "ALTER TABLE config_contador ADD COLUMN cep_provider_ativo VARCHAR(60)",
                 'cep_provider_primario': "ALTER TABLE config_contador ADD COLUMN cep_provider_primario VARCHAR(60)",
@@ -147,7 +161,7 @@ def create_app():
                 if nome_coluna not in colunas_config:
                     db.session.execute(text(sql))
                     db.session.commit()
-                    print(f"Coluna {nome_coluna} adicionada em config_contador")
+                    _logger.info(f"Coluna {nome_coluna} adicionada em config_contador")
 
         if 'pecas' in inspector.get_table_names():
             colunas_pecas = {c['name'] for c in inspector.get_columns('pecas')}
@@ -156,13 +170,13 @@ def create_app():
                     text("ALTER TABLE pecas ADD COLUMN valor_custo FLOAT DEFAULT 0")
                 )
                 db.session.commit()
-                print("Coluna valor_custo adicionada em pecas")
+                _logger.info("Coluna valor_custo adicionada em pecas")
             if 'percentual_lucro' not in colunas_pecas:
                 db.session.execute(
                     text("ALTER TABLE pecas ADD COLUMN percentual_lucro FLOAT DEFAULT 0")
                 )
                 db.session.commit()
-                print("Coluna percentual_lucro adicionada em pecas")
+                _logger.info("Coluna percentual_lucro adicionada em pecas")
 
         if 'config_contador' in inspector.get_table_names():
             colunas_config = {c['name'] for c in inspector.get_columns('config_contador')}
@@ -171,7 +185,7 @@ def create_app():
                     text("ALTER TABLE config_contador ADD COLUMN whatsapp_orcamento VARCHAR(30)")
                 )
                 db.session.commit()
-                print("Coluna whatsapp_orcamento adicionada em config_contador")
+                _logger.info("Coluna whatsapp_orcamento adicionada em config_contador")
             novas_colunas_branding = {
                 'nome_exibicao_sistema': "ALTER TABLE config_contador ADD COLUMN nome_exibicao_sistema VARCHAR(120)",
                 'empresa_nome': "ALTER TABLE config_contador ADD COLUMN empresa_nome VARCHAR(120)",
@@ -190,51 +204,57 @@ def create_app():
                 if nome_coluna not in colunas_config:
                     db.session.execute(text(sql))
                     db.session.commit()
-                    print(f"Coluna {nome_coluna} adicionada em config_contador")
+                    _logger.info(f"Coluna {nome_coluna} adicionada em config_contador")
 
         # Verificar quais tabelas foram criadas
         tabelas = inspector.get_table_names()
-        print(f"Tabelas criadas: {', '.join(tabelas)}")
+        _logger.debug(f"Tabelas criadas: {', '.join(tabelas)}")
     
     # ===========================================
     # REGISTRAR BLUEPRINTS (ROTAS)
     # ===========================================
+    import logging as _logging2
+    _logger2 = _logging2.getLogger(__name__)
     for bp in blueprints:
         app.register_blueprint(bp)
-        print(f"Blueprint registrado: {bp.name}")
+        _logger2.debug(f"Blueprint registrado: {bp.name}")
     
     # ===========================================
-    # INICIAR SCHEDULER (TAREFAS AGENDADAS)
+    # INICIAR SCHEDULER (TAREFAS AGENDADAS) - não iniciar em modo de teste
     # ===========================================
-    if not scheduler.running:
-        scheduler.start()
-        atexit.register(lambda: scheduler.shutdown())
-        print("Agendador de tarefas iniciado!")
+    if not app.config.get('TESTING', False):
+        if not scheduler.running:
+            scheduler.start()
+            atexit.register(lambda: scheduler.shutdown())
+            _logger2.info("Agendador de tarefas iniciado!")
 
     def gerar_backup_diario():
         try:
             retencao_dias = int(os.environ.get('BACKUP_RETENTION_DAYS', '15'))
             info = criar_backup_database(prefixo='database_backup_', dias_retencao=retencao_dias)
-            print(f"Backup diario criado: {info['arquivo']}")
+            _logger2.info(f"Backup diario criado: {info['arquivo']}")
         except Exception as e:
-            print(f"Backup diario falhou: {str(e)}")
+            _logger2.exception(f"Backup diario falhou: {str(e)}")
 
-    if not scheduler.get_job('daily_db_backup'):
-        scheduler.add_job(
-            gerar_backup_diario,
-            trigger='cron',
-            hour=2,
-            minute=30,
-            id='daily_db_backup',
-            replace_existing=True,
-            max_instances=1,
-            coalesce=True
-        )
-        print("Job de backup diario agendado (02:30)")
+    if not app.config.get('TESTING', False):
+        if not scheduler.get_job('daily_db_backup'):
+            scheduler.add_job(
+                gerar_backup_diario,
+                trigger='cron',
+                hour=2,
+                minute=30,
+                id='daily_db_backup',
+                replace_existing=True,
+                max_instances=1,
+                coalesce=True
+            )
+            _logger2.info("Job de backup diario agendado (02:30)")
 
-    # Forçar exibição de erros no terminal
+    # Forçar exibição de erros no terminal por padrão, nível ajustável via env
     import logging
-    logging.basicConfig(level=logging.DEBUG)
+    log_level = os.environ.get('LOG_LEVEL', 'DEBUG').upper()
+    logging.basicConfig(level=getattr(logging, log_level, logging.DEBUG))
+    logger = logging.getLogger(__name__)
     
     return app
 
@@ -243,13 +263,10 @@ def create_app():
 # ===========================================
 if __name__ == '__main__':
     app = create_app()
-    
-    print("=" * 50)
-    print("SISTEMA DE GESTAO DE OFICINA")
-    print("=" * 50)
-    print("Banco de dados: database.db")
-    print("Acesse: http://localhost:5000")
-    print("E-mail: configuravel via banco")
-    print("=" * 50)
-    
+    logger = __import__('logging').getLogger(__name__)
+    logger.info("SISTEMA DE GESTAO DE OFICINA")
+    logger.info("Banco de dados: database.db")
+    logger.info("Acesse: http://localhost:5000")
+    logger.info("E-mail: configuravel via banco")
+
     app.run(debug=True, host='0.0.0.0', port=5000)

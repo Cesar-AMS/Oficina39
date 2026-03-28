@@ -7,3 +7,6 @@ openpyxl==3.1.2
 xlsxwriter==3.1.2
 reportlab==4.2.2
 pywebview==5.1
+
+# Dev / optional
+python-dotenv==1.0.0

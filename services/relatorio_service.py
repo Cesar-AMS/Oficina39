@@ -3,6 +3,7 @@
 # ===========================================
 
 from models import Ordem, Cliente, Saida
+from extensions import db
 from datetime import datetime, timedelta
 
 def buscar_dados_periodo(data_inicio):
@@ -25,7 +26,7 @@ def buscar_dados_periodo(data_inicio):
     
     for o in ordens_concluidas:
         if o.data_conclusao and o.data_conclusao.date() >= data_inicio.date():
-            cliente = Cliente.query.get(o.cliente_id)
+            cliente = db.session.get(Cliente, o.cliente_id)
             entradas.append({
                 'data': o.data_conclusao.strftime('%d/%m/%Y'),
                 'cliente': cliente.nome_cliente if cliente else '---',

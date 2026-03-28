@@ -1,5 +1,5 @@
-// ===========================================
-// ordemServico.js - VERSÃO PADRONIZADA
+﻿// ===========================================
+// ordemServico.js - VERSÃƒO PADRONIZADA
 // ===========================================
 
 let clienteSelecionado = null;
@@ -21,7 +21,7 @@ function alertSucesso(mensagem) {
 }
 
 // ===========================================
-// FUNÇÕES AUXILIARES
+// FUNÃ‡Ã•ES AUXILIARES
 // ===========================================
 
 function formatarValor(valor) {
@@ -29,7 +29,7 @@ function formatarValor(valor) {
 }
 
 function formatarStatusExibicao(status) {
-    return status === 'Concluído' ? 'Finalizado' : (status || '---');
+    return status === 'ConcluÃ­do' ? 'Finalizado' : (status || '---');
 }
 
 function calcularValorVendaPeca(valorCusto, percentualLucro) {
@@ -84,13 +84,14 @@ function renderSugestoesCliente(lista) {
 
     if (!lista.length) {
         esconderSugestoesCliente();
+        janelaExistente?.close();
         return;
     }
 
     box.innerHTML = lista.map((c, idx) => `
         <div class="sugestao-item" data-idx="${idx}">
             <div>${c.nome_cliente || '---'}</div>
-            <div class="sugestao-cpf">${c.cpf || 'CPF não informado'}</div>
+            <div class="sugestao-cpf">${c.cpf || 'CPF nÃ£o informado'}</div>
         </div>
     `).join('');
     box.style.display = 'block';
@@ -161,16 +162,16 @@ async function carregarWhatsappOrcamento() {
             whatsappOrcamentoConfigurado = numero;
         }
     } catch (error) {
-        console.error('Erro ao carregar WhatsApp do orçamento:', error);
+        console.error('Erro ao carregar WhatsApp do orÃ§amento:', error);
     }
 }
 
 // ===========================================
-// FUNÇÃO DE CÁLCULO (SERÁ CHAMADA DE VÁRIAS FORMAS)
+// FUNÃ‡ÃƒO DE CÃLCULO (SERÃ CHAMADA DE VÃRIAS FORMAS)
 // ===========================================
 
 window.calcularTotais = function() {
-    // Calcular serviços
+    // Calcular serviÃ§os
     let totalServicos = 0;
     document.querySelectorAll('#corpo-servicos .valor-servico').forEach(input => {
         let valor = parseFloat(input.value);
@@ -179,7 +180,7 @@ window.calcularTotais = function() {
         }
     });
     
-    // Calcular peças
+    // Calcular peÃ§as
     let totalPecas = 0;
     document.querySelectorAll('#corpo-pecas .total-peca').forEach(span => {
         let valorTexto = span.textContent.replace('R$ ', '').replace(',', '.');
@@ -200,7 +201,7 @@ window.calcularTotais = function() {
 };
 
 // ===========================================
-// FUNÇÃO PARA ATUALIZAR TOTAL DE UMA PEÇA
+// FUNÃ‡ÃƒO PARA ATUALIZAR TOTAL DE UMA PEÃ‡A
 // ===========================================
 
 window.calcularTotalPeca = function(elemento) {
@@ -220,7 +221,7 @@ window.calcularTotalPeca = function(elemento) {
 };
 
 // ===========================================
-// FUNÇÃO PARA ADICIONAR EVENTOS A UMA LINHA DE SERVIÇO
+// FUNÃ‡ÃƒO PARA ADICIONAR EVENTOS A UMA LINHA DE SERVIÃ‡O
 // ===========================================
 
 function adicionarEventosServico(linha) {
@@ -233,7 +234,7 @@ function adicionarEventosServico(linha) {
 }
 
 // ===========================================
-// FUNÇÃO PARA ADICIONAR EVENTOS A UMA LINHA DE PEÇA
+// FUNÃ‡ÃƒO PARA ADICIONAR EVENTOS A UMA LINHA DE PEÃ‡A
 // ===========================================
 
 function adicionarEventosPeca(linha) {
@@ -268,7 +269,7 @@ function adicionarEventosPeca(linha) {
 }
 
 // ===========================================
-// FUNÇÕES DE SERVIÇOS
+// FUNÃ‡Ã•ES DE SERVIÃ‡OS
 // ===========================================
 
 window.adicionarServico = function() {
@@ -277,7 +278,7 @@ window.adicionarServico = function() {
     
     const tbody = document.getElementById('corpo-servicos');
     if (!tbody) {
-        alertErro('Tabela de serviços não encontrada.');
+        alertErro('Tabela de serviÃ§os nÃ£o encontrada.');
         return;
     }
     
@@ -285,7 +286,7 @@ window.adicionarServico = function() {
     novaLinha.id = `servico-${contadorServicos}`;
     novaLinha.innerHTML = `
         <td><input type="text" class="codigo-servico" value="${codigo}" readonly style="width:60px"></td>
-        <td><input type="text" class="descricao-servico" placeholder="Descrição do serviço" style="width:100%"></td>
+        <td><input type="text" class="descricao-servico" placeholder="DescriÃ§Ã£o do serviÃ§o" style="width:100%"></td>
         <td><input type="number" class="valor-servico" placeholder="0,00" step="0.01" style="width:100%"></td>
         <td><button type="button" class="btn-remover" onclick="window.removerServico(this)">Excluir</button></td>
     `;
@@ -296,8 +297,8 @@ window.adicionarServico = function() {
 
 window.removerServico = async function(botao) {
     const confirmado = window.ui?.confirmAsync
-        ? await window.ui.confirmAsync('Confirma remover este serviço?')
-        : (window.ui ? window.ui.confirm('Confirma remover este serviço?') : confirm('Confirma remover este serviço?'));
+        ? await window.ui.confirmAsync('Confirma remover este serviÃ§o?')
+        : (window.ui ? window.ui.confirm('Confirma remover este serviÃ§o?') : confirm('Confirma remover este serviÃ§o?'));
     if (!confirmado) return;
 
     const linha = botao.closest('tr');
@@ -306,7 +307,7 @@ window.removerServico = async function(botao) {
 };
 
 // ===========================================
-// FUNÇÕES DE PEÇAS
+// FUNÃ‡Ã•ES DE PEÃ‡AS
 // ===========================================
 
 window.adicionarPeca = function() {
@@ -314,11 +315,11 @@ window.adicionarPeca = function() {
     
     const tbody = document.getElementById('corpo-pecas');
     if (!tbody) {
-        alertErro('Tabela de peças não encontrada.');
+        alertErro('Tabela de peÃ§as nÃ£o encontrada.');
         return;
     }
     
-    // Pega o último código de serviço para gerar código da peça
+    // Pega o Ãºltimo cÃ³digo de serviÃ§o para gerar cÃ³digo da peÃ§a
     const ultimoServico = document.querySelector('#corpo-servicos tr:last-child .codigo-servico');
     const codigoServico = ultimoServico ? ultimoServico.value : 'A';
     
@@ -326,7 +327,7 @@ window.adicionarPeca = function() {
     novaLinha.id = `peca-${contadorPecas}`;
     novaLinha.innerHTML = `
         <td><input type="text" class="codigo-peca" value="${codigoServico}.${contadorPecas}" readonly style="width:80px"></td>
-        <td><input type="text" class="descricao-peca" placeholder="Descrição da peça" style="width:100%"></td>
+        <td><input type="text" class="descricao-peca" placeholder="DescriÃ§Ã£o da peÃ§a" style="width:100%"></td>
         <td><input type="number" class="qtd-peca" placeholder="Qtd" step="0.01" value="1" style="width:80px"></td>
         <td><input type="number" class="valor-custo-peca" placeholder="Custo" step="0.01" style="width:110px"></td>
         <td><input type="number" class="lucro-peca" placeholder="%" step="0.01" value="0" style="width:85px"></td>
@@ -341,8 +342,8 @@ window.adicionarPeca = function() {
 
 window.removerPeca = async function(botao) {
     const confirmado = window.ui?.confirmAsync
-        ? await window.ui.confirmAsync('Confirma remover esta peça?')
-        : (window.ui ? window.ui.confirm('Confirma remover esta peça?') : confirm('Confirma remover esta peça?'));
+        ? await window.ui.confirmAsync('Confirma remover esta peÃ§a?')
+        : (window.ui ? window.ui.confirm('Confirma remover esta peÃ§a?') : confirm('Confirma remover esta peÃ§a?'));
     if (!confirmado) return;
 
     const linha = botao.closest('tr');
@@ -351,23 +352,23 @@ window.removerPeca = async function(botao) {
 };
 
 // ===========================================
-// FUNÇÃO PARA VERIFICAR CAMPOS EXISTENTES
+// FUNÃ‡ÃƒO PARA VERIFICAR CAMPOS EXISTENTES
 // ===========================================
 
 function verificarCamposExistentes() {
-    // Adicionar eventos a serviços existentes (se houver)
+    // Adicionar eventos a serviÃ§os existentes (se houver)
     document.querySelectorAll('#corpo-servicos tr').forEach(linha => {
         adicionarEventosServico(linha);
     });
     
-    // Adicionar eventos a peças existentes (se houver)
+    // Adicionar eventos a peÃ§as existentes (se houver)
     document.querySelectorAll('#corpo-pecas tr').forEach(linha => {
         adicionarEventosPeca(linha);
     });
 }
 
 // ===========================================
-// FUNÇÃO DE BUSCA DE CLIENTE
+// FUNÃ‡ÃƒO DE BUSCA DE CLIENTE
 // ===========================================
 
 window.buscarCliente = async function() {
@@ -395,7 +396,7 @@ window.buscarCliente = async function() {
         const resultados = await response.json();
 
         if (resultados.length === 0) {
-            alertErro('Cliente não encontrado.');
+            alertErro('Cliente nÃ£o encontrado.');
             return;
         }
 
@@ -410,7 +411,7 @@ window.buscarCliente = async function() {
 };
 
 // ===========================================
-// FUNÇÃO DE COLETA DE DADOS
+// FUNÃ‡ÃƒO DE COLETA DE DADOS
 // ===========================================
 
 function coletarDadosOrdem() {
@@ -427,11 +428,11 @@ function coletarDadosOrdem() {
 
     const profissionalValido = profissionaisDisponiveis.some((p) => (p?.nome || '').trim() === profissionalResponsavel);
     if (!profissionalValido) {
-        alertErro('Profissional inválido. Selecione um profissional cadastrado.');
+        alertErro('Profissional invÃ¡lido. Selecione um profissional cadastrado.');
         return null;
     }
     
-    // Coletar serviços
+    // Coletar serviÃ§os
     const servicos = [];
     document.querySelectorAll('#corpo-servicos tr').forEach(linha => {
         const descricao = linha.querySelector('.descricao-servico')?.value;
@@ -444,7 +445,7 @@ function coletarDadosOrdem() {
         }
     });
     
-    // Coletar peças
+    // Coletar peÃ§as
     const pecas = [];
     document.querySelectorAll('#corpo-pecas tr').forEach(linha => {
         const descricao = linha.querySelector('.descricao-peca')?.value;
@@ -461,7 +462,7 @@ function coletarDadosOrdem() {
     });
     
     if (servicos.length === 0 && pecas.length === 0) {
-        alertErro('Adicione pelo menos um serviço ou peça.');
+        alertErro('Adicione pelo menos um serviÃ§o ou peÃ§a.');
         return null;
     }
     
@@ -476,7 +477,7 @@ function coletarDadosOrdem() {
 }
 
 // ===========================================
-// FUNÇÃO SALVAR ORDEM
+// FUNÃ‡ÃƒO SALVAR ORDEM
 // ===========================================
 
 window.salvarOrdem = async function() {
@@ -491,47 +492,70 @@ window.salvarOrdem = async function() {
 };
 
 // ===========================================
-// FUNÇÃO SALVAR E IMPRIMIR - GERA PDF DIRETO
+// FUNÃ‡ÃƒO SALVAR E IMPRIMIR - GERA PDF DIRETO
 // ===========================================
 
 function montarMensagemOrcamento(resultado, dados) {
     const cliente = clienteSelecionado || {};
-    const telefoneCliente = cliente.telefone || 'não informado';
+    const telefoneCliente = cliente.telefone || 'nÃ£o informado';
     const servicosResumo = (dados.servicos || []).map((s) => `- ${s.descricao_servico}: ${formatarValor(s.valor_servico)}`).join('%0A');
     const pecasResumo = (dados.pecas || []).map((p) => `- ${p.descricao_peca}: ${formatarValor((p.quantidade || 0) * (p.valor_unitario || 0))}`).join('%0A');
 
     return [
-        `Olá! Orçamento da OS #${resultado.id}`,
+        `OlÃ¡! OrÃ§amento da OS #${resultado.id}`,
         `Cliente: ${cliente.nome_cliente || '---'}`,
         `Telefone do cliente: ${telefoneCliente}`,
-        `Veículo: ${(cliente.fabricante || '')} ${(cliente.modelo || '')} - ${cliente.placa || '---'}`.trim(),
+        `VeÃ­culo: ${(cliente.fabricante || '')} ${(cliente.modelo || '')} - ${cliente.placa || '---'}`.trim(),
         `Profissional: ${dados.profissional_responsavel || '---'}`,
-        dados.servicos?.length ? `Serviços:%0A${servicosResumo}` : 'Serviços: não informados',
-        dados.pecas?.length ? `Peças:%0A${pecasResumo}` : 'Peças: não informadas',
+        dados.servicos?.length ? `ServiÃ§os:%0A${servicosResumo}` : 'ServiÃ§os: nÃ£o informados',
+        dados.pecas?.length ? `PeÃ§as:%0A${pecasResumo}` : 'PeÃ§as: nÃ£o informadas',
         `Total: ${formatarValor(resultado.total_geral || 0)}`
     ].join('%0A%0A');
 }
 
-function abrirWhatsappOrcamento(resultado, dados) {
+function abrirWhatsappOrcamento(resultado, dados, janelaExistente = null) {
     const numeroWhatsapp = normalizarWhatsapp(whatsappOrcamentoConfigurado);
     if (!numeroWhatsapp) {
-        alertErro('Configure o WhatsApp da oficina em Configurações antes de enviar orçamento.');
+        alertErro('Configure o WhatsApp da oficina em ConfiguraÃ§Ãµes antes de enviar orÃ§amento.');
         return;
     }
     const mensagem = montarMensagemOrcamento(resultado, dados);
     const url = `https://wa.me/${numeroWhatsapp}?text=${mensagem}`;
-    window.open(url, '_blank', 'noopener');
+    const janela = janelaExistente || window.open('about:blank', '_blank', 'noopener');
+    if (janela) {
+        janela.location.replace(url);
+        return;
+    }
+    window.location.assign(url);
+}
+
+function abrirPreviewOrcamento(ordemId) {
+    const urlPdf = `/api/export/gerar-pdf/${ordemId}?inline=1`;
+    window.location.assign(urlPdf);
+    return true;
+}
+
+function prepararJanelaWhatsappOrcamento() {
+    const janela = window.open('about:blank', '_blank', 'noopener');
+    if (janela) {
+        janela.document.title = 'WhatsApp';
+        janela.document.body.innerHTML = '<p style="font-family: Arial, sans-serif; padding: 24px;">Preparando envio do orcamento no WhatsApp...</p>';
+    }
+    return janela;
 }
 
 window.enviarOrcamentoWhatsapp = async function() {
     const dados = coletarDadosOrdem();
-    if (!dados) return;
+    if (!dados) {
+        return;
+    }
 
     const resultado = await criarOrdemNoServidor(dados);
-    if (!resultado) return;
+    if (!resultado) {
+        return;
+    }
 
-    abrirWhatsappOrcamento(resultado, dados);
-    window.location.assign('/nova-os');
+    abrirPreviewOrcamento(resultado.id);
 };
 
 window.finalizarNoCaixa = async function() {
@@ -594,13 +618,13 @@ async function criarOrdemNoServidor(dados) {
     }
 }
 // ===========================================
-// FUNÇÃO CANCELAR
+// FUNÃ‡ÃƒO CANCELAR
 // ===========================================
 
 window.cancelar = async function() {
     const confirmado = window.ui?.confirmAsync
-        ? await window.ui.confirmAsync('Confirma cancelar esta operação?')
-        : (window.ui ? window.ui.confirm('Confirma cancelar esta operação?') : confirm('Confirma cancelar esta operação?'));
+        ? await window.ui.confirmAsync('Confirma cancelar esta operaÃ§Ã£o?')
+        : (window.ui ? window.ui.confirm('Confirma cancelar esta operaÃ§Ã£o?') : confirm('Confirma cancelar esta operaÃ§Ã£o?'));
     if (!confirmado) return;
     window.location.assign('/');
 };
@@ -644,7 +668,7 @@ function limparFormularioNovaOrdem() {
 }
 
 // ===========================================
-// TIMER PARA ATUALIZAÇÃO CONTÍNUA
+// TIMER PARA ATUALIZAÃ‡ÃƒO CONTÃNUA
 // ===========================================
 
 setInterval(function() {
@@ -652,7 +676,7 @@ setInterval(function() {
 }, 500);
 
 // ===========================================
-// INICIALIZAÇÃO
+// INICIALIZAÃ‡ÃƒO
 // ===========================================
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -701,4 +725,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
 

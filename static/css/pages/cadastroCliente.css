@@ -242,3 +242,35 @@
     font-size: 1.3rem;
     padding: 15px 30px;
 }
+
+/* Stepper styles */
+.stepper {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 24px;
+    justify-content: center;
+}
+.stepper .step {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    background: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-weight: 700;
+    border: 2px solid var(--border);
+}
+.stepper .step.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+.stepper .step.completed {
+    background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+}
+
+.stepper .step span { font-size: 0.8rem; font-weight: 600; }

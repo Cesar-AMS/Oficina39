@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Pre-visualizacao do Orcamento</title>
+    <link rel="stylesheet" href="/static/css/global.css">
+    <style>
+        body { margin: 0; background: #eef2f5; font-family: Arial, sans-serif; color: #1f2933; }
+        .preview-shell { min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+        .preview-topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 20px; background: #0a3147; color: #fff; }
+        .preview-title { margin: 0; font-size: 1.1rem; }
+        .preview-copy { margin: 4px 0 0; color: rgba(255,255,255,0.78); font-size: 0.92rem; }
+        .preview-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .preview-btn {
+            border: 1px solid rgba(255,255,255,0.24);
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .preview-stage { padding: 18px; }
+        .preview-card {
+            min-height: calc(100vh - 110px);
+            border-radius: 18px;
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid #d8e0e8;
+            position: relative;
+        }
+        .preview-frame { width: 100%; height: calc(100vh - 110px); border: 0; background: #fff; display: none; }
+        .preview-empty, .preview-fallback {
+            display: grid;
+            place-items: center;
+            min-height: calc(100vh - 110px);
+            padding: 24px;
+            text-align: center;
+            color: #5b6978;
+        }
+        .preview-fallback { display: none; gap: 16px; }
+        .preview-fallback p { max-width: 520px; margin: 0 auto; line-height: 1.5; }
+        .preview-fallback-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .preview-fallback .preview-btn { background: #0a3147; border-color: #0a3147; }
+    </style>
+</head>
+<body>
+    <div class="preview-shell">
+        <header class="preview-topbar">
+            <div>
+                <h1 class="preview-title">Pre-visualizacao do orcamento</h1>
+                <p class="preview-copy">Confira a nota antes de compartilhar com o cliente.</p>
+            </div>
+            <div class="preview-actions">
+                <button class="preview-btn" type="button" onclick="window.location.reload()">Atualizar</button>
+                <button class="preview-btn" type="button" onclick="window.print()">Imprimir</button>
+            </div>
+        </header>
+        <main class="preview-stage">
+            <div class="preview-card" id="previewCard">
+                <div class="preview-empty" id="previewEmpty">Gerando orcamento...</div>
+                <iframe class="preview-frame" id="previewFrame" title="Preview do orcamento"></iframe>
+                <div class="preview-fallback" id="previewFallback">
+                    <div>
+                        <h2>Não foi possível embutir a nota nessa janela.</h2>
+                        <p>Isso pode acontecer em alguns navegadores ou visualizadores internos. Você ainda pode abrir o PDF diretamente em outra aba ou baixar o arquivo.</p>
+                    </div>
+                    <div class="preview-fallback-actions">
+                        <a class="preview-btn" id="abrirPdfDireto" target="_blank" rel="noopener">Abrir PDF direto</a>
+                        <a class="preview-btn" id="baixarPdf" download>Baixar PDF</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const ordemId = params.get('id');
+            const empty = document.getElementById('previewEmpty');
+            const frame = document.getElementById('previewFrame');
+            const fallback = document.getElementById('previewFallback');
+            const abrirDireto = document.getElementById('abrirPdfDireto');
+            const baixarPdf = document.getElementById('baixarPdf');
+
+            if (!ordemId) {
+                empty.textContent = 'ID da ordem nao informado para a pre-visualizacao.';
+                return;
+            }
+
+            const pdfUrl = `/api/export/gerar-pdf/${ordemId}?inline=1`;
+            abrirDireto.href = pdfUrl;
+            baixarPdf.href = `/api/export/gerar-pdf/${ordemId}`;
+
+            let blobUrl = '';
+
+            function mostrarFallback() {
+                empty.style.display = 'none';
+                frame.style.display = 'none';
+                fallback.style.display = 'grid';
+            }
+
+            fetch(pdfUrl)
+                .then((response) => {
+                    if (!response.ok) throw new Error('Falha ao carregar PDF');
+                    return response.blob();
+                })
+                .then((blob) => {
+                    blobUrl = URL.createObjectURL(blob);
+                    abrirDireto.href = blobUrl;
+                    frame.src = blobUrl;
+                    frame.style.display = 'block';
+                    empty.style.display = 'none';
+
+                    const timer = setTimeout(() => {
+                        if (!frame.contentWindow) mostrarFallback();
+                    }, 2500);
+
+                    frame.onload = function () {
+                        clearTimeout(timer);
+                    };
+                })
+                .catch(() => {
+                    mostrarFallback();
+                });
+
+            window.addEventListener('beforeunload', function () {
+                if (blobUrl) URL.revokeObjectURL(blobUrl);
+            });
+        })();
+    </script>
+</body>
+</html>
