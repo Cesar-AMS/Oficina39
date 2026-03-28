@@ -70,13 +70,12 @@
                 <iframe class="preview-frame" id="previewFrame" title="Preview do orcamento"></iframe>
                 <div class="preview-fallback" id="previewFallback">
                     <div>
-                        <h2>Nao foi possivel embutir a nota nessa janela.</h2>
-                        <p>Voce ainda pode salvar o PDF escolhendo a pasta ou baixar o arquivo diretamente para enviar manualmente.</p>
+                        <h2>A visualizacao em PDF nao abriu nessa janela.</h2>
+                        <p>Voce ainda pode salvar a nota no computador e abrir o PDF direto para conferir antes de enviar manualmente.</p>
                     </div>
                     <div class="preview-fallback-actions">
                         <button class="preview-btn" id="salvarPdf" type="button">Salvar PDF em uma pasta</button>
                         <a class="preview-btn" id="abrirPdfDireto" target="_blank" rel="noopener">Abrir PDF direto</a>
-                        <a class="preview-btn" id="baixarPdf" download>Baixar PDF direto</a>
                     </div>
                 </div>
             </div>
@@ -90,7 +89,6 @@
             const frame = document.getElementById('previewFrame');
             const fallback = document.getElementById('previewFallback');
             const abrirDireto = document.getElementById('abrirPdfDireto');
-            const baixarPdf = document.getElementById('baixarPdf');
             const salvarTopo = document.getElementById('salvarTopo');
             const salvarPdf = document.getElementById('salvarPdf');
 
@@ -103,15 +101,18 @@
             const pdfDownloadUrl = `/api/export/gerar-pdf/${ordemId}`;
             const nomeArquivo = `nota_ordem_${ordemId}.pdf`;
             abrirDireto.href = pdfUrl;
-            baixarPdf.href = pdfDownloadUrl;
-            baixarPdf.download = nomeArquivo;
 
-            let blobUrl = '';
+            const apiDesktop = window.pywebview && window.pywebview.api ? window.pywebview.api : null;
 
             async function salvarPdfEscolhendoPasta() {
-                if (!blobUrl) {
-                    window.location.assign(pdfDownloadUrl);
-                    return;
+                if (apiDesktop && apiDesktop.salvar_pdf) {
+                    const resposta = await apiDesktop.salvar_pdf(pdfDownloadUrl, nomeArquivo);
+                    if (resposta && resposta.ok) {
+                        return;
+                    }
+                    if (resposta && resposta.cancelado) {
+                        return;
+                    }
                 }
 
                 if (window.showSaveFilePicker) {
@@ -123,7 +124,7 @@
                         }]
                     });
                     const writable = await handle.createWritable();
-                    const response = await fetch(blobUrl);
+                    const response = await fetch(pdfDownloadUrl);
                     const blob = await response.blob();
                     await writable.write(blob);
                     await writable.close();
@@ -131,7 +132,7 @@
                 }
 
                 const link = document.createElement('a');
-                link.href = blobUrl || pdfDownloadUrl;
+                link.href = pdfDownloadUrl;
                 link.download = nomeArquivo;
                 document.body.appendChild(link);
                 link.click();
@@ -156,33 +157,32 @@
                 fallback.style.display = 'grid';
             }
 
-            fetch(pdfUrl)
+            const timeoutFallback = setTimeout(() => {
+                if (empty.style.display !== 'none') {
+                    mostrarFallback();
+                }
+            }, 2500);
+
+            frame.onload = function () {
+                clearTimeout(timeoutFallback);
+                frame.style.display = 'block';
+                empty.style.display = 'none';
+            };
+
+            frame.onerror = function () {
+                clearTimeout(timeoutFallback);
+                mostrarFallback();
+            };
+
+            fetch(pdfUrl, { method: 'HEAD' })
                 .then((response) => {
                     if (!response.ok) throw new Error('Falha ao carregar PDF');
-                    return response.blob();
-                })
-                .then((blob) => {
-                    blobUrl = URL.createObjectURL(blob);
-                    abrirDireto.href = blobUrl;
-                    frame.src = blobUrl;
-                    frame.style.display = 'block';
-                    empty.style.display = 'none';
-
-                    const timer = setTimeout(() => {
-                        if (!frame.contentWindow) mostrarFallback();
-                    }, 2500);
-
-                    frame.onload = function () {
-                        clearTimeout(timer);
-                    };
+                    frame.src = pdfUrl;
                 })
                 .catch(() => {
+                    clearTimeout(timeoutFallback);
                     mostrarFallback();
                 });
-
-            window.addEventListener('beforeunload', function () {
-                if (blobUrl) URL.revokeObjectURL(blobUrl);
-            });
         })();
     </script>
 </body>

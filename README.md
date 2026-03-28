@@ -11,7 +11,6 @@ Sistema de gestao para oficina mecanica, com operacao local no Windows, ordens d
 - relatorios operacionais e por profissional
 - exportacao e importacao de dados
 - geracao de recibo/ordem em PDF
-- execucao em janela propria via executavel
 
 ## Stack
 
@@ -21,14 +20,11 @@ Sistema de gestao para oficina mecanica, com operacao local no Windows, ordens d
 - SQLite
 - HTML, CSS e JavaScript
 - ReportLab
-- PyInstaller
-- pywebview
 
 ## Estrutura do projeto
 
 ```text
 app.py                  # Inicializacao da aplicacao Flask
-desktop_app.py          # Execucao em janela propria
 extensions.py           # Extensoes e scheduler
 controllers/            # Controllers Flask (APIs e paginas)
 models/                 # Modelos de dados
@@ -40,9 +36,7 @@ infrastructure/         # Suporte tecnico (email, backup, PDF, log)
 views/                  # Paginas HTML
 static/                 # CSS, JS e imagens
 tests/                  # Testes automatizados
-scripts/                # Scripts de build
 docs/                   # Documentacao complementar
-artifacts/              # Saida dos builds
 ```
 
 ## Requisitos
@@ -65,28 +59,6 @@ Depois abra:
 http://localhost:5000
 ```
 
-## Como iniciar pelo atalho local
-
-Tambem e possivel iniciar com:
-
-```text
-INICIAR_OFICINA.bat
-```
-
-Esse arquivo procura o executavel empacotado em `artifacts/release/Oficina39`.
-
-## Como gerar o executavel
-
-```powershell
-.\scripts\build_windows.ps1
-```
-
-Saida esperada:
-
-```text
-artifacts\release\Oficina39\Oficina39.exe
-```
-
 ## Testes
 
 ```powershell
@@ -97,7 +69,5 @@ artifacts\release\Oficina39\Oficina39.exe
 
 Arquivos uteis na pasta [docs](./docs):
 
-- `EMPACOTAMENTO_WINDOWS.md`
-- `INSTALACAO_PENDRIVE_WINDOWS.md`
 - `OPERACAO_DIARIA_BACKUP_RESTORE.md`
 - `HOMOLOGACAO_RELEASE.md`

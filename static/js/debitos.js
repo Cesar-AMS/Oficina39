@@ -1,5 +1,8 @@
 let debitos = [];
 let debitosFiltrados = [];
+let paginaDebitosAtual = 1;
+const DEBITOS_POR_PAGINA = 15;
+let paginacaoDebitosEl;
 
 function alertErro(mensagem) {
     if (window.ui) return window.ui.error(mensagem);
@@ -26,12 +29,54 @@ function soDigitos(valor) {
     return String(valor || '').replace(/\D/g, '');
 }
 
+function renderPaginacaoDebitos(lista) {
+    if (!paginacaoDebitosEl) return;
+
+    const totalItens = lista.length;
+    const totalPaginas = Math.max(1, Math.ceil(totalItens / DEBITOS_POR_PAGINA));
+    paginaDebitosAtual = Math.min(Math.max(1, paginaDebitosAtual), totalPaginas);
+
+    if (!totalItens) {
+        paginacaoDebitosEl.innerHTML = '';
+        return;
+    }
+
+    const inicio = ((paginaDebitosAtual - 1) * DEBITOS_POR_PAGINA) + 1;
+    const fim = Math.min(totalItens, paginaDebitosAtual * DEBITOS_POR_PAGINA);
+
+    let html = `
+        <div class="paginacao-info">Mostrando ${inicio}-${fim} de ${totalItens} registros</div>
+        <div class="paginacao-acoes">
+            <button class="paginacao-btn" data-pagina="${paginaDebitosAtual - 1}" ${paginaDebitosAtual === 1 ? 'disabled' : ''}>Anterior</button>
+    `;
+
+    for (let pagina = 1; pagina <= totalPaginas; pagina += 1) {
+        html += `<button class="paginacao-btn ${pagina === paginaDebitosAtual ? 'ativo' : ''}" data-pagina="${pagina}">${pagina}</button>`;
+    }
+
+    html += `
+            <button class="paginacao-btn" data-pagina="${paginaDebitosAtual + 1}" ${paginaDebitosAtual === totalPaginas ? 'disabled' : ''}>Proxima</button>
+        </div>
+    `;
+
+    paginacaoDebitosEl.innerHTML = html;
+    paginacaoDebitosEl.querySelectorAll('[data-pagina]').forEach((botao) => {
+        botao.addEventListener('click', () => {
+            const proximaPagina = Number(botao.getAttribute('data-pagina'));
+            if (!Number.isFinite(proximaPagina) || proximaPagina === paginaDebitosAtual) return;
+            paginaDebitosAtual = proximaPagina;
+            renderTabelaDebitos(debitosFiltrados);
+        });
+    });
+}
+
 function filtrarDebitos(termo) {
     const texto = normalizarBusca(termo);
     const digitos = soDigitos(termo);
 
     if (!texto && !digitos) {
         debitosFiltrados = [...debitos];
+        paginaDebitosAtual = 1;
         renderTabelaDebitos(debitosFiltrados);
         return;
     }
@@ -47,6 +92,7 @@ function filtrarDebitos(termo) {
         );
     });
 
+    paginaDebitosAtual = 1;
     renderTabelaDebitos(debitosFiltrados);
 }
 
@@ -55,11 +101,15 @@ function renderTabelaDebitos(lista) {
     if (!tbody) return;
 
     if (!lista.length) {
+        renderPaginacaoDebitos([]);
         tbody.innerHTML = `<tr><td colspan="8" class="text-center mensagem-carregando">Nenhum débito em aberto.</td></tr>`;
         return;
     }
 
-    tbody.innerHTML = lista.map((ordem) => `
+    const inicio = (paginaDebitosAtual - 1) * DEBITOS_POR_PAGINA;
+    const listaPagina = lista.slice(inicio, inicio + DEBITOS_POR_PAGINA);
+
+    tbody.innerHTML = listaPagina.map((ordem) => `
         <tr>
             <td><strong>#${ordem.id}</strong></td>
             <td>
@@ -81,6 +131,7 @@ function renderTabelaDebitos(lista) {
             </td>
         </tr>
     `).join('');
+    renderPaginacaoDebitos(lista);
 }
 
 async function carregarDebitos() {
@@ -90,6 +141,7 @@ async function carregarDebitos() {
         if (!response.ok) throw new Error(dados.erro || 'Erro ao carregar débitos.');
         debitos = Array.isArray(dados) ? dados : [];
         debitosFiltrados = [...debitos];
+        paginaDebitosAtual = 1;
         renderTabelaDebitos(debitosFiltrados);
     } catch (error) {
         alertErro(error.message);
@@ -98,6 +150,7 @@ async function carregarDebitos() {
 
 document.addEventListener('DOMContentLoaded', () => {
     const campoBusca = document.getElementById('buscaDebitos');
+    paginacaoDebitosEl = document.getElementById('paginacaoDebitos');
     if (campoBusca) {
         campoBusca.addEventListener('input', (event) => filtrarDebitos(event.target.value || ''));
     }

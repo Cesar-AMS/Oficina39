@@ -5,52 +5,59 @@ color 0A
 
 cd /d "%~dp0"
 
-set "EXE_SAFE=artifacts\release-safe\Oficina39\Oficina39.exe"
-set "EXE_PADRAO=artifacts\release\Oficina39\Oficina39.exe"
-set "EXE_BUILD_SAFE=artifacts\build-work-safe\Oficina39\Oficina39.exe"
-set "EXE_BUILD=artifacts\build-work\Oficina39\Oficina39.exe"
+set "PYTHONW=.venv\Scripts\pythonw.exe"
+set "PYTHON=.venv\Scripts\python.exe"
+set "APP=main.py"
+set "LEGACY_APP=desktop_app.py"
+set "WEB_APP=app.py"
+set "MODO=silencioso"
+set "LOG_DIR=logs"
+set "LOG_ARQUIVO=%LOG_DIR%\desktop_debug.log"
 
-echo =========================================
-echo OFICINA 39 - SISTEMA DE GESTAO
-echo =========================================
-echo.
-echo Pasta do sistema: %cd%
-echo.
+if /I "%~1"=="debug" set "MODO=debug"
+if /I "%~1"=="verificar" set "MODO=verificar"
+if /I "%~1"=="console" set "MODO=verificar"
 
-if exist "%EXE_SAFE%" (
-    echo Abrindo versao atualizada...
-    start "" "%EXE_SAFE%"
+if not exist "%APP%" (
+    if exist "%LEGACY_APP%" (
+        set "APP=%LEGACY_APP%"
+    ) else (
+        echo Arquivo main.py nao encontrado.
+        pause
+        exit /b 1
+    )
+)
+
+if /I "%MODO%"=="verificar" (
+    if exist "%PYTHON%" (
+        if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
+        echo Iniciando Oficina 39 em modo de verificacao desktop...
+        echo O console ficara aberto para mostrar erros da inicializacao nativa.
+        echo O log desta execucao sera salvo em: %LOG_ARQUIVO%
+        echo.
+        echo ===== %date% %time% | modo=verificar =====>>"%LOG_ARQUIVO%"
+        "%PYTHON%" "%APP%" >>"%LOG_ARQUIVO%" 2>&1
+        set "EXIT_CODE=%errorlevel%"
+        echo.
+        echo O sistema foi encerrado com codigo: %EXIT_CODE%
+        echo Se algo falhar, confira o arquivo: %LOG_ARQUIVO%
+        echo Pressione qualquer tecla para fechar.
+        pause >nul
+        exit /b %EXIT_CODE%
+    )
+)
+
+if exist "%PYTHONW%" (
+    start "" "%PYTHONW%" "%APP%"
     exit /b 0
 )
 
-if exist "%EXE_PADRAO%" (
-    echo Abrindo versao padrao...
-    start "" "%EXE_PADRAO%"
+if exist "%PYTHON%" (
+    start "" "%PYTHON%" "%APP%"
     exit /b 0
 )
 
-if exist "%EXE_BUILD_SAFE%" (
-    echo Abrindo versao de trabalho segura...
-    start "" "%EXE_BUILD_SAFE%"
-    exit /b 0
-)
-
-if exist "%EXE_BUILD%" (
-    echo Abrindo versao de trabalho...
-    start "" "%EXE_BUILD%"
-    exit /b 0
-)
-
-echo Nenhum executavel foi encontrado.
-echo.
-echo Caminhos verificados:
-echo - %EXE_SAFE%
-echo - %EXE_PADRAO%
-echo - %EXE_BUILD_SAFE%
-echo - %EXE_BUILD%
-echo.
-echo Gere o executavel com:
-echo .\scripts\build_windows.ps1
+echo Ambiente virtual nao encontrado em .venv\Scripts.
 echo.
 pause
 exit /b 1

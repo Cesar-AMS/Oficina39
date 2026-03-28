@@ -59,6 +59,11 @@ def salvar_config_contador(dados):
     config.empresa_email = valor_opcional('empresa_email', config.empresa_email)
     config.empresa_telefone = valor_opcional('empresa_telefone', config.empresa_telefone)
     config.empresa_endereco = valor_opcional('empresa_endereco', config.empresa_endereco)
+    if 'tema_visual' in dados:
+        tema_visual = (dados.get('tema_visual') or 'escuro').strip().lower()
+        config.tema_visual = tema_visual if tema_visual in {'escuro', 'claro'} else 'escuro'
+    elif not config.tema_visual:
+        config.tema_visual = 'escuro'
     config.logo_index_path = valor_opcional('logo_index_path', config.logo_index_path)
     config.qrcode_1_path = valor_opcional('qrcode_1_path', config.qrcode_1_path)
     config.qrcode_2_path = valor_opcional('qrcode_2_path', config.qrcode_2_path)

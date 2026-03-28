@@ -13,7 +13,7 @@ from infrastructure.backup_service import criar_backup_database
 # ===========================================
 # CRIAR A APLICAÇÃO
 # ===========================================
-def create_app(testing: bool = False):
+def create_app(testing: bool = False, start_scheduler: bool = True):
     # Caminho absoluto para a pasta static
     basedir = os.path.abspath(os.path.dirname(__file__))
     static_dir = os.path.join(basedir, 'static')
@@ -42,6 +42,8 @@ def create_app(testing: bool = False):
     else:
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    if os.environ.get('OFICINA39_USE_WEBVIEW') == '1':
+        app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
     
     # Configurações de e-mail (preferir variáveis de ambiente)
     app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
@@ -192,6 +194,7 @@ def create_app(testing: bool = False):
                 'empresa_email': "ALTER TABLE config_contador ADD COLUMN empresa_email VARCHAR(120)",
                 'empresa_telefone': "ALTER TABLE config_contador ADD COLUMN empresa_telefone VARCHAR(30)",
                 'empresa_endereco': "ALTER TABLE config_contador ADD COLUMN empresa_endereco VARCHAR(180)",
+                'tema_visual': "ALTER TABLE config_contador ADD COLUMN tema_visual VARCHAR(20) DEFAULT 'escuro'",
                 'logo_index_path': "ALTER TABLE config_contador ADD COLUMN logo_index_path VARCHAR(255)",
                 'logo_index_formato': "ALTER TABLE config_contador ADD COLUMN logo_index_formato VARCHAR(20)",
                 'logo_index_escala': "ALTER TABLE config_contador ADD COLUMN logo_index_escala FLOAT DEFAULT 1.0",
@@ -222,7 +225,7 @@ def create_app(testing: bool = False):
     # ===========================================
     # INICIAR SCHEDULER (TAREFAS AGENDADAS) - não iniciar em modo de teste
     # ===========================================
-    if not app.config.get('TESTING', False):
+    if start_scheduler and not app.config.get('TESTING', False):
         if not scheduler.running:
             scheduler.start()
             atexit.register(lambda: scheduler.shutdown())
@@ -236,7 +239,7 @@ def create_app(testing: bool = False):
         except Exception as e:
             _logger2.exception(f"Backup diario falhou: {str(e)}")
 
-    if not app.config.get('TESTING', False):
+    if start_scheduler and not app.config.get('TESTING', False):
         if not scheduler.get_job('daily_db_backup'):
             scheduler.add_job(
                 gerar_backup_diario,
@@ -251,6 +254,14 @@ def create_app(testing: bool = False):
             _logger2.info("Job de backup diario agendado (02:30)")
 
     # Forçar exibição de erros no terminal por padrão, nível ajustável via env
+    if os.environ.get('OFICINA39_USE_WEBVIEW') == '1':
+        @app.after_request
+        def desabilitar_cache_desktop(response):
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+            return response
+
     import logging
     log_level = os.environ.get('LOG_LEVEL', 'DEBUG').upper()
     logging.basicConfig(level=getattr(logging, log_level, logging.DEBUG))

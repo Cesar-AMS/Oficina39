@@ -197,22 +197,26 @@
 
 #secao-personalizacao-index {
     display: grid;
-    gap: 18px;
+    gap: 20px;
 }
 
 .branding-top-row {
-    display: block;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    align-items: stretch;
+    gap: 18px;
     margin-bottom: 0;
 }
 
 .branding-top-field {
-    max-width: 720px;
+    max-width: none;
 }
 
 .branding-company-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px 18px;
+    gap: 18px;
+    align-items: stretch;
 }
 
 .branding-escala-badge {
@@ -235,9 +239,9 @@
 
 .branding-row {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) 320px;
-    align-items: start;
-    gap: 18px;
+    grid-template-columns: minmax(0, 1.1fr) minmax(320px, 360px);
+    align-items: stretch;
+    gap: 20px;
 }
 
 .branding-qrcode-grid,
@@ -251,9 +255,11 @@
 .branding-upload-group {
     min-width: 0;
     display: grid;
-    grid-template-rows: auto auto auto 1fr auto;
+    grid-template-rows: auto auto auto auto 1fr auto;
+    align-content: start;
     padding: 18px;
     min-height: 100%;
+    height: 100%;
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(10, 49, 71, 0.025), var(--bg-hover));
@@ -287,10 +293,10 @@
     justify-content: flex-start;
     align-items: center;
     gap: 14px;
-    padding: 18px;
+    padding: 20px;
     min-height: 100%;
     height: 100%;
-    align-self: start;
+    align-self: stretch;
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(10, 49, 71, 0.03), var(--bg-hover));
@@ -301,8 +307,9 @@
     width: 100%;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(180px, 220px);
-    align-items: end;
+    align-items: start;
     gap: 12px 16px;
+    padding-bottom: 2px;
 }
 
 .branding-preview-intro {
@@ -319,6 +326,8 @@
 .branding-toolbar-field {
     margin-bottom: 0;
     min-width: 0;
+    display: grid;
+    align-content: start;
 }
 
 .branding-toolbar-field label {
@@ -341,8 +350,8 @@
     --branding-logo-scale: 1;
     --branding-logo-offset-x: 0%;
     --branding-logo-offset-y: 0%;
-    width: 190px;
-    height: 190px;
+    width: 210px;
+    height: 210px;
     display: grid;
     place-items: center;
     margin: 0 auto;
@@ -376,6 +385,7 @@
     border-top: 1px solid var(--border);
     display: grid;
     gap: 10px;
+    margin-top: 2px;
 }
 
 .branding-ajuste-head {
@@ -426,8 +436,8 @@
 }
 
 .branding-preview-frame-qrcode {
-    width: 180px;
-    height: 180px;
+    width: 176px;
+    height: 176px;
     margin: 0 auto;
     border-radius: 22px;
     padding: 18px;
@@ -438,7 +448,7 @@
     justify-content: flex-start;
     min-height: 100%;
     height: 100%;
-    align-self: start;
+    align-self: stretch;
 }
 
 .branding-qrcode-grid .branding-upload-group,
@@ -456,15 +466,19 @@
 .branding-qrcode-pairs {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
-    align-items: start;
+    gap: 20px;
+    align-items: stretch;
 }
 
 .branding-qrcode-item {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 240px;
-    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 240px);
+    gap: 16px;
     align-items: stretch;
+}
+
+.branding-qrcode-item > * {
+    align-self: stretch;
 }
 
 .branding-upload-copy {
@@ -491,6 +505,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding-inline: 6px;
 }
 
 .branding-preview-company {
@@ -499,6 +514,7 @@
     border-top: 1px solid var(--border);
     display: grid;
     gap: 6px;
+    margin-top: auto;
 }
 
 .branding-preview-company p {
@@ -540,6 +556,15 @@
     margin-bottom: 0;
     display: grid;
     align-content: start;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: linear-gradient(180deg, rgba(10, 49, 71, 0.025), var(--bg-hover));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+#secao-personalizacao-index > .config-row:first-of-type {
+    align-items: stretch;
 }
 
 #secao-personalizacao-index > .config-row:first-of-type .form-group label,
@@ -614,6 +639,23 @@
     min-height: 38px;
 }
 
+#secao-personalizacao-index .branding-company-grid .form-group {
+    display: grid;
+    align-content: start;
+    margin-bottom: 0;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: linear-gradient(180deg, rgba(10, 49, 71, 0.025), var(--bg-hover));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+#secao-personalizacao-index .branding-company-grid .form-group label {
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+}
+
 .subtitulo-config {
     margin: 0 0 12px;
     font-size: 1rem;
@@ -634,6 +676,16 @@
 .config-row .form-group {
     flex: 1;
     min-width: 240px;
+}
+
+#secao-personalizacao-index .branding-top-row,
+#secao-personalizacao-index .branding-row {
+    align-items: stretch;
+}
+
+#secao-personalizacao-index .branding-row > .branding-preview-card,
+#secao-personalizacao-index .branding-row > .branding-upload-group {
+    align-self: stretch;
 }
 
 .botao-exportar {
@@ -819,12 +871,22 @@
 
     .branding-row,
     .branding-company-grid,
+    .branding-top-row,
     .branding-qrcode-grid,
     .branding-qrcode-preview-grid,
     .branding-qrcode-pairs,
     .branding-qrcode-item,
     .branding-preview-toolbar {
         grid-template-columns: 1fr;
+    }
+
+    .branding-row {
+        gap: 18px;
+    }
+
+    .branding-preview-frame {
+        width: 190px;
+        height: 190px;
     }
 
     .branding-upload-actions .btn,

@@ -286,6 +286,55 @@
     margin-top: 30px;
 }
 
+.paginacao-tabela {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding: 12px 4px 0;
+}
+
+.paginacao-info {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+}
+
+.paginacao-acoes {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.paginacao-btn {
+    min-width: 38px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.paginacao-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.paginacao-btn.ativo {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.paginacao-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 .modal-pagamento-overlay {
     position: fixed;
     inset: 0;
@@ -357,6 +406,15 @@
 
     .botoes-rodape .btn {
         width: 100%;
+    }
+
+    .paginacao-tabela {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .paginacao-acoes {
+        justify-content: center;
     }
 
     .tabela-orcens {

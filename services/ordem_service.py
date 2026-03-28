@@ -161,6 +161,18 @@ def atualizar_ordem(ordem, dados, request_ctx):
 
     if 'assinatura_cliente' in dados:
         ordem.assinatura_cliente = dados['assinatura_cliente']
+    if 'data_retirada' in dados:
+        valor_data_retirada = dados.get('data_retirada')
+        if valor_data_retirada:
+            if isinstance(valor_data_retirada, datetime):
+                ordem.data_retirada = valor_data_retirada
+            else:
+                try:
+                    ordem.data_retirada = datetime.strptime(str(valor_data_retirada), '%Y-%m-%d')
+                except ValueError:
+                    raise ValueError('Data de retirada inválida. Use o formato YYYY-MM-DD.')
+        else:
+            ordem.data_retirada = None
     if 'status' in dados:
         ordem.status = dados['status']
     if 'forma_pagamento' in dados:

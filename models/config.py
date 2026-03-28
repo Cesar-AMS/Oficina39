@@ -32,6 +32,7 @@ class ConfigContador(db.Model):
     empresa_email = db.Column(db.String(120))
     empresa_telefone = db.Column(db.String(30))
     empresa_endereco = db.Column(db.String(180))
+    tema_visual = db.Column(db.String(20), default='escuro')
     logo_index_path = db.Column(db.String(255))
     logo_index_formato = db.Column(db.String(20), default='circulo')
     logo_index_escala = db.Column(db.Float, default=1.0)
@@ -64,6 +65,7 @@ class ConfigContador(db.Model):
             'empresa_email': self.empresa_email,
             'empresa_telefone': self.empresa_telefone,
             'empresa_endereco': self.empresa_endereco,
+            'tema_visual': self.tema_visual or 'escuro',
             'logo_index_path': self.logo_index_path,
             'logo_index_formato': self.logo_index_formato or 'circulo',
             'logo_index_escala': float(self.logo_index_escala or 1.0),

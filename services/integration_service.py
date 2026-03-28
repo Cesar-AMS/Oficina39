@@ -51,8 +51,12 @@ def _api_key_por_provedor(tipo, provedor):
     config = _config()
     if not config:
         return None
-    primario = (config.cep_provider_primario if tipo == 'cep' else config.placa_provider_primario or '').strip().lower()
-    secundario = (config.cep_provider_secundario if tipo == 'cep' else config.placa_provider_secundario or '').strip().lower()
+    primario = (
+        (config.cep_provider_primario if tipo == 'cep' else config.placa_provider_primario) or ''
+    ).strip().lower()
+    secundario = (
+        (config.cep_provider_secundario if tipo == 'cep' else config.placa_provider_secundario) or ''
+    ).strip().lower()
     provedor = (provedor or '').strip().lower()
     if provedor and provedor == primario:
         return _api_key(tipo, 'primaria')
