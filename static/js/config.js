@@ -1,4 +1,4 @@
-// config.js
+﻿// config.js
 
 let profissionaisCadastrados = [];
 let previewLogoTemporaria = '';
@@ -97,7 +97,7 @@ function reorganizarSecaoPersonalizacao() {
         );
         if (labelPreview) {
             intro.prepend(labelPreview);
-            labelPreview.textContent = 'PrÃ©-visualizaÃ§Ã£o da logo';
+            labelPreview.textContent = 'Pré-visualização da logo';
         }
 
         if (labelPreview) labelPreview.textContent = 'Preview da logo';
@@ -797,3 +797,4 @@ window.alternarAbaConfig = alternarAbaConfig;
 window.enviarLogoIndex = enviarLogoIndex;
 window.enviarQrCode = enviarQrCode;
 window.salvarPersonalizacao = salvarPersonalizacao;
+

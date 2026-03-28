@@ -24,7 +24,7 @@ function alertErro(mensagem) {
 }
 
 // ===========================================
-// FUNÃ‡Ã•ES DE FORMATAÃ‡ÃƒO
+// FUNÇÕES DE FORMATAÇÃO
 // ===========================================
 
 function formatarValor(valor) {
@@ -58,12 +58,12 @@ function getStatusBadge(status) {
     else if (statusLower.includes('conclu')) classe = 'status-concluido';
     else if (statusLower.includes('garantia')) classe = 'status-garantia';
     
-    const statusExibicao = status === 'ConcluÃ­do' ? 'Finalizado' : (status || 'NÃ£o definido');
+    const statusExibicao = status === 'Concluído' ? 'Finalizado' : (status || 'Não definido');
     return `<span class="status-badge ${classe}">${statusExibicao}</span>`;
 }
 
 // ===========================================
-// FUNÃ‡ÃƒO AUXILIAR PARA SETAR VALOR
+// FUNÇÃO AUXILIAR PARA SETAR VALOR
 // ===========================================
 
 function setValue(id, valor, tipo = 'input') {
@@ -114,7 +114,7 @@ function preencherCampos() {
     setValue('status_financeiro', ordem.status_financeiro || '---');
     setValue('debito_valor_restante', formatarValor(ordem.saldo_pendente || 0));
     setValue('debito_vencimento', ordem.debito_vencimento || '---');
-    setValue('debito_observacao', ordem.debito_observacao || (Number(ordem.saldo_pendente || 0) > 0 ? 'Pagamento pendente sem observaÃ§Ã£o.' : 'Sem dÃ©bito pendente.'));
+    setValue('debito_observacao', ordem.debito_observacao || (Number(ordem.saldo_pendente || 0) > 0 ? 'Pagamento pendente sem observação.' : 'Sem débito pendente.'));
     
     setValue('data_entrada', formatarData(ordem.data_entrada));
     setValue('data_emissao', formatarData(ordem.data_emissao));
@@ -135,7 +135,7 @@ function preencherCampos() {
             });
             tbodyServicos.innerHTML = html;
         } else {
-            tbodyServicos.innerHTML = `<tr><td colspan="3" class="text-center mensagem-vazia">Nenhum serviÃ§o registrado</td></tr>`;
+            tbodyServicos.innerHTML = `<tr><td colspan="3" class="text-center mensagem-vazia">Nenhum serviço registrado</td></tr>`;
         }
     }
     
@@ -157,7 +157,7 @@ function preencherCampos() {
             });
             tbodyPecas.innerHTML = html;
         } else {
-            tbodyPecas.innerHTML = `<tr><td colspan="5" class="text-center mensagem-vazia">Nenhuma peÃ§a registrada</td></tr>`;
+            tbodyPecas.innerHTML = `<tr><td colspan="5" class="text-center mensagem-vazia">Nenhuma peça registrada</td></tr>`;
         }
     }
     
@@ -197,7 +197,7 @@ function renderTimelineStatus(logs) {
     el.innerHTML = logs.map((log) => `
         <div class="timeline-item">
             <div class="timeline-cabecalho">
-                <strong>${log.status_anterior || '---'} â†’ ${log.status_novo}</strong>
+                <strong>${log.status_anterior || '---'} → ${log.status_novo}</strong>
                 <span>${log.data_evento || '---'}</span>
             </div>
             <div class="timeline-detalhes">
@@ -216,7 +216,7 @@ function renderTimelineStatus(logs) {
 function mostrarErro(mensagem) {
     const container = document.querySelector('.container');
     container.innerHTML = `
-        <h1 style="color: var(--danger); text-align: center; margin: 50px 0;">âŒ ${mensagem}</h1>
+        <h1 style="color: var(--danger); text-align: center; margin: 50px 0;">Erro: ${mensagem}</h1>
         <div style="text-align: center;">
             <button class="btn btn-voltar" onclick="voltar()">Voltar</button>
         </div>
@@ -272,7 +272,7 @@ async function carregarTimelineStatus() {
 }
 
 // ===========================================
-// FUNÃ‡Ã•ES DE NAVEGAÃ‡ÃƒO
+// FUNÇÕES DE NAVEGAÇÃO
 // ===========================================
 
 function voltar() {
@@ -319,7 +319,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ===========================================
-// INICIALIZAÃ‡ÃƒO
+// INICIALIZAÇÃO
 // ===========================================
 
 document.addEventListener('DOMContentLoaded', async function() {

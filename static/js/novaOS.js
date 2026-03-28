@@ -1,5 +1,5 @@
 ﻿// ===========================================
-// ordemServico.js - VERSÃƒO PADRONIZADA
+// ordemServico.js - VERSÃO PADRONIZADA
 // ===========================================
 
 let clienteSelecionado = null;
@@ -21,7 +21,7 @@ function alertSucesso(mensagem) {
 }
 
 // ===========================================
-// FUNÃ‡Ã•ES AUXILIARES
+// FUNÇÕES AUXILIARES
 // ===========================================
 
 function formatarValor(valor) {
@@ -29,7 +29,7 @@ function formatarValor(valor) {
 }
 
 function formatarStatusExibicao(status) {
-    return status === 'ConcluÃ­do' ? 'Finalizado' : (status || '---');
+    return status === 'Concluído' ? 'Finalizado' : (status || '---');
 }
 
 function calcularValorVendaPeca(valorCusto, percentualLucro) {
@@ -91,7 +91,7 @@ function renderSugestoesCliente(lista) {
     box.innerHTML = lista.map((c, idx) => `
         <div class="sugestao-item" data-idx="${idx}">
             <div>${c.nome_cliente || '---'}</div>
-            <div class="sugestao-cpf">${c.cpf || 'CPF nÃ£o informado'}</div>
+            <div class="sugestao-cpf">${c.cpf || 'CPF não informado'}</div>
         </div>
     `).join('');
     box.style.display = 'block';
@@ -162,16 +162,16 @@ async function carregarWhatsappOrcamento() {
             whatsappOrcamentoConfigurado = numero;
         }
     } catch (error) {
-        console.error('Erro ao carregar WhatsApp do orÃ§amento:', error);
+        console.error('Erro ao carregar WhatsApp do orçamento:', error);
     }
 }
 
 // ===========================================
-// FUNÃ‡ÃƒO DE CÃLCULO (SERÃ CHAMADA DE VÃRIAS FORMAS)
+// FUNÇÃO DE CÁLCULO (SERÁ CHAMADA DE VÁRIAS FORMAS)
 // ===========================================
 
 window.calcularTotais = function() {
-    // Calcular serviÃ§os
+    // Calcular serviços
     let totalServicos = 0;
     document.querySelectorAll('#corpo-servicos .valor-servico').forEach(input => {
         let valor = parseFloat(input.value);
@@ -180,7 +180,7 @@ window.calcularTotais = function() {
         }
     });
     
-    // Calcular peÃ§as
+    // Calcular peças
     let totalPecas = 0;
     document.querySelectorAll('#corpo-pecas .total-peca').forEach(span => {
         let valorTexto = span.textContent.replace('R$ ', '').replace(',', '.');
@@ -201,7 +201,7 @@ window.calcularTotais = function() {
 };
 
 // ===========================================
-// FUNÃ‡ÃƒO PARA ATUALIZAR TOTAL DE UMA PEÃ‡A
+// FUNÇÃO PARA ATUALIZAR TOTAL DE UMA PEÇA
 // ===========================================
 
 window.calcularTotalPeca = function(elemento) {
@@ -221,7 +221,7 @@ window.calcularTotalPeca = function(elemento) {
 };
 
 // ===========================================
-// FUNÃ‡ÃƒO PARA ADICIONAR EVENTOS A UMA LINHA DE SERVIÃ‡O
+// FUNÇÃO PARA ADICIONAR EVENTOS A UMA LINHA DE SERVIÇO
 // ===========================================
 
 function adicionarEventosServico(linha) {
@@ -234,7 +234,7 @@ function adicionarEventosServico(linha) {
 }
 
 // ===========================================
-// FUNÃ‡ÃƒO PARA ADICIONAR EVENTOS A UMA LINHA DE PEÃ‡A
+// FUNÇÃO PARA ADICIONAR EVENTOS A UMA LINHA DE PEÇA
 // ===========================================
 
 function adicionarEventosPeca(linha) {
@@ -269,7 +269,7 @@ function adicionarEventosPeca(linha) {
 }
 
 // ===========================================
-// FUNÃ‡Ã•ES DE SERVIÃ‡OS
+// FUNÇÕES DE SERVIÇOS
 // ===========================================
 
 window.adicionarServico = function() {
@@ -278,7 +278,7 @@ window.adicionarServico = function() {
     
     const tbody = document.getElementById('corpo-servicos');
     if (!tbody) {
-        alertErro('Tabela de serviÃ§os nÃ£o encontrada.');
+        alertErro('Tabela de serviços não encontrada.');
         return;
     }
     
@@ -286,7 +286,7 @@ window.adicionarServico = function() {
     novaLinha.id = `servico-${contadorServicos}`;
     novaLinha.innerHTML = `
         <td><input type="text" class="codigo-servico" value="${codigo}" readonly style="width:60px"></td>
-        <td><input type="text" class="descricao-servico" placeholder="DescriÃ§Ã£o do serviÃ§o" style="width:100%"></td>
+        <td><input type="text" class="descricao-servico" placeholder="Descrição do serviço" style="width:100%"></td>
         <td><input type="number" class="valor-servico" placeholder="0,00" step="0.01" style="width:100%"></td>
         <td><button type="button" class="btn-remover" onclick="window.removerServico(this)">Excluir</button></td>
     `;
@@ -297,8 +297,8 @@ window.adicionarServico = function() {
 
 window.removerServico = async function(botao) {
     const confirmado = window.ui?.confirmAsync
-        ? await window.ui.confirmAsync('Confirma remover este serviÃ§o?')
-        : (window.ui ? window.ui.confirm('Confirma remover este serviÃ§o?') : confirm('Confirma remover este serviÃ§o?'));
+        ? await window.ui.confirmAsync('Confirma remover este serviço?')
+        : (window.ui ? window.ui.confirm('Confirma remover este serviço?') : confirm('Confirma remover este serviço?'));
     if (!confirmado) return;
 
     const linha = botao.closest('tr');
@@ -307,7 +307,7 @@ window.removerServico = async function(botao) {
 };
 
 // ===========================================
-// FUNÃ‡Ã•ES DE PEÃ‡AS
+// FUNÇÕES DE PEÇAS
 // ===========================================
 
 window.adicionarPeca = function() {
@@ -315,11 +315,11 @@ window.adicionarPeca = function() {
     
     const tbody = document.getElementById('corpo-pecas');
     if (!tbody) {
-        alertErro('Tabela de peÃ§as nÃ£o encontrada.');
+        alertErro('Tabela de peças não encontrada.');
         return;
     }
     
-    // Pega o Ãºltimo cÃ³digo de serviÃ§o para gerar cÃ³digo da peÃ§a
+    // Pega o último código de serviço para gerar código da peça
     const ultimoServico = document.querySelector('#corpo-servicos tr:last-child .codigo-servico');
     const codigoServico = ultimoServico ? ultimoServico.value : 'A';
     
@@ -327,7 +327,7 @@ window.adicionarPeca = function() {
     novaLinha.id = `peca-${contadorPecas}`;
     novaLinha.innerHTML = `
         <td><input type="text" class="codigo-peca" value="${codigoServico}.${contadorPecas}" readonly style="width:80px"></td>
-        <td><input type="text" class="descricao-peca" placeholder="DescriÃ§Ã£o da peÃ§a" style="width:100%"></td>
+        <td><input type="text" class="descricao-peca" placeholder="Descrição da peça" style="width:100%"></td>
         <td><input type="number" class="qtd-peca" placeholder="Qtd" step="0.01" value="1" style="width:80px"></td>
         <td><input type="number" class="valor-custo-peca" placeholder="Custo" step="0.01" style="width:110px"></td>
         <td><input type="number" class="lucro-peca" placeholder="%" step="0.01" value="0" style="width:85px"></td>
@@ -342,8 +342,8 @@ window.adicionarPeca = function() {
 
 window.removerPeca = async function(botao) {
     const confirmado = window.ui?.confirmAsync
-        ? await window.ui.confirmAsync('Confirma remover esta peÃ§a?')
-        : (window.ui ? window.ui.confirm('Confirma remover esta peÃ§a?') : confirm('Confirma remover esta peÃ§a?'));
+        ? await window.ui.confirmAsync('Confirma remover esta peça?')
+        : (window.ui ? window.ui.confirm('Confirma remover esta peça?') : confirm('Confirma remover esta peça?'));
     if (!confirmado) return;
 
     const linha = botao.closest('tr');
@@ -352,23 +352,23 @@ window.removerPeca = async function(botao) {
 };
 
 // ===========================================
-// FUNÃ‡ÃƒO PARA VERIFICAR CAMPOS EXISTENTES
+// FUNÇÃO PARA VERIFICAR CAMPOS EXISTENTES
 // ===========================================
 
 function verificarCamposExistentes() {
-    // Adicionar eventos a serviÃ§os existentes (se houver)
+    // Adicionar eventos a serviços existentes (se houver)
     document.querySelectorAll('#corpo-servicos tr').forEach(linha => {
         adicionarEventosServico(linha);
     });
     
-    // Adicionar eventos a peÃ§as existentes (se houver)
+    // Adicionar eventos a peças existentes (se houver)
     document.querySelectorAll('#corpo-pecas tr').forEach(linha => {
         adicionarEventosPeca(linha);
     });
 }
 
 // ===========================================
-// FUNÃ‡ÃƒO DE BUSCA DE CLIENTE
+// FUNÇÃO DE BUSCA DE CLIENTE
 // ===========================================
 
 window.buscarCliente = async function() {
@@ -396,7 +396,7 @@ window.buscarCliente = async function() {
         const resultados = await response.json();
 
         if (resultados.length === 0) {
-            alertErro('Cliente nÃ£o encontrado.');
+            alertErro('Cliente não encontrado.');
             return;
         }
 
@@ -411,7 +411,7 @@ window.buscarCliente = async function() {
 };
 
 // ===========================================
-// FUNÃ‡ÃƒO DE COLETA DE DADOS
+// FUNÇÃO DE COLETA DE DADOS
 // ===========================================
 
 function coletarDadosOrdem() {
@@ -428,11 +428,11 @@ function coletarDadosOrdem() {
 
     const profissionalValido = profissionaisDisponiveis.some((p) => (p?.nome || '').trim() === profissionalResponsavel);
     if (!profissionalValido) {
-        alertErro('Profissional invÃ¡lido. Selecione um profissional cadastrado.');
+        alertErro('Profissional inválido. Selecione um profissional cadastrado.');
         return null;
     }
     
-    // Coletar serviÃ§os
+    // Coletar serviços
     const servicos = [];
     document.querySelectorAll('#corpo-servicos tr').forEach(linha => {
         const descricao = linha.querySelector('.descricao-servico')?.value;
@@ -445,7 +445,7 @@ function coletarDadosOrdem() {
         }
     });
     
-    // Coletar peÃ§as
+    // Coletar peças
     const pecas = [];
     document.querySelectorAll('#corpo-pecas tr').forEach(linha => {
         const descricao = linha.querySelector('.descricao-peca')?.value;
@@ -462,7 +462,7 @@ function coletarDadosOrdem() {
     });
     
     if (servicos.length === 0 && pecas.length === 0) {
-        alertErro('Adicione pelo menos um serviÃ§o ou peÃ§a.');
+        alertErro('Adicione pelo menos um serviço ou peça.');
         return null;
     }
     
@@ -477,7 +477,7 @@ function coletarDadosOrdem() {
 }
 
 // ===========================================
-// FUNÃ‡ÃƒO SALVAR ORDEM
+// FUNÇÃO SALVAR ORDEM
 // ===========================================
 
 window.salvarOrdem = async function() {
@@ -492,56 +492,38 @@ window.salvarOrdem = async function() {
 };
 
 // ===========================================
-// FUNÃ‡ÃƒO SALVAR E IMPRIMIR - GERA PDF DIRETO
+// FUNÇÃO SALVAR E IMPRIMIR - GERA PDF DIRETO
 // ===========================================
 
 function montarMensagemOrcamento(resultado, dados) {
     const cliente = clienteSelecionado || {};
-    const telefoneCliente = cliente.telefone || 'nÃ£o informado';
-    const servicosResumo = (dados.servicos || []).map((s) => `- ${s.descricao_servico}: ${formatarValor(s.valor_servico)}`).join('%0A');
-    const pecasResumo = (dados.pecas || []).map((p) => `- ${p.descricao_peca}: ${formatarValor((p.quantidade || 0) * (p.valor_unitario || 0))}`).join('%0A');
+    const telefoneCliente = cliente.telefone || 'não informado';
+    const servicosResumo = (dados.servicos || []).map((s) => `- ${s.descricao_servico}: ${formatarValor(s.valor_servico)}`).join('\n');
+    const pecasResumo = (dados.pecas || []).map((p) => `- ${p.descricao_peca}: ${formatarValor((p.quantidade || 0) * (p.valor_unitario || 0))}`).join('\n');
 
     return [
-        `OlÃ¡! OrÃ§amento da OS #${resultado.id}`,
+        `Olá! Orçamento da OS #${resultado.id}`,
         `Cliente: ${cliente.nome_cliente || '---'}`,
         `Telefone do cliente: ${telefoneCliente}`,
-        `VeÃ­culo: ${(cliente.fabricante || '')} ${(cliente.modelo || '')} - ${cliente.placa || '---'}`.trim(),
+        `Veículo: ${(cliente.fabricante || '')} ${(cliente.modelo || '')} - ${cliente.placa || '---'}`.trim(),
         `Profissional: ${dados.profissional_responsavel || '---'}`,
-        dados.servicos?.length ? `ServiÃ§os:%0A${servicosResumo}` : 'ServiÃ§os: nÃ£o informados',
-        dados.pecas?.length ? `PeÃ§as:%0A${pecasResumo}` : 'PeÃ§as: nÃ£o informadas',
+        dados.servicos?.length ? `Serviços:\n${servicosResumo}` : 'Serviços: não informados',
+        dados.pecas?.length ? `Peças:\n${pecasResumo}` : 'Peças: não informadas',
         `Total: ${formatarValor(resultado.total_geral || 0)}`
-    ].join('%0A%0A');
+    ].join('\n\n');
 }
 
-function abrirWhatsappOrcamento(resultado, dados, janelaExistente = null) {
+function abrirPreviewOrcamento(ordemId, resultado = null, dados = null) {
     const numeroWhatsapp = normalizarWhatsapp(whatsappOrcamentoConfigurado);
-    if (!numeroWhatsapp) {
-        alertErro('Configure o WhatsApp da oficina em ConfiguraÃ§Ãµes antes de enviar orÃ§amento.');
-        return;
-    }
-    const mensagem = montarMensagemOrcamento(resultado, dados);
-    const url = `https://wa.me/${numeroWhatsapp}?text=${mensagem}`;
-    const janela = janelaExistente || window.open('about:blank', '_blank', 'noopener');
-    if (janela) {
-        janela.location.replace(url);
-        return;
-    }
-    window.location.assign(url);
-}
+    const mensagem = resultado && dados ? encodeURIComponent(montarMensagemOrcamento(resultado, dados)) : '';
+    const query = new URLSearchParams({ id: String(ordemId) });
 
-function abrirPreviewOrcamento(ordemId) {
-    const urlPdf = `/api/export/gerar-pdf/${ordemId}?inline=1`;
+    if (numeroWhatsapp) query.set('phone', numeroWhatsapp);
+    if (mensagem) query.set('text', mensagem);
+
+    const urlPdf = `/preview-orcamento.html?${query.toString()}`;
     window.location.assign(urlPdf);
     return true;
-}
-
-function prepararJanelaWhatsappOrcamento() {
-    const janela = window.open('about:blank', '_blank', 'noopener');
-    if (janela) {
-        janela.document.title = 'WhatsApp';
-        janela.document.body.innerHTML = '<p style="font-family: Arial, sans-serif; padding: 24px;">Preparando envio do orcamento no WhatsApp...</p>';
-    }
-    return janela;
 }
 
 window.enviarOrcamentoWhatsapp = async function() {
@@ -555,7 +537,7 @@ window.enviarOrcamentoWhatsapp = async function() {
         return;
     }
 
-    abrirPreviewOrcamento(resultado.id);
+    abrirPreviewOrcamento(resultado.id, resultado, dados);
 };
 
 window.finalizarNoCaixa = async function() {
@@ -618,13 +600,13 @@ async function criarOrdemNoServidor(dados) {
     }
 }
 // ===========================================
-// FUNÃ‡ÃƒO CANCELAR
+// FUNÇÃO CANCELAR
 // ===========================================
 
 window.cancelar = async function() {
     const confirmado = window.ui?.confirmAsync
-        ? await window.ui.confirmAsync('Confirma cancelar esta operaÃ§Ã£o?')
-        : (window.ui ? window.ui.confirm('Confirma cancelar esta operaÃ§Ã£o?') : confirm('Confirma cancelar esta operaÃ§Ã£o?'));
+        ? await window.ui.confirmAsync('Confirma cancelar esta operação?')
+        : (window.ui ? window.ui.confirm('Confirma cancelar esta operação?') : confirm('Confirma cancelar esta operação?'));
     if (!confirmado) return;
     window.location.assign('/');
 };
@@ -668,7 +650,7 @@ function limparFormularioNovaOrdem() {
 }
 
 // ===========================================
-// TIMER PARA ATUALIZAÃ‡ÃƒO CONTÃNUA
+// TIMER PARA ATUALIZAÇÃO CONTÍNUA
 // ===========================================
 
 setInterval(function() {
@@ -676,7 +658,7 @@ setInterval(function() {
 }, 500);
 
 // ===========================================
-// INICIALIZAÃ‡ÃƒO
+// INICIALIZAÇÃO
 // ===========================================
 
 document.addEventListener('DOMContentLoaded', function() {

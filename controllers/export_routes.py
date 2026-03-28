@@ -29,7 +29,7 @@ export_bp = Blueprint('export', __name__, url_prefix='/api/export')
 
 
 def _resolver_caminho_branding(valor_path):
-    """Converte caminhos pÃºblicos/relativos do branding para caminhos reais no disco."""
+    """Converte caminhos públicos/relativos do branding para caminhos reais no disco."""
     valor = (valor_path or '').strip()
     if not valor:
         return None
@@ -57,7 +57,7 @@ def _obter_branding_empresa():
     from models import ConfigContador
 
     config = ConfigContador.query.first()
-    # Arquivos padrÃ£o do sistema: entram apenas como fallback quando o cliente ainda nÃ£o enviou branding prÃ³prio.
+    # Arquivos padrão do sistema: entram apenas como fallback quando o cliente ainda não enviou branding próprio.
     logo_padrao_sistema = _resolver_caminho_branding('/static/images/picapau4.png')
     qrcode_1_padrao_sistema = _resolver_caminho_branding('/static/images/qrcodewhatsapp.jpeg')
     qrcode_2_padrao_sistema = _resolver_caminho_branding('/static/images/qrcodeinstagram.jpeg')
@@ -66,7 +66,7 @@ def _obter_branding_empresa():
     empresa_nome = 'OFICINA 39'
     empresa_telefone = '(11) 99209-2341'
     empresa_email = 'oficina39ca@gmail.com'
-    empresa_endereco = 'Rua Noel Rosa, 39 - PoÃ¡ - SP'
+    empresa_endereco = 'Rua Noel Rosa, 39 - Poá - SP'
     qrcode_1_path = qrcode_1_padrao_sistema
     qrcode_2_path = qrcode_2_padrao_sistema
     logo_escala = 1.0
@@ -112,7 +112,38 @@ def _obter_branding_empresa():
     }
 
 
-def _criar_logo_pdf(caminho_logo, largura_max, altura_max, escala=1.0):
+def _preparar_imagem_pdf(caminho_imagem, remover_bordas_brancas=False):
+    if not remover_bordas_brancas:
+        return caminho_imagem, None
+
+    try:
+        from PIL import Image as PILImage, ImageChops
+
+        imagem = PILImage.open(caminho_imagem).convert('RGB')
+        fundo = PILImage.new('RGB', imagem.size, 'white')
+        diferenca = ImageChops.difference(imagem, fundo)
+        bbox = diferenca.getbbox()
+        if not bbox:
+            return caminho_imagem, None
+
+        largura_original, altura_original = imagem.size
+        largura_bbox = bbox[2] - bbox[0]
+        altura_bbox = bbox[3] - bbox[1]
+
+        # So recorta quando houver borda branca significativa.
+        if largura_bbox >= largura_original * 0.96 and altura_bbox >= altura_original * 0.96:
+            return caminho_imagem, None
+
+        imagem_cortada = imagem.crop(bbox)
+        buffer = io.BytesIO()
+        imagem_cortada.save(buffer, format='PNG')
+        buffer.seek(0)
+        return buffer, buffer
+    except Exception:
+        return caminho_imagem, None
+
+
+def _criar_logo_pdf(caminho_logo, largura_max, altura_max, escala=1.0, remover_bordas_brancas=False):
     if not os.path.exists(caminho_logo):
         return None
 
@@ -122,10 +153,11 @@ def _criar_logo_pdf(caminho_logo, largura_max, altura_max, escala=1.0):
         escala = 1.0
 
     try:
-        leitor = ImageReader(caminho_logo)
+        origem_imagem, buffer_temporario = _preparar_imagem_pdf(caminho_logo, remover_bordas_brancas=remover_bordas_brancas)
+        leitor = ImageReader(origem_imagem)
         largura_img, altura_img = leitor.getSize()
         if not largura_img or not altura_img:
-            raise ValueError('Imagem invÃ¡lida')
+            raise ValueError('Imagem inválida')
 
         largura_alvo = float(largura_max) * escala
         altura_alvo = float(altura_max) * escala
@@ -133,8 +165,10 @@ def _criar_logo_pdf(caminho_logo, largura_max, altura_max, escala=1.0):
         largura_final = largura_img * proporcao
         altura_final = altura_img * proporcao
 
-        logo = Image(caminho_logo, width=largura_final, height=altura_final)
+        logo = Image(origem_imagem, width=largura_final, height=altura_final)
         logo.hAlign = 'LEFT'
+        if buffer_temporario is not None:
+            logo._imagem_buffer = buffer_temporario
         return logo
     except Exception:
         logo = Image(caminho_logo, width=largura_max * escala, height=altura_max * escala)
@@ -144,17 +178,17 @@ def _criar_logo_pdf(caminho_logo, largura_max, altura_max, escala=1.0):
 
 @export_bp.route('/gerar-pdf/<int:id>')
 def gerar_pdf_ordem(id):
-    """Gera recibo profissional da ordem de serviÃ§o"""
+    """Gera recibo profissional da ordem de serviço"""
 
     if not PDF_AVAILABLE:
-        return jsonify({'erro': 'Biblioteca ReportLab nÃ£o instalada'}), 500
+        return jsonify({'erro': 'Biblioteca ReportLab não instalada'}), 500
 
     try:
         from models import Ordem, Cliente
 
         ordem = db.session.get(Ordem, id)
         if not ordem:
-            return jsonify({'erro': 'Ordem nÃ£o encontrada'}), 404
+            return jsonify({'erro': 'Ordem não encontrada'}), 404
 
         cliente = db.session.get(Cliente, ordem.cliente_id)
 
@@ -282,19 +316,25 @@ def gerar_pdf_ordem(id):
         )
 
         # ===========================================
-        # CABEÃ‡ALHO
+        # CABEÇALHO
         # ===========================================
         branding = _obter_branding_empresa()
         logo_path = branding.get('logo_path') or ''
         if logo_path and os.path.exists(logo_path):
-            logo = _criar_logo_pdf(logo_path, logo_size, logo_size, branding.get('logo_escala', 1.0))
+            logo = _criar_logo_pdf(
+                logo_path,
+                logo_size,
+                logo_size,
+                branding.get('logo_escala', 1.0),
+                remover_bordas_brancas=True,
+            )
             logo_bloco = Table([[logo]], colWidths=[logo_size], hAlign='LEFT')
             logo_bloco.setStyle(TableStyle([
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
                 ('LEFTPADDING', (0, 0), (-1, -1), 0),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-                ('TOPPADDING', (0, 0), (-1, -1), 0),
+                ('TOPPADDING', (0, 0), (-1, -1), -3),
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
             ]))
         else:
@@ -304,36 +344,16 @@ def gerar_pdf_ordem(id):
         empresa_dados = Paragraph(
             f"<b>Contato:</b> {branding['empresa_telefone']}<br/>"
             f"<b>E-mail:</b> {branding['empresa_email']}<br/>"
-            f"<b>Endereco:</b> {branding['empresa_endereco']}",
+            f"<b>Endereço:</b> {branding['empresa_endereco']}",
             estilo_dados_empresa
         )
-        empresa_bloco = Table(
-            [[empresa_nome], [empresa_dados]],
-            colWidths=[92 * mm],
-            hAlign='LEFT'
-        )
+        empresa_bloco = Table([[empresa_nome], [empresa_dados]], hAlign='LEFT')
         empresa_bloco.setStyle(TableStyle([
             ('LEFTPADDING', (0, 0), (-1, -1), 0),
             ('RIGHTPADDING', (0, 0), (-1, -1), 0),
             ('TOPPADDING', (0, 0), (-1, -1), 0),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ]))
-
-        bloco_esquerdo = Table(
-            [[logo_bloco, empresa_bloco]],
-            colWidths=[logo_size + 2 * mm, 92 * mm],
-            hAlign='LEFT'
-        )
-        bloco_esquerdo.setStyle(TableStyle([
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-            ('TOPPADDING', (0, 0), (-1, -1), 0),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
-            ('LEFTPADDING', (1, 0), (1, -1), 4),
         ]))
 
         qr_imagens = []
@@ -349,7 +369,7 @@ def gerar_pdf_ordem(id):
             qr_tabela.setStyle(TableStyle([
                 ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 2),
+                ('LEFTPADDING', (0, 0), (-1, -1), 0),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 0),
                 ('TOPPADDING', (0, 0), (-1, -1), 0),
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
@@ -357,20 +377,27 @@ def gerar_pdf_ordem(id):
         else:
             qr_tabela = Paragraph("", estilo_normal)
 
+        qr_largura = (len(qr_imagens) * qr_size) + (max(0, len(qr_imagens) - 1) * qr_gap)
+        qr_largura = qr_largura if qr_largura > 0 else 28 * mm
+        logo_largura = logo_size + 2 * mm
+        empresa_largura = max(70 * mm, largura_conteudo - logo_largura - qr_largura)
+
         cabecalho_tabela = Table(
-            [[bloco_esquerdo, qr_tabela]],
-            colWidths=larguras_proporcionais(largura_conteudo, [152, 38]),
+            [[logo_bloco, empresa_bloco, qr_tabela]],
+            colWidths=[logo_largura, empresa_largura, qr_largura],
             hAlign='LEFT'
         )
         cabecalho_tabela.setStyle(TableStyle([
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-            ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('ALIGN', (2, 0), (2, -1), 'RIGHT'),
             ('LEFTPADDING', (0, 0), (-1, -1), 0),
             ('RIGHTPADDING', (0, 0), (-1, -1), 0),
             ('TOPPADDING', (0, 0), (-1, -1), 0),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
             ('LEFTPADDING', (1, 0), (1, -1), 4),
+            ('LEFTPADDING', (2, 0), (2, -1), 6),
         ]))
         elementos.append(cabecalho_tabela)
         linha_cabecalho = Table([['']], colWidths=[largura_conteudo], hAlign='LEFT')
@@ -385,14 +412,14 @@ def gerar_pdf_ordem(id):
         elementos.append(Spacer(1, 2*mm))
 
         # ===========================================
-        # TÃTULO
+        # TÍTULO
         # ===========================================
         elementos.append(
-            Paragraph(f"ORDEM DE SERVIÃ‡O #{ordem.id}", estilo_titulo_ordem))
+            Paragraph(f"ORDEM DE SERVIÇO #{ordem.id}", estilo_titulo_ordem))
         elementos.append(Spacer(1, 3*mm))
 
         # ===========================================
-        # DADOS DO CLIENTE E VEÃCULO
+        # DADOS DO CLIENTE E VEÍCULO
         # ===========================================
         elementos.append(Spacer(1, 2*mm))
 
@@ -410,15 +437,15 @@ def gerar_pdf_ordem(id):
             Paragraph(cliente.cpf or '---', estilo_normal)
         ])
 
-        # VeÃ­culo
+        # Veículo
         veiculo_str = f"{cliente.fabricante or ''} {cliente.modelo or ''} - {cliente.placa or ''} - {cliente.ano or ''} {cliente.cor or ''}".strip()
         if veiculo_str and veiculo_str != '- - -':
             dados_cliente.append([
-                Paragraph("Veiculo:", estilo_label),
+                Paragraph("Veículo:", estilo_label),
                 Paragraph(veiculo_str, estilo_normal)
             ])
 
-        # Profissional responsÃ¡vel
+        # Profissional responsável
         dados_cliente.append([
             Paragraph("Profissional:", estilo_label),
             Paragraph(ordem.profissional_responsavel or '---', estilo_normal)
@@ -445,12 +472,12 @@ def gerar_pdf_ordem(id):
             elementos.append(Spacer(1, 4*mm))
 
         # ===========================================
-        # SERVIÃ‡OS - VERSÃƒO ENCOSTADA NOS CANTOS
+        # SERVIÇOS
         # ===========================================
         elementos.append(Paragraph("SERVICOS REALIZADOS", estilo_secao))
 
         if ordem.servicos and len(ordem.servicos) > 0:
-            servicos_data = [['CÃ³digo', 'DescriÃ§Ã£o', 'Valor']]
+            servicos_data = [['Código', 'Descrição', 'Valor']]
             for s in ordem.servicos:
                 servicos_data.append([
                     s.codigo_servico or '---',
@@ -470,7 +497,7 @@ def gerar_pdf_ordem(id):
                 ('BACKGROUND', (0, 1), (-1, -1), colors.white),
                 ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#dddddd')),
 
-                # CabeÃ§alhos alinhados
+                # Cabeçalhos alinhados
                 ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
 
                 # Corpo da tabela
@@ -486,16 +513,16 @@ def gerar_pdf_ordem(id):
             elementos.append(servicos_table)
         else:
             elementos.append(
-                Paragraph("Nenhum serviÃ§o registrado", estilo_normal))
+                Paragraph("Nenhum serviço registrado", estilo_normal))
         elementos.append(Spacer(1, 5*mm))
 
         # ===========================================
-        # PEÃ‡AS - VERSÃƒO ENCOSTADA NOS CANTOS
+        # PEÇAS
         # ===========================================
         elementos.append(Paragraph("PECAS UTILIZADAS", estilo_secao))
 
         if ordem.pecas and len(ordem.pecas) > 0:
-            pecas_data = [['CÃ³digo', 'DescriÃ§Ã£o', 'Qtd', 'Lucro %', 'Valor Unit.', 'Total']]
+            pecas_data = [['Código', 'Descrição', 'Qtd', 'Lucro %', 'Valor Unit.', 'Total']]
             for p in ordem.pecas:
                 total = p.quantidade * p.valor_unitario
                 pecas_data.append([
@@ -522,7 +549,7 @@ def gerar_pdf_ordem(id):
                 ('BACKGROUND', (0, 1), (-1, -1), colors.white),
                 ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#dddddd')),
 
-                # CabeÃ§alhos alinhados
+                # Cabeçalhos alinhados
                 ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
 
                 # Corpo da tabela
@@ -538,7 +565,7 @@ def gerar_pdf_ordem(id):
             elementos.append(pecas_table)
         else:
             elementos.append(
-                Paragraph("Nenhuma peÃ§a registrada", estilo_normal))
+                Paragraph("Nenhuma peça registrada", estilo_normal))
         elementos.append(Spacer(1, 8*mm))
 
         # ===========================================
@@ -594,7 +621,7 @@ def gerar_pdf_ordem(id):
 
         pagamentos = getattr(ordem, 'pagamentos', []) or []
         if saldo_pendente > 0.009 or pagamentos:
-            elementos.append(Paragraph("SITUACAO FINANCEIRA", estilo_secao))
+            elementos.append(Paragraph("SITUAÇÃO FINANCEIRA", estilo_secao))
 
         if saldo_pendente > 0.009:
             detalhes_debito = []
@@ -607,13 +634,13 @@ def gerar_pdf_ordem(id):
                 )
             if getattr(ordem, 'debito_observacao', None):
                 detalhes_debito.append(
-                    f"<b>Observacao do debito:</b> {ordem.debito_observacao}"
+                    f"<b>Observação do débito:</b> {ordem.debito_observacao}"
                 )
             elementos.append(Paragraph('<br/>'.join(detalhes_debito), estilo_normal))
             elementos.append(Spacer(1, 3*mm))
 
         if pagamentos:
-            pagamentos_data = [['Data', 'Forma', 'Valor', 'ObservaÃ§Ã£o']]
+            pagamentos_data = [['Data', 'Forma', 'Valor', 'Observação']]
             for pg in pagamentos:
                 pagamentos_data.append([
                     pg.data_pagamento.strftime('%d/%m/%Y %H:%M') if getattr(pg, 'data_pagamento', None) else '---',
@@ -665,7 +692,7 @@ def gerar_pdf_ordem(id):
         elementos.append(Spacer(1, 5*mm))
 
         # ===========================================
-        # RODAPÃ‰
+        # RODAPÉ
         # ===========================================
         rodape_style = ParagraphStyle(
             'Rodape',
@@ -676,7 +703,7 @@ def gerar_pdf_ordem(id):
         )
         elementos.append(Paragraph(
             f"Documento gerado em {datetime.now().strftime('%d/%m/%Y %H:%M')}", rodape_style))
-        elementos.append(Paragraph("Obrigado pela preferÃªncia!", rodape_style))
+        elementos.append(Paragraph("Obrigado pela preferência!", rodape_style))
 
         # Construir PDF
         doc.build(elementos)
@@ -697,9 +724,9 @@ def gerar_pdf_ordem(id):
 
 @export_bp.route('/fechamento-mensal-contador-pdf', methods=['GET'])
 def gerar_pdf_fechamento_mensal_contador():
-    """Gera PDF mensal com produÃ§Ã£o por profissional e resumo por forma de pagamento."""
+    """Gera PDF mensal com produção por profissional e resumo por forma de pagamento."""
     if not PDF_AVAILABLE:
-        return jsonify({'erro': 'Biblioteca ReportLab nÃ£o instalada'}), 500
+        return jsonify({'erro': 'Biblioteca ReportLab não instalada'}), 500
 
     try:
         from sqlalchemy import func
@@ -748,11 +775,11 @@ def gerar_pdf_fechamento_mensal_contador():
         pagamentos_rows = (
             Ordem.query
             .with_entities(
-                func.coalesce(func.nullif(func.trim(Ordem.forma_pagamento), ''), 'NÃ£o informado').label('forma_pagamento'),
+                func.coalesce(func.nullif(func.trim(Ordem.forma_pagamento), ''), 'Não informado').label('forma_pagamento'),
                 func.coalesce(func.sum(Ordem.total_geral), 0.0).label('valor_total'),
                 func.count(Ordem.id).label('quantidade')
             )
-            .filter(Ordem.status.in_(['ConcluÃ­do', 'Garantia']))
+            .filter(Ordem.status.in_(['Concluído', 'Garantia']))
             .filter(Ordem.data_conclusao >= data_inicio, Ordem.data_conclusao <= data_fim)
             .group_by('forma_pagamento')
             .order_by(func.coalesce(func.sum(Ordem.total_geral), 0.0).desc())
@@ -781,12 +808,12 @@ def gerar_pdf_fechamento_mensal_contador():
         )
 
         elementos.append(Paragraph('Fechamento Mensal - Contador', titulo))
-        elementos.append(Paragraph(f'PerÃ­odo: {data_inicio.strftime("%d/%m/%Y")} a {data_fim.strftime("%d/%m/%Y")}', subt))
-        elementos.append(Paragraph(f'Total geral do perÃ­odo: R$ {total_geral:.2f}'.replace('.', ','), styles['Normal']))
+        elementos.append(Paragraph(f'Período: {data_inicio.strftime("%d/%m/%Y")} a {data_fim.strftime("%d/%m/%Y")}', subt))
+        elementos.append(Paragraph(f'Total geral do período: R$ {total_geral:.2f}'.replace('.', ','), styles['Normal']))
         elementos.append(Spacer(1, 4*mm))
 
-        elementos.append(Paragraph('ProduÃ§Ã£o por Profissional', secao))
-        tabela_prof = [['Profissional', 'Qtd ServiÃ§os', 'Valor Total', 'MÃ©dia']]
+        elementos.append(Paragraph('Produção por Profissional', secao))
+        tabela_prof = [['Profissional', 'Qtd Serviços', 'Valor Total', 'Média']]
         for r in ranking_rows:
             tabela_prof.append([
                 r.profissional,
@@ -837,7 +864,7 @@ def gerar_pdf_fechamento_mensal_contador():
         return send_file(buffer, as_attachment=True, download_name=nome, mimetype='application/pdf')
 
     except ValueError:
-        return jsonify({'erro': 'Formato invÃ¡lido. Use mes=YYYY-MM.'}), 400
+        return jsonify({'erro': 'Formato inválido. Use mes=YYYY-MM.'}), 400
     except Exception as e:
         traceback.print_exc()
         return jsonify({'erro': str(e)}), 500
@@ -853,18 +880,18 @@ def exportar_dados():
         formatos_validos = {'db', 'csv', 'xlsx', 'json'}
 
         if tipo not in tipos_validos:
-            return jsonify({'erro': 'Tipo de exportaÃ§Ã£o invÃ¡lido.'}), 400
+            return jsonify({'erro': 'Tipo de exportação inválido.'}), 400
         if formato not in formatos_validos:
-            return jsonify({'erro': 'Formato de exportaÃ§Ã£o invÃ¡lido.'}), 400
+            return jsonify({'erro': 'Formato de exportação inválido.'}), 400
 
         nome_arquivo = ExportService.get_nome_arquivo(tipo, formato)
 
         if formato == 'db':
             if tipo != 'completo':
-                return jsonify({'erro': 'ExportaÃ§Ã£o .db disponÃ­vel apenas para tipo completo.'}), 400
+                return jsonify({'erro': 'Exportação .db disponível apenas para tipo completo.'}), 400
             caminho_db = ExportService.get_database_path()
             if not os.path.exists(caminho_db):
-                return jsonify({'erro': 'Arquivo database.db nÃ£o encontrado.'}), 404
+                return jsonify({'erro': 'Arquivo database.db não encontrado.'}), 404
             return send_file(caminho_db, as_attachment=True, download_name=nome_arquivo, mimetype='application/octet-stream')
 
         if formato == 'csv':
@@ -907,7 +934,7 @@ def importar_dados():
         formato = (request.form.get('formato') or '').strip().lower()
 
         if not arquivo:
-            return jsonify({'erro': 'Arquivo nÃ£o enviado.'}), 400
+            return jsonify({'erro': 'Arquivo não enviado.'}), 400
         if not formato:
             nome = (arquivo.filename or '').lower()
             if nome.endswith('.json'):
@@ -917,10 +944,10 @@ def importar_dados():
             elif nome.endswith('.xlsx'):
                 formato = 'xlsx'
         if formato not in {'json', 'csv', 'xlsx'}:
-            return jsonify({'erro': 'Formato invÃ¡lido para importaÃ§Ã£o.'}), 400
+            return jsonify({'erro': 'Formato inválido para importação.'}), 400
 
         if formato in {'csv', 'xlsx'} and tipo == 'completo':
-            return jsonify({'erro': 'ImportaÃ§Ã£o completa via CSV/XLSX nÃ£o Ã© suportada. Use JSON.'}), 400
+            return jsonify({'erro': 'Importação completa via CSV/XLSX não é suportada. Use JSON.'}), 400
 
         if formato == 'json':
             dados = json.load(arquivo.stream)

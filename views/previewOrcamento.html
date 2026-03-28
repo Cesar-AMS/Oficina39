@@ -24,6 +24,10 @@
             align-items: center;
             justify-content: center;
         }
+        .preview-btn[disabled] {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
         .preview-stage { padding: 18px; }
         .preview-card {
             min-height: calc(100vh - 110px);
@@ -53,11 +57,11 @@
         <header class="preview-topbar">
             <div>
                 <h1 class="preview-title">Pre-visualizacao do orcamento</h1>
-                <p class="preview-copy">Confira a nota antes de compartilhar com o cliente.</p>
+                <p class="preview-copy">Confira a nota abaixo, salve o PDF escolhendo a pasta e depois envie manualmente.</p>
             </div>
             <div class="preview-actions">
-                <button class="preview-btn" type="button" onclick="window.location.reload()">Atualizar</button>
-                <button class="preview-btn" type="button" onclick="window.print()">Imprimir</button>
+                <a class="preview-btn" href="/">Voltar para inicio</a>
+                <button class="preview-btn" id="salvarTopo" type="button">Salvar PDF em uma pasta</button>
             </div>
         </header>
         <main class="preview-stage">
@@ -66,12 +70,13 @@
                 <iframe class="preview-frame" id="previewFrame" title="Preview do orcamento"></iframe>
                 <div class="preview-fallback" id="previewFallback">
                     <div>
-                        <h2>Não foi possível embutir a nota nessa janela.</h2>
-                        <p>Isso pode acontecer em alguns navegadores ou visualizadores internos. Você ainda pode abrir o PDF diretamente em outra aba ou baixar o arquivo.</p>
+                        <h2>Nao foi possivel embutir a nota nessa janela.</h2>
+                        <p>Voce ainda pode salvar o PDF escolhendo a pasta ou baixar o arquivo diretamente para enviar manualmente.</p>
                     </div>
                     <div class="preview-fallback-actions">
+                        <button class="preview-btn" id="salvarPdf" type="button">Salvar PDF em uma pasta</button>
                         <a class="preview-btn" id="abrirPdfDireto" target="_blank" rel="noopener">Abrir PDF direto</a>
-                        <a class="preview-btn" id="baixarPdf" download>Baixar PDF</a>
+                        <a class="preview-btn" id="baixarPdf" download>Baixar PDF direto</a>
                     </div>
                 </div>
             </div>
@@ -86,6 +91,8 @@
             const fallback = document.getElementById('previewFallback');
             const abrirDireto = document.getElementById('abrirPdfDireto');
             const baixarPdf = document.getElementById('baixarPdf');
+            const salvarTopo = document.getElementById('salvarTopo');
+            const salvarPdf = document.getElementById('salvarPdf');
 
             if (!ordemId) {
                 empty.textContent = 'ID da ordem nao informado para a pre-visualizacao.';
@@ -93,10 +100,55 @@
             }
 
             const pdfUrl = `/api/export/gerar-pdf/${ordemId}?inline=1`;
+            const pdfDownloadUrl = `/api/export/gerar-pdf/${ordemId}`;
+            const nomeArquivo = `nota_ordem_${ordemId}.pdf`;
             abrirDireto.href = pdfUrl;
-            baixarPdf.href = `/api/export/gerar-pdf/${ordemId}`;
+            baixarPdf.href = pdfDownloadUrl;
+            baixarPdf.download = nomeArquivo;
 
             let blobUrl = '';
+
+            async function salvarPdfEscolhendoPasta() {
+                if (!blobUrl) {
+                    window.location.assign(pdfDownloadUrl);
+                    return;
+                }
+
+                if (window.showSaveFilePicker) {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: nomeArquivo,
+                        types: [{
+                            description: 'Arquivo PDF',
+                            accept: { 'application/pdf': ['.pdf'] }
+                        }]
+                    });
+                    const writable = await handle.createWritable();
+                    const response = await fetch(blobUrl);
+                    const blob = await response.blob();
+                    await writable.write(blob);
+                    await writable.close();
+                    return;
+                }
+
+                const link = document.createElement('a');
+                link.href = blobUrl || pdfDownloadUrl;
+                link.download = nomeArquivo;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            }
+
+            salvarTopo.addEventListener('click', function () {
+                salvarPdfEscolhendoPasta().catch(() => {
+                    window.location.assign(pdfDownloadUrl);
+                });
+            });
+
+            salvarPdf.addEventListener('click', function () {
+                salvarPdfEscolhendoPasta().catch(() => {
+                    window.location.assign(pdfDownloadUrl);
+                });
+            });
 
             function mostrarFallback() {
                 empty.style.display = 'none';
