@@ -10,7 +10,10 @@ import io
 import logging
 from flask import Blueprint, jsonify, request, Response
 from sqlalchemy import func
+from .auth_utils import require_profiles
 from repositories import relatorio_repository
+from services.relatorio_service import painel_dia_operacional, relatorio_financeiro, relatorio_operacional
+from services.report_export_service import exportar_excel_operacional
 
 relatorios_bp = Blueprint('relatorios', __name__, url_prefix='/api/relatorios')
 logger = logging.getLogger(__name__)
@@ -441,50 +444,10 @@ def painel_dia():
     - saldo do dia
     """
     try:
-        from models import Ordem, Saida
-
         data_ref = _parse_data_dia((request.args.get('data') or '').strip())
         data_inicio = data_ref.replace(hour=0, minute=0, second=0, microsecond=0)
         data_fim = data_ref.replace(hour=23, minute=59, second=59, microsecond=999999)
-
-        ordens_abertas = (
-            Ordem.query
-            .filter(~Ordem.status.in_(['Concluído', 'Garantia']))
-            .count()
-        )
-
-        concluidas_hoje = (
-            Ordem.query
-            .filter(Ordem.status.in_(['Concluído', 'Garantia']))
-            .filter(Ordem.data_conclusao >= data_inicio, Ordem.data_conclusao <= data_fim)
-            .count()
-        )
-
-        faturamento_row = (
-            Ordem.query
-            .with_entities(func.coalesce(func.sum(Ordem.total_geral), 0.0))
-            .filter(Ordem.status.in_(['Concluído', 'Garantia']))
-            .filter(Ordem.data_conclusao >= data_inicio, Ordem.data_conclusao <= data_fim)
-            .first()
-        )
-        faturamento_hoje = float((faturamento_row[0] if faturamento_row else 0) or 0)
-
-        saidas_row = (
-            Saida.query
-            .with_entities(func.coalesce(func.sum(Saida.valor), 0.0))
-            .filter(Saida.data >= data_inicio.date(), Saida.data <= data_fim.date())
-            .first()
-        )
-        saidas_hoje = float((saidas_row[0] if saidas_row else 0) or 0)
-
-        return jsonify({
-            'data': data_inicio.strftime('%Y-%m-%d'),
-            'ordens_abertas': int(ordens_abertas or 0),
-            'ordens_concluidas_hoje': int(concluidas_hoje or 0),
-            'faturamento_hoje': faturamento_hoje,
-            'saidas_hoje': saidas_hoje,
-            'saldo_hoje': faturamento_hoje - saidas_hoje
-        })
+        return jsonify(painel_dia_operacional(data_inicio, data_fim))
     except ValueError:
         return jsonify({'erro': 'Formato de data invalido. Use YYYY-MM-DD.'}), 400
     except Exception as e:
@@ -1180,13 +1143,12 @@ def exportar_excel_profissional_periodo():
 
 
 @relatorios_bp.route('/contabilidade-geral', methods=['GET'])
+@require_profiles('admin', 'gerente')
 def relatorio_contabilidade_geral():
     """
     Resumo contábil mensal para apoio ao contador.
     """
     try:
-        from models import Ordem, Saida
-
         mes = (request.args.get('mes') or '').strip()  # YYYY-MM
         if mes:
             data_base = datetime.strptime(f'{mes}-01', '%Y-%m-%d')
@@ -1200,65 +1162,16 @@ def relatorio_contabilidade_geral():
         else:
             prox = datetime(data_base.year, data_base.month + 1, 1)
         data_fim = prox - timedelta(microseconds=1)
-
-        # Faturamento (ordens concluídas/garantia no mês)
-        faturamento_row = (
-            Ordem.query
-            .with_entities(func.coalesce(func.sum(Ordem.total_geral), 0.0))
-            .filter(Ordem.status.in_(['Concluído', 'Garantia']))
-            .filter(Ordem.data_conclusao >= data_inicio, Ordem.data_conclusao <= data_fim)
-            .first()
-        )
-        faturamento_bruto = float((faturamento_row[0] if faturamento_row else 0) or 0)
-
-        quantidade_os = (
-            Ordem.query
-            .filter(Ordem.status.in_(['Concluído', 'Garantia']))
-            .filter(Ordem.data_conclusao >= data_inicio, Ordem.data_conclusao <= data_fim)
-            .count()
-        )
-
-        # Saídas financeiras no mês
-        saidas_row = (
-            Saida.query
-            .with_entities(func.coalesce(func.sum(Saida.valor), 0.0))
-            .filter(Saida.data >= data_inicio.date(), Saida.data <= data_fim.date())
-            .first()
-        )
-        total_saidas = float((saidas_row[0] if saidas_row else 0) or 0)
-
-        pagamentos_rows = (
-            Ordem.query
-            .with_entities(
-                func.coalesce(func.nullif(func.trim(Ordem.forma_pagamento), ''), 'Não informado').label('forma_pagamento'),
-                func.coalesce(func.sum(Ordem.total_geral), 0.0).label('valor_total'),
-                func.count(Ordem.id).label('quantidade')
-            )
-            .filter(Ordem.status.in_(['Concluído', 'Garantia']))
-            .filter(Ordem.data_conclusao >= data_inicio, Ordem.data_conclusao <= data_fim)
-            .group_by('forma_pagamento')
-            .order_by(func.coalesce(func.sum(Ordem.total_geral), 0.0).desc())
-            .all()
-        )
-
-        ticket_medio = (faturamento_bruto / quantidade_os) if quantidade_os else 0.0
-
+        dados = relatorio_financeiro(data_inicio, data_fim)
         return jsonify({
             'mes_referencia': data_inicio.strftime('%Y-%m'),
-            'periodo': {
-                'inicio': data_inicio.strftime('%Y-%m-%d'),
-                'fim': data_fim.strftime('%Y-%m-%d')
-            },
-            'faturamento_bruto': faturamento_bruto,
-            'total_saidas': total_saidas,
-            'saldo_operacional': faturamento_bruto - total_saidas,
-            'quantidade_os': int(quantidade_os or 0),
-            'ticket_medio': ticket_medio,
-            'pagamentos': [{
-                'forma_pagamento': row.forma_pagamento,
-                'valor_total': float(row.valor_total or 0),
-                'quantidade': int(row.quantidade or 0)
-            } for row in pagamentos_rows]
+            'periodo': dados['periodo'],
+            'faturamento_bruto': dados['faturamento_bruto'],
+            'total_saidas': dados['total_saidas'],
+            'saldo_operacional': dados['saldo_operacional'],
+            'quantidade_os': dados['quantidade_os'],
+            'ticket_medio': dados['ticket_medio'],
+            'pagamentos': dados['pagamentos'],
         })
     except ValueError:
         return jsonify({'erro': 'Formato inválido. Use mes=YYYY-MM.'}), 400
@@ -1275,8 +1188,6 @@ def relatorio_operacional_servicos_pecas_saidas():
     - saídas de caixa
     """
     try:
-        from models import Ordem, ItemServico, ItemPeca, Saida
-
         data_inicio = _parse_data(request.args.get('data_inicio'))
         data_fim = _parse_data(request.args.get('data_fim'), fim_do_dia=True)
         if not data_inicio or not data_fim:
@@ -1285,93 +1196,7 @@ def relatorio_operacional_servicos_pecas_saidas():
             data_fim = hoje.replace(hour=23, minute=59, second=59, microsecond=999999)
         if data_fim < data_inicio:
             return jsonify({'erro': 'data_fim deve ser maior ou igual à data_inicio.'}), 400
-
-        # Agregação de serviços no período.
-        servicos_rows = (
-            ItemServico.query
-            .join(Ordem, ItemServico.ordem_id == Ordem.id)
-            .with_entities(
-                Ordem.id.label('ordem_id'),
-                func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada).label('data_ref'),
-                func.coalesce(func.nullif(func.trim(ItemServico.nome_profissional), ''), func.nullif(func.trim(Ordem.profissional_responsavel), ''), 'Nao informado').label('profissional'),
-                ItemServico.descricao_servico.label('descricao'),
-                func.coalesce(ItemServico.valor_servico, 0.0).label('valor')
-            )
-            .filter(func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada) >= data_inicio)
-            .filter(func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada) <= data_fim)
-            .order_by(func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada).desc())
-            .all()
-        )
-
-        # Agregação de peças no período.
-        pecas_rows = (
-            ItemPeca.query
-            .join(Ordem, ItemPeca.ordem_id == Ordem.id)
-            .with_entities(
-                Ordem.id.label('ordem_id'),
-                func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada).label('data_ref'),
-                ItemPeca.descricao_peca.label('descricao'),
-                func.coalesce(ItemPeca.quantidade, 0.0).label('quantidade'),
-                func.coalesce(ItemPeca.valor_unitario, 0.0).label('valor_unitario')
-            )
-            .filter(func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada) >= data_inicio)
-            .filter(func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada) <= data_fim)
-            .order_by(func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada).desc())
-            .all()
-        )
-
-        # Saídas financeiras já lançadas no período.
-        saidas_rows = (
-            Saida.query
-            .with_entities(
-                Saida.data.label('data_ref'),
-                func.coalesce(Saida.categoria, 'Outros').label('categoria'),
-                func.coalesce(Saida.descricao, '').label('descricao'),
-                func.coalesce(Saida.valor, 0.0).label('valor')
-            )
-            .filter(Saida.data >= data_inicio, Saida.data <= data_fim)
-            .order_by(Saida.data.desc())
-            .all()
-        )
-
-        total_servicos = float(sum(float(r.valor or 0) for r in servicos_rows))
-        total_pecas = float(sum(float((r.quantidade or 0) * (r.valor_unitario or 0)) for r in pecas_rows))
-        total_saidas = float(sum(float(r.valor or 0) for r in saidas_rows))
-
-        return jsonify({
-            'periodo': {
-                'inicio': data_inicio.strftime('%Y-%m-%d'),
-                'fim': data_fim.strftime('%Y-%m-%d')
-            },
-            'resumo': {
-                'quantidade_servicos': len(servicos_rows),
-                'valor_servicos': total_servicos,
-                'quantidade_pecas': len(pecas_rows),
-                'valor_pecas': total_pecas,
-                'quantidade_saidas': len(saidas_rows),
-                'valor_saidas': total_saidas
-            },
-            'servicos': [{
-                'ordem_id': r.ordem_id,
-                'data_referencia': (r.data_ref.strftime('%d/%m/%Y') if r.data_ref else '---'),
-                'profissional': r.profissional or 'Nao informado',
-                'descricao': r.descricao or '---',
-                'valor': float(r.valor or 0)
-            } for r in servicos_rows],
-            'pecas': [{
-                'ordem_id': r.ordem_id,
-                'data_referencia': (r.data_ref.strftime('%d/%m/%Y') if r.data_ref else '---'),
-                'descricao': r.descricao or '---',
-                'quantidade': float(r.quantidade or 0),
-                'valor_total': float((r.quantidade or 0) * (r.valor_unitario or 0))
-            } for r in pecas_rows],
-            'saidas': [{
-                'data_referencia': (r.data_ref.strftime('%d/%m/%Y') if r.data_ref else '---'),
-                'categoria': r.categoria or 'Outros',
-                'descricao': r.descricao or '---',
-                'valor': float(r.valor or 0)
-            } for r in saidas_rows]
-        })
+        return jsonify(relatorio_operacional(data_inicio, data_fim))
     except ValueError:
         return jsonify({'erro': 'Formato inválido. Use datas em YYYY-MM-DD.'}), 400
     except Exception as e:
@@ -1382,13 +1207,6 @@ def relatorio_operacional_servicos_pecas_saidas():
 def exportar_excel_operacional_servicos_pecas_saidas():
     """Exporta planilha operacional com abas: resumo, serviços, peças e saídas."""
     try:
-        import pandas as pd
-        from models import Ordem, ItemServico, ItemPeca, Saida
-
-        engine_excel = _excel_engine_disponivel()
-        if not engine_excel:
-            return jsonify({'erro': 'Biblioteca para Excel não instalada. Instale openpyxl ou xlsxwriter.'}), 500
-
         data_inicio = _parse_data(request.args.get('data_inicio'))
         data_fim = _parse_data(request.args.get('data_fim'), fim_do_dia=True)
         if not data_inicio or not data_fim:
@@ -1397,120 +1215,10 @@ def exportar_excel_operacional_servicos_pecas_saidas():
             data_fim = hoje.replace(hour=23, minute=59, second=59, microsecond=999999)
         if data_fim < data_inicio:
             return jsonify({'erro': 'data_fim deve ser maior ou igual à data_inicio.'}), 400
-
-        servicos_rows = (
-            ItemServico.query
-            .join(Ordem, ItemServico.ordem_id == Ordem.id)
-            .with_entities(
-                Ordem.id.label('ordem_id'),
-                func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada).label('data_ref'),
-                func.coalesce(func.nullif(func.trim(ItemServico.nome_profissional), ''), func.nullif(func.trim(Ordem.profissional_responsavel), ''), 'Nao informado').label('profissional'),
-                ItemServico.descricao_servico.label('descricao'),
-                func.coalesce(ItemServico.valor_servico, 0.0).label('valor')
-            )
-            .filter(func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada) >= data_inicio)
-            .filter(func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada) <= data_fim)
-            .order_by(func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada).desc())
-            .all()
-        )
-        pecas_rows = (
-            ItemPeca.query
-            .join(Ordem, ItemPeca.ordem_id == Ordem.id)
-            .with_entities(
-                Ordem.id.label('ordem_id'),
-                func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada).label('data_ref'),
-                ItemPeca.descricao_peca.label('descricao'),
-                func.coalesce(ItemPeca.quantidade, 0.0).label('quantidade'),
-                func.coalesce(ItemPeca.valor_unitario, 0.0).label('valor_unitario')
-            )
-            .filter(func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada) >= data_inicio)
-            .filter(func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada) <= data_fim)
-            .order_by(func.coalesce(Ordem.data_conclusao, Ordem.data_emissao, Ordem.data_entrada).desc())
-            .all()
-        )
-        saidas_rows = (
-            Saida.query
-            .with_entities(
-                Saida.data.label('data_ref'),
-                func.coalesce(Saida.categoria, 'Outros').label('categoria'),
-                func.coalesce(Saida.descricao, '').label('descricao'),
-                func.coalesce(Saida.valor, 0.0).label('valor')
-            )
-            .filter(Saida.data >= data_inicio, Saida.data <= data_fim)
-            .order_by(Saida.data.desc())
-            .all()
-        )
-
-        total_servicos = float(sum(float(r.valor or 0) for r in servicos_rows))
-        total_pecas = float(sum(float((r.quantidade or 0) * (r.valor_unitario or 0)) for r in pecas_rows))
-        total_saidas = float(sum(float(r.valor or 0) for r in saidas_rows))
-
-        df_resumo = pd.DataFrame([
-            {'Campo': 'Relatorio', 'Valor': 'Operacional - Servicos, Pecas e Saidas'},
-            {'Campo': 'Periodo inicio', 'Valor': data_inicio.strftime('%Y-%m-%d')},
-            {'Campo': 'Periodo fim', 'Valor': data_fim.strftime('%Y-%m-%d')},
-            {'Campo': 'Emitido em', 'Valor': datetime.now().strftime('%Y-%m-%d %H:%M:%S')},
-            {'Campo': 'Qtd servicos', 'Valor': len(servicos_rows)},
-            {'Campo': 'Total servicos', 'Valor': total_servicos},
-            {'Campo': 'Qtd pecas', 'Valor': len(pecas_rows)},
-            {'Campo': 'Total pecas', 'Valor': total_pecas},
-            {'Campo': 'Qtd saidas', 'Valor': len(saidas_rows)},
-            {'Campo': 'Total saidas', 'Valor': total_saidas}
-        ])
-
-        df_servicos = pd.DataFrame([{
-            'OS': r.ordem_id,
-            'Data': r.data_ref,
-            'Profissional': r.profissional or 'Nao informado',
-            'Servico': r.descricao or '---',
-            'Valor': float(r.valor or 0)
-        } for r in servicos_rows])
-        if df_servicos.empty:
-            df_servicos = pd.DataFrame([{'OS': '', 'Data': '', 'Profissional': 'Sem dados', 'Servico': '', 'Valor': 0.0}])
-
-        df_pecas = pd.DataFrame([{
-            'OS': r.ordem_id,
-            'Data': r.data_ref,
-            'Peca': r.descricao or '---',
-            'Quantidade': float(r.quantidade or 0),
-            'Valor total': float((r.quantidade or 0) * (r.valor_unitario or 0))
-        } for r in pecas_rows])
-        if df_pecas.empty:
-            df_pecas = pd.DataFrame([{'OS': '', 'Data': '', 'Peca': 'Sem dados', 'Quantidade': 0.0, 'Valor total': 0.0}])
-
-        df_saidas = pd.DataFrame([{
-            'Data': r.data_ref,
-            'Categoria': r.categoria or 'Outros',
-            'Descricao': r.descricao or '',
-            'Valor': float(r.valor or 0)
-        } for r in saidas_rows])
-        if df_saidas.empty:
-            df_saidas = pd.DataFrame([{'Data': '', 'Categoria': 'Sem dados', 'Descricao': '', 'Valor': 0.0}])
-
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine=engine_excel) as writer:
-            df_resumo.to_excel(writer, sheet_name='Resumo', index=False)
-            df_servicos.to_excel(writer, sheet_name='Servicos', index=False)
-            df_pecas.to_excel(writer, sheet_name='Pecas', index=False)
-            df_saidas.to_excel(writer, sheet_name='Saidas', index=False)
-
-            _aplicar_estilo_excel(writer, engine_excel, [
-                {'sheet_name': 'Resumo', 'df': df_resumo, 'currency_cols': ['Valor']},
-                {'sheet_name': 'Servicos', 'df': df_servicos, 'currency_cols': ['Valor'], 'date_cols': ['Data']},
-                {'sheet_name': 'Pecas', 'df': df_pecas, 'currency_cols': ['Valor total'], 'date_cols': ['Data']},
-                {'sheet_name': 'Saidas', 'df': df_saidas, 'currency_cols': ['Valor'], 'date_cols': ['Data']}
-            ])
-
-        output.seek(0)
-        nome_arquivo = f'operacional_servicos_pecas_saidas_{data_inicio.strftime("%Y_%m_%d")}_{data_fim.strftime("%Y_%m_%d")}.xlsx'
-        logger.info(
-            "Exportacao Excel operacional gerada: %s (inicio=%s, fim=%s)",
-            nome_arquivo,
-            data_inicio.strftime('%Y-%m-%d'),
-            data_fim.strftime('%Y-%m-%d')
-        )
+        relatorio = relatorio_operacional(data_inicio, data_fim)
+        nome_arquivo, conteudo = exportar_excel_operacional(relatorio)
         return Response(
-            output.getvalue(),
+            conteudo,
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             headers={'Content-Disposition': f'attachment; filename={nome_arquivo}'}
         )

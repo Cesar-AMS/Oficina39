@@ -9,12 +9,10 @@ from extensions import db
 import io
 import os
 from datetime import datetime, timedelta
+from .auth_utils import require_profiles
 from infrastructure.export_service import ExportService
-from services.order_pdf_service import (
-    generate_order_pdf_bytes,
-    pdf_available as order_pdf_available,
-    suggested_order_pdf_name,
-)
+from services.order_pdf_service import pdf_available as order_pdf_available
+from services.report_export_service import exportar_pdf_ordem
 
 # Tentar importar ReportLab
 try:
@@ -189,13 +187,13 @@ def gerar_pdf_ordem(id):
         return jsonify({'erro': 'Biblioteca ReportLab não instalada'}), 500
 
     try:
-        pdf_bytes = generate_order_pdf_bytes(id)
+        nome_arquivo, pdf_bytes = exportar_pdf_ordem(id)
         buffer = io.BytesIO(pdf_bytes)
         visualizar_inline = (request.args.get('inline') or '').strip() in {'1', 'true', 'yes'}
         return send_file(
             buffer,
             as_attachment=not visualizar_inline,
-            download_name=suggested_order_pdf_name(id),
+            download_name=nome_arquivo,
             mimetype='application/pdf'
         )
 
@@ -207,6 +205,7 @@ def gerar_pdf_ordem(id):
 
 
 @export_bp.route('/fechamento-mensal-contador-pdf', methods=['GET'])
+@require_profiles('admin', 'gerente')
 def gerar_pdf_fechamento_mensal_contador():
     """Gera PDF mensal com produção por profissional e resumo por forma de pagamento."""
     if not PDF_AVAILABLE:
@@ -355,6 +354,7 @@ def gerar_pdf_fechamento_mensal_contador():
 
 
 @export_bp.route('/exportar', methods=['GET'])
+@require_profiles('admin', 'gerente')
 def exportar_dados():
     """Exporta dados para db, csv, xlsx ou json."""
     try:
@@ -408,6 +408,7 @@ def exportar_dados():
 
 
 @export_bp.route('/importar', methods=['POST'])
+@require_profiles('admin', 'gerente')
 def importar_dados():
     """Importa dados de json, csv ou xlsx."""
     try:

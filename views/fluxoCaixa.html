@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oficina 39 - PDV / Caixa do Dia</title>
     
     <!-- CSS GLOBAL -->
@@ -17,6 +18,7 @@
     
     <!-- CSS ESPECÍFICO DA PÁGINA -->
     <link rel="stylesheet" href="/static/css/pages/fluxoCaixa.css?v=20260321f">
+    <link rel="stylesheet" href="/static/css/style.css">
     
 </head>
 
@@ -33,42 +35,39 @@
         </div>
 
         <section class="fluxo-tab-panel" id="fluxoTabCaixa">
-            <div class="resumo-card">
-                <div class="resumo-item">
-                    <div class="label">Recebimentos</div>
-                    <div class="valor" id="totalEntradas">R$ 0,00</div>
-                </div>
-                <div class="resumo-item">
-                    <div class="label">Saídas</div>
-                    <div class="valor" id="totalSaidas">R$ 0,00</div>
-                </div>
-                <div class="resumo-item">
-                    <div class="label">Saldo</div>
-                    <div class="valor" id="saldo">R$ 0,00</div>
-                </div>
-            </div>
-
             <section class="form-section caixa-dia-section">
                 <div class="pdv-header">
                     <div>
                         <h3 class="section-titulo">Caixa do Dia</h3>
                         <p class="subtitulo-fluxo">Resumo financeiro do dia com atalhos operacionais para saída e apoio de cálculo.</p>
                     </div>
+                    <div class="caixa-header-actions">
+                        <button class="btn btn-nova-saida btn-lg" onclick="abrirModalSaida()">
+                            Nova Saída
+                        </button>
+                    </div>
+                </div>
+
+                <div class="caixa-resumo-grid">
+                    <div class="caixa-resumo-card caixa-resumo-card-entrada">
+                        <span class="caixa-resumo-kicker">Entradas hoje</span>
+                        <strong id="totalEntradas">R$ 0,00</strong>
+                        <p>Recebimentos de ordens concluídas e créditos lançados.</p>
+                    </div>
+                    <div class="caixa-resumo-card caixa-resumo-card-saida">
+                        <span class="caixa-resumo-kicker">Saídas hoje</span>
+                        <strong id="totalSaidas">R$ 0,00</strong>
+                        <p>Despesas operacionais e retiradas registradas no dia.</p>
+                    </div>
+                    <div class="caixa-resumo-card caixa-resumo-card-saldo">
+                        <span class="caixa-resumo-kicker">Saldo atual</span>
+                        <strong id="saldo">R$ 0,00</strong>
+                        <p>Resultado líquido do caixa considerando entradas e saídas.</p>
+                    </div>
                 </div>
 
                 <div class="pdv-hint-box pdv-hint-box-discreto">
                     Caixa vivo do dia: acompanhe entradas, saídas e registre despesas operacionais quando necessário.
-                </div>
-
-                <div class="nova-saida-container">
-                    <div class="acoes-caixa-botoes">
-                        <button class="btn btn-nova-saida" onclick="abrirModalSaida()">
-                            Nova Saída
-                        </button>
-                        <button class="btn btn-calculadora" onclick="abrirModalCalculadora()">
-                            Calculadora
-                        </button>
-                    </div>
                 </div>
 
                 <div class="pdv-box caixa-historico-box">
@@ -77,10 +76,15 @@
                             <h4 class="pdv-box-titulo">Movimentações do dia</h4>
                             <p class="pdv-box-subtitulo">Histórico operacional do caixa com origem, forma e observações.</p>
                         </div>
-                        <div class="caixa-filtros">
-                            <button type="button" class="caixa-filtro-btn active" data-filtro="todas" onclick="aplicarFiltroMovimentacao('todas')">Todas</button>
-                            <button type="button" class="caixa-filtro-btn" data-filtro="entradas" onclick="aplicarFiltroMovimentacao('entradas')">Entradas</button>
-                            <button type="button" class="caixa-filtro-btn" data-filtro="saidas" onclick="aplicarFiltroMovimentacao('saidas')">Saídas</button>
+                        <div class="caixa-toolbar">
+                            <div class="caixa-filtros">
+                                <button type="button" class="caixa-filtro-btn active" data-filtro="todas" onclick="aplicarFiltroMovimentacao('todas')">Todas</button>
+                                <button type="button" class="caixa-filtro-btn" data-filtro="entradas" onclick="aplicarFiltroMovimentacao('entradas')">Entradas</button>
+                                <button type="button" class="caixa-filtro-btn" data-filtro="saidas" onclick="aplicarFiltroMovimentacao('saidas')">Saídas</button>
+                            </div>
+                            <button class="btn btn-calculadora" onclick="abrirModalCalculadora()">
+                                Calculadora
+                            </button>
                         </div>
                     </div>
 

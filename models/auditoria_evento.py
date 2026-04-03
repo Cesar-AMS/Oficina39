@@ -16,11 +16,20 @@ class AuditoriaEvento(db.Model):
     origem = db.Column(db.String(40), default='api')
     data_evento = db.Column(db.DateTime, default=datetime.now, nullable=False, index=True)
 
+    @property
+    def entidade_tipo(self):
+        return self.entidade
+
+    @entidade_tipo.setter
+    def entidade_tipo(self, valor):
+        self.entidade = valor
+
     def to_dict(self):
         return {
             'id': self.id,
             'acao': self.acao,
             'entidade': self.entidade,
+            'entidade_tipo': self.entidade,
             'entidade_id': self.entidade_id,
             'valor_anterior': self.valor_anterior,
             'valor_novo': self.valor_novo,

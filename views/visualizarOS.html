@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oficina 39 - Visualizar Ordem de Serviço</title>
 
     <!-- CSS GLOBAL -->
@@ -15,6 +16,7 @@
 
     <!-- CSS ESPECÍFICO DA PÁGINA -->
     <link rel="stylesheet" href="/static/css/pages/visualizarOS.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
 <body class="pagina-visualizar-os">
@@ -23,274 +25,285 @@
 
         <!-- CABEÇALHO DA TELA -->
         <div class="cabecalho-duplo">
-            <h1 class="titulo-visualizar">Visualizar Ordem de Serviço</h1>
+            <div>
+                <h1 class="titulo-visualizar">Visualizar Ordem de Serviço</h1>
+                <p class="subtitulo-visualizar">Acompanhe os dados operacionais, financeiros e o histórico completo da ordem.</p>
+            </div>
             <div class="acoes-visualizar">
+                <span class="status-chip-topo">Status <span id="statusDisplay" class="status-badge"></span></span>
+                <button class="btn btn-salvar" onclick="imprimirOrdem()">PDF</button>
+                <button class="btn btn-editar" onclick="editarOrdem()">Editar</button>
                 <a class="btn btn-voltar" id="linkVoltarVisualizacao" href="/consultarOS.html">Voltar</a>
             </div>
         </div>
 
-        <!-- CARD DE IDENTIFICAÇÃO -->
-        <div class="info-card">
+        <div class="info-card info-card-resumo-topo">
             <div class="info-id">
                 Ordem de Serviço #<span id="ordemId"></span>
             </div>
-            <div class="status-container">
-                Status: <span id="statusDisplay" class="status-badge"></span>
-            </div>
-        </div>
-
-        <!-- PROFISSIONAL RESPONSÁVEL -->
-        <div class="form-section">
-            <h3 class="section-titulo">Profissional Responsável</h3>
-            <input type="text" id="profissional_responsavel" readonly disabled class="campo-readonly">
-        </div>
-
-        <!-- DADOS DO CLIENTE -->
-        <div class="form-section">
-            <h3 class="section-titulo">Dados do Cliente</h3>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Nome Completo</label>
-                    <input type="text" id="nome_cliente" readonly disabled class="campo-readonly">
+            <div class="visualizar-meta-grid">
+                <div class="visualizar-meta-item">
+                    <span>Profissional</span>
+                    <strong id="profissional_responsavel_meta">---</strong>
                 </div>
-                <div class="form-group">
-                    <label>CPF</label>
-                    <input type="text" id="cpf" readonly disabled class="campo-readonly">
+                <div class="visualizar-meta-item">
+                    <span>Forma de pagamento</span>
+                    <strong id="forma_pagamento_meta">---</strong>
                 </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group endereco-full">
-                    <label>Endereço</label>
-                    <input type="text" id="endereco" readonly disabled class="campo-readonly">
+                <div class="visualizar-meta-item">
+                    <span>Status financeiro</span>
+                    <strong id="status_financeiro_meta">---</strong>
                 </div>
             </div>
         </div>
 
-        <!-- DADOS DO VEÍCULO -->
-        <div class="form-section">
-            <h3 class="section-titulo">Dados do Veículo</h3>
+        <div class="visualizar-layout-grid">
+            <div class="visualizar-coluna-principal">
+                <div class="form-section">
+                    <h3 class="section-titulo">Dados do Cliente</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome Completo</label>
+                            <input type="text" id="nome_cliente" readonly disabled class="campo-readonly">
+                        </div>
+                        <div class="form-group">
+                            <label>CPF</label>
+                            <input type="text" id="cpf" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group endereco-full">
+                            <label>Endereço</label>
+                            <input type="text" id="endereco" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
+                </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Placa</label>
-                    <input type="text" id="placa" readonly disabled class="campo-readonly">
+                <div class="form-section">
+                    <h3 class="section-titulo">Dados do Veículo</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Placa</label>
+                            <input type="text" id="placa" readonly disabled class="campo-readonly">
+                        </div>
+                        <div class="form-group">
+                            <label>Fabricante</label>
+                            <input type="text" id="fabricante" readonly disabled class="campo-readonly">
+                        </div>
+                        <div class="form-group">
+                            <label>Modelo</label>
+                            <input type="text" id="modelo" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ano</label>
+                            <input type="text" id="ano" readonly disabled class="campo-readonly">
+                        </div>
+                        <div class="form-group">
+                            <label>Motor</label>
+                            <input type="text" id="motor" readonly disabled class="campo-readonly">
+                        </div>
+                        <div class="form-group">
+                            <label>Combustível</label>
+                            <input type="text" id="combustivel" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cor</label>
+                            <input type="text" id="cor" readonly disabled class="campo-readonly">
+                        </div>
+                        <div class="form-group">
+                            <label>Tanque (%)</label>
+                            <input type="text" id="tanque" readonly disabled class="campo-readonly">
+                        </div>
+                        <div class="form-group">
+                            <label>KM</label>
+                            <input type="text" id="km" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Direção</label>
+                            <input type="text" id="direcao" readonly disabled class="campo-readonly">
+                        </div>
+                        <div class="form-group">
+                            <label>Ar Condicionado</label>
+                            <input type="text" id="ar" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Fabricante</label>
-                    <input type="text" id="fabricante" readonly disabled class="campo-readonly">
+
+                <div class="form-section">
+                    <h3 class="section-titulo">Diagnóstico</h3>
+                    <textarea id="diagnostico" rows="3" readonly disabled class="campo-diagnostico"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Modelo</label>
-                    <input type="text" id="modelo" readonly disabled class="campo-readonly">
+
+                <div class="form-section">
+                    <h3 class="section-titulo">Serviços Realizados</h3>
+                    <div class="table-container">
+                        <table class="tabela-visualizar">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-servicos">
+                                <tr>
+                                    <td colspan="3" class="text-center mensagem-vazia">Nenhum serviço registrado</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-titulo">Peças Utilizadas</h3>
+                    <div class="table-container">
+                        <table class="tabela-visualizar">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Qtd</th>
+                                    <th>Valor Unit.</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-pecas">
+                                <tr>
+                                    <td colspan="6" class="text-center mensagem-vazia">Nenhuma peça registrada</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-titulo">Histórico de Pagamentos</h3>
+                    <div class="table-container">
+                        <table class="tabela-visualizar">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Forma</th>
+                                    <th>Valor</th>
+                                    <th>Observação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-pagamentos">
+                                <tr>
+                                    <td colspan="4" class="text-center mensagem-vazia">Nenhum pagamento registrado</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Ano</label>
-                    <input type="text" id="ano" readonly disabled class="campo-readonly">
+            <aside class="visualizar-coluna-lateral">
+                <div class="resumo-card resumo-visualizar">
+                    <div class="resumo-item">
+                        <div class="label">Total Serviços</div>
+                        <div class="valor" id="total-servicos">R$ 0,00</div>
+                    </div>
+                    <div class="resumo-item">
+                        <div class="label">Total Peças</div>
+                        <div class="valor" id="total-pecas">R$ 0,00</div>
+                    </div>
+                    <div class="resumo-item">
+                        <div class="label">Total Bruto</div>
+                        <div class="valor total-destaque" id="total-geral">R$ 0,00</div>
+                    </div>
+                    <div class="resumo-item">
+                        <div class="label">Desconto</div>
+                        <div class="valor" id="desconto-valor">R$ 0,00</div>
+                    </div>
+                    <div class="resumo-item">
+                        <div class="label">Total Final</div>
+                        <div class="valor total-destaque" id="total-cobrado">R$ 0,00</div>
+                    </div>
+                    <div class="resumo-item">
+                        <div class="label">Total Pago</div>
+                        <div class="valor" id="total-pago">R$ 0,00</div>
+                    </div>
+                    <div class="resumo-item">
+                        <div class="label">Saldo Pendente</div>
+                        <div class="valor" id="saldo-pendente">R$ 0,00</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Motor</label>
-                    <input type="text" id="motor" readonly disabled class="campo-readonly">
-                </div>
-                <div class="form-group">
-                    <label>Combustível</label>
-                    <input type="text" id="combustivel" readonly disabled class="campo-readonly">
-                </div>
-            </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Cor</label>
-                    <input type="text" id="cor" readonly disabled class="campo-readonly">
+                <div class="form-section visualizar-card-stack">
+                    <h3 class="section-titulo">Débito / Pendência</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Valor restante</label>
+                            <input type="text" id="debito_valor_restante" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Vencimento</label>
+                            <input type="text" id="debito_vencimento" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Observação do débito</label>
+                            <input type="text" id="debito_observacao" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Tanque (%)</label>
-                    <input type="text" id="tanque" readonly disabled class="campo-readonly">
-                </div>
-                <div class="form-group">
-                    <label>KM</label>
-                    <input type="text" id="km" readonly disabled class="campo-readonly">
-                </div>
-            </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Direção</label>
-                    <input type="text" id="direcao" readonly disabled class="campo-readonly">
+                <div class="form-section visualizar-card-stack">
+                    <h3 class="section-titulo">Datas e Fechamento</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data de Entrada</label>
+                            <input type="text" id="data_entrada" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data de Emissão</label>
+                            <input type="text" id="data_emissao" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data de Retirada</label>
+                            <input type="text" id="data_retirada" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Forma de Pagamento</label>
+                            <input type="text" id="forma_pagamento" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Status Financeiro</label>
+                            <input type="text" id="status_financeiro" readonly disabled class="campo-readonly">
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Ar Condicionado</label>
-                    <input type="text" id="ar" readonly disabled class="campo-readonly">
-                </div>
-            </div>
-        </div>
 
-        <!-- DIAGNÓSTICO -->
-        <div class="form-section">
-            <h3 class="section-titulo">Diagnóstico</h3>
-            <textarea id="diagnostico" rows="3" readonly disabled class="campo-diagnostico"></textarea>
-        </div>
-
-        <!-- SERVIÇOS -->
-        <div class="form-section">
-            <h3 class="section-titulo">Serviços Realizados</h3>
-            <div class="table-container">
-                <table class="tabela-visualizar">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Descrição</th>
-                            <th>Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-servicos">
-                        <tr>
-                            <td colspan="3" class="text-center mensagem-vazia">Nenhum serviço registrado</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- PEÇAS -->
-        <div class="form-section">
-            <h3 class="section-titulo">Peças Utilizadas</h3>
-            <div class="table-container">
-                <table class="tabela-visualizar">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Descrição</th>
-                            <th>Qtd</th>
-                            <th>Valor Unit.</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-pecas">
-                        <tr>
-                            <td colspan="6" class="text-center mensagem-vazia">Nenhuma peça registrada</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- RESUMO -->
-        <div class="resumo-card resumo-visualizar">
-            <div class="resumo-item">
-                <div class="label">Total Serviços</div>
-                <div class="valor" id="total-servicos">R$ 0,00</div>
-            </div>
-            <div class="resumo-item">
-                <div class="label">Total Peças</div>
-                <div class="valor" id="total-pecas">R$ 0,00</div>
-            </div>
-            <div class="resumo-item">
-                <div class="label">Total Bruto</div>
-                <div class="valor total-destaque" id="total-geral">R$ 0,00</div>
-            </div>
-            <div class="resumo-item">
-                <div class="label">Desconto</div>
-                <div class="valor" id="desconto-valor">R$ 0,00</div>
-            </div>
-            <div class="resumo-item">
-                <div class="label">Total Final</div>
-                <div class="valor total-destaque" id="total-cobrado">R$ 0,00</div>
-            </div>
-            <div class="resumo-item">
-                <div class="label">Total Pago</div>
-                <div class="valor" id="total-pago">R$ 0,00</div>
-            </div>
-            <div class="resumo-item">
-                <div class="label">Saldo Pendente</div>
-                <div class="valor" id="saldo-pendente">R$ 0,00</div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <h3 class="section-titulo">Débito / Pendência</h3>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Valor restante</label>
-                    <input type="text" id="debito_valor_restante" readonly disabled class="campo-readonly">
+                <div class="form-section visualizar-card-stack">
+                    <h3 class="section-titulo">Histórico de Status</h3>
+                    <div id="timelineStatusOS" class="timeline-status">
+                        Carregando histórico...
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Vencimento</label>
-                    <input type="text" id="debito_vencimento" readonly disabled class="campo-readonly">
-                </div>
-                <div class="form-group">
-                    <label>Observação do débito</label>
-                    <input type="text" id="debito_observacao" readonly disabled class="campo-readonly">
-                </div>
-            </div>
-        </div>
 
-        <!-- ASSINATURA -->
-        <div class="form-section">
-            <h3 class="section-titulo">Assinatura do Consumidor</h3>
-            <input type="text" id="assinatura_cliente" readonly disabled class="campo-assinatura">
-        </div>
-
-        <!-- DATAS -->
-        <div class="form-section">
-            <h3 class="section-titulo">Datas</h3>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Data de Entrada</label>
-                    <input type="text" id="data_entrada" readonly disabled class="campo-readonly">
+                <div class="form-section visualizar-card-stack">
+                    <h3 class="section-titulo">Assinatura do Consumidor</h3>
+                    <input type="text" id="assinatura_cliente" readonly disabled class="campo-assinatura">
                 </div>
-                <div class="form-group">
-                    <label>Data de Emissão</label>
-                    <input type="text" id="data_emissao" readonly disabled class="campo-readonly">
-                </div>
-                <div class="form-group">
-                    <label>Data de Retirada</label>
-                    <input type="text" id="data_retirada" readonly disabled class="campo-readonly">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Forma de Pagamento</label>
-                    <input type="text" id="forma_pagamento" readonly disabled class="campo-readonly">
-                </div>
-                <div class="form-group">
-                    <label>Status Financeiro</label>
-                    <input type="text" id="status_financeiro" readonly disabled class="campo-readonly">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <h3 class="section-titulo">Histórico de Pagamentos</h3>
-            <div class="table-container">
-                <table class="tabela-visualizar">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Forma</th>
-                            <th>Valor</th>
-                            <th>Observação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-pagamentos">
-                        <tr>
-                            <td colspan="4" class="text-center mensagem-vazia">Nenhum pagamento registrado</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- LINHA DO TEMPO DE STATUS -->
-        <div class="form-section">
-            <h3 class="section-titulo">Histórico de Status</h3>
-            <div id="timelineStatusOS" class="timeline-status">
-                Carregando histórico...
-            </div>
+            </aside>
         </div>
 
         <!-- BOTÕES -->

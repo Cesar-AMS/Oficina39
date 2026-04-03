@@ -6,6 +6,8 @@ from repositories import debito_repository, ordem_repository
 from services.auditoria_service import registrar_evento_auditoria
 from services.caixa_service import registrar_entrada
 from services.ordem_service import STATUS_CONCLUIDOS, normalizar_forma_pagamento, registrar_log_status
+from services.template_comunicacao_service import disparar_evento_ordem
+from services.webhook_service import disparar_evento_webhook, payload_ordem
 
 
 FORMAS_PAGAMENTO_MULTIPLAS = {
@@ -127,6 +129,9 @@ def registrar_pagamentos(ordem_id, pagamentos, request_ctx):
     )
 
     db.session.commit()
+    if ordem.status_financeiro == 'Quitado':
+        disparar_evento_ordem('os_paga', ordem)
+        disparar_evento_webhook('os.paga', payload_ordem(ordem))
     return ordem
 
 
@@ -136,6 +141,7 @@ def faturar_ordem_no_caixa(ordem_id, dados, request_ctx):
         raise LookupError('Ordem não encontrada.')
 
     status_anterior = ordem.status
+    status_foi_concluido_agora = False
     dados = dados or {}
     pagamentos = dados.get('pagamentos') or []
     debito_vencimento = (dados.get('debito_vencimento') or '').strip()
@@ -149,6 +155,7 @@ def faturar_ordem_no_caixa(ordem_id, dados, request_ctx):
 
     if ordem.status not in STATUS_CONCLUIDOS:
         ordem.status = 'Concluído'
+        status_foi_concluido_agora = True
         if not ordem.data_conclusao:
             from datetime import datetime
             ordem.data_conclusao = datetime.now()
@@ -206,4 +213,10 @@ def faturar_ordem_no_caixa(ordem_id, dados, request_ctx):
         ordem.debito_observacao = None
 
     db.session.commit()
+    if status_foi_concluido_agora:
+        disparar_evento_ordem('os_concluida', ordem)
+        disparar_evento_webhook('os.concluida', payload_ordem(ordem))
+    if ordem.status_financeiro == 'Quitado':
+        disparar_evento_ordem('os_paga', ordem)
+        disparar_evento_webhook('os.paga', payload_ordem(ordem))
     return ordem

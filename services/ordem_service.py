@@ -5,6 +5,9 @@ from extensions import db
 from repositories import cliente_repository, ordem_repository
 from services.auditoria_service import registrar_evento_auditoria
 from services import peca_service, servico_service
+from services.status_service import registrar_status_ordem
+from services.template_comunicacao_service import disparar_evento_ordem
+from services.webhook_service import disparar_evento_webhook, payload_ordem
 
 STATUS_CONCLUIDOS = {'Concluído', 'Garantia'}
 FORMAS_PAGAMENTO_VALIDAS = {
@@ -45,21 +48,14 @@ def parse_data_iso(valor):
 
 
 def registrar_log_status(ordem, request_ctx, status_anterior, status_novo, forma_pagamento=None, observacao=None):
-    from models import OrdemStatusLog
-
-    operador = (request_ctx.headers.get('X-Operador') or request_ctx.args.get('operador') or 'sistema').strip()[:80]
-    origem = (request_ctx.headers.get('X-Origem') or 'api').strip()[:40]
-
-    log = OrdemStatusLog(
-        ordem_id=ordem.id,
+    return registrar_status_ordem(
+        ordem=ordem,
+        request_ctx=request_ctx,
         status_anterior=status_anterior,
         status_novo=status_novo,
         forma_pagamento=forma_pagamento,
-        operador=operador or 'sistema',
-        origem=origem or 'api',
-        observacao=(observacao or '').strip()[:255] or None
+        observacao=observacao,
     )
-    db.session.add(log)
 
 
 def _recalcular_totais_manualmente(ordem):
@@ -103,6 +99,8 @@ def criar_ordem(dados, request_ctx):
     _recalcular_totais_manualmente(ordem)
     registrar_log_status(ordem, request_ctx, None, ordem.status, forma_pagamento=ordem.forma_pagamento, observacao='Criação da ordem')
     db.session.commit()
+    disparar_evento_ordem('os_criada', ordem)
+    disparar_evento_webhook('os.criada', payload_ordem(ordem))
     return ordem
 
 
@@ -213,6 +211,9 @@ def atualizar_status(ordem, dados, request_ctx):
         observacao=(dados.get('observacao') or '').strip() or None
     )
     db.session.commit()
+    if novo_status in STATUS_CONCLUIDOS:
+        disparar_evento_ordem('os_concluida', ordem)
+        disparar_evento_webhook('os.concluida', payload_ordem(ordem))
     return status_anterior
 
 

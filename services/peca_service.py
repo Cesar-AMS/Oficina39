@@ -256,3 +256,40 @@ def duplicar_pecas_da_ordem(origem, nova_ordem):
         itens.append(item)
     db.session.flush()
     return itens
+
+
+def listar_pecas_com_filtro_periodo(data_inicio, data_fim):
+    from sqlalchemy import func
+    from models import ItemPeca, Ordem
+
+    data_ref_expr = func.coalesce(
+        Ordem.data_conclusao,
+        Ordem.data_emissao,
+        Ordem.data_entrada,
+    )
+
+    rows = (
+        ItemPeca.query
+        .join(Ordem, ItemPeca.ordem_id == Ordem.id)
+        .with_entities(
+            Ordem.id.label('ordem_id'),
+            data_ref_expr.label('data_ref'),
+            ItemPeca.descricao_peca.label('descricao'),
+            func.coalesce(ItemPeca.quantidade, 0.0).label('quantidade'),
+            func.coalesce(ItemPeca.valor_unitario, 0.0).label('valor_unitario'),
+        )
+        .filter(data_ref_expr >= data_inicio)
+        .filter(data_ref_expr <= data_fim)
+        .order_by(data_ref_expr.desc())
+        .all()
+    )
+
+    return [{
+        'ordem_id': row.ordem_id,
+        'data_referencia': row.data_ref.strftime('%d/%m/%Y') if row.data_ref else '---',
+        'data_ordem': row.data_ref.isoformat() if row.data_ref else '',
+        'descricao': row.descricao or '---',
+        'quantidade': float(row.quantidade or 0),
+        'valor_unitario': float(row.valor_unitario or 0),
+        'valor_total': float((row.quantidade or 0) * (row.valor_unitario or 0)),
+    } for row in rows]

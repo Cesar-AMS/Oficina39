@@ -188,3 +188,44 @@ def duplicar_servicos_da_ordem(origem, nova_ordem):
         itens.append(item)
     db.session.flush()
     return itens
+
+
+def listar_servicos_com_filtro_periodo(data_inicio, data_fim):
+    from sqlalchemy import func
+    from models import ItemServico, Ordem
+
+    data_ref_expr = func.coalesce(
+        Ordem.data_conclusao,
+        Ordem.data_emissao,
+        Ordem.data_entrada,
+    )
+    profissional_expr = func.coalesce(
+        func.nullif(func.trim(ItemServico.nome_profissional), ''),
+        func.nullif(func.trim(Ordem.profissional_responsavel), ''),
+        'Nao informado',
+    )
+
+    rows = (
+        ItemServico.query
+        .join(Ordem, ItemServico.ordem_id == Ordem.id)
+        .with_entities(
+            Ordem.id.label('ordem_id'),
+            data_ref_expr.label('data_ref'),
+            profissional_expr.label('profissional'),
+            ItemServico.descricao_servico.label('descricao'),
+            func.coalesce(ItemServico.valor_servico, 0.0).label('valor'),
+        )
+        .filter(data_ref_expr >= data_inicio)
+        .filter(data_ref_expr <= data_fim)
+        .order_by(data_ref_expr.desc())
+        .all()
+    )
+
+    return [{
+        'ordem_id': row.ordem_id,
+        'data_referencia': row.data_ref.strftime('%d/%m/%Y') if row.data_ref else '---',
+        'data_ordem': row.data_ref.isoformat() if row.data_ref else '',
+        'profissional': row.profissional or 'Nao informado',
+        'descricao': row.descricao or '---',
+        'valor': float(row.valor or 0),
+    } for row in rows]

@@ -155,6 +155,10 @@ def obter_saldo(data_corte: datetime = None) -> float:
     return caixa_repository.obter_saldo(data_corte)
 
 
+def obter_saldo_atual(data_corte: datetime = None) -> float:
+    return obter_saldo(data_corte)
+
+
 def obter_extrato(data_inicio: datetime, data_fim: datetime, tipo: str = None):
     if data_inicio > data_fim:
         raise ValueError('Data inicial nao pode ser maior que a data final.')
@@ -174,3 +178,107 @@ def obter_movimentos_por_ordem(ordem_id: int):
 
 def obter_movimentos_por_cliente(cliente_id: int):
     return caixa_repository.obter_movimentos_por_cliente(cliente_id)
+
+
+def _veiculo_cliente(cliente):
+    if not cliente:
+        return ''
+    return f"{cliente.fabricante or ''} {cliente.modelo or ''}".strip()
+
+
+def _serializar_movimento(movimento: MovimentoCaixa) -> dict:
+    ordem = movimento.ordem
+    cliente = movimento.cliente or (ordem.cliente if ordem else None)
+    tipo = (movimento.tipo or '').lower()
+    categoria = (movimento.categoria or '').lower()
+
+    if tipo == 'entrada':
+        origem = 'Recebimento de OS' if categoria == 'pagamento_os' else 'Entrada de caixa'
+        return {
+            'id': movimento.id,
+            'ordem_id': ordem.id if ordem else movimento.ordem_id,
+            'data': movimento.data_movimento.strftime('%d/%m/%Y') if movimento.data_movimento else None,
+            'hora': movimento.data_movimento.strftime('%H:%M') if movimento.data_movimento else '--:--',
+            'data_hora_iso': movimento.data_movimento.isoformat() if movimento.data_movimento else None,
+            'tipo': 'Entrada',
+            'origem': origem,
+            'cliente_nome': cliente.nome_cliente if cliente else '---',
+            'veiculo': _veiculo_cliente(cliente),
+            'placa': cliente.placa if cliente else '---',
+            'forma_pagamento': movimento.forma_pagamento or '---',
+            'observacao': movimento.descricao,
+            'total': float(movimento.valor or 0),
+            'total_pago': float(ordem.total_pago or 0) if ordem else 0,
+            'saldo_pendente': float(ordem.saldo_pendente or 0) if ordem else 0,
+            'status_financeiro': ordem.status_financeiro if ordem else '---',
+            'status': ordem.status if ordem else '---',
+        }
+
+    origem_saida = 'Retirada' if categoria == 'retirada' else 'Saída manual'
+    return {
+        'id': movimento.id,
+        'data': movimento.data_movimento.strftime('%d/%m/%Y') if movimento.data_movimento else None,
+        'hora': movimento.data_movimento.strftime('%H:%M') if movimento.data_movimento else '--:--',
+        'data_hora_iso': movimento.data_movimento.isoformat() if movimento.data_movimento else None,
+        'tipo': 'Saída',
+        'origem': origem_saida,
+        'forma_pagamento': movimento.forma_pagamento or '---',
+        'observacao': movimento.descricao,
+        'descricao': movimento.descricao,
+        'categoria': movimento.categoria,
+        'valor': float(movimento.valor or 0),
+    }
+
+
+def obter_fluxo_serializado(data_inicio: datetime, data_fim: datetime) -> dict:
+    movimentos = obter_extrato(data_inicio, data_fim)
+    entradas = []
+    saidas = []
+    for movimento in movimentos:
+        serializado = _serializar_movimento(movimento)
+        if (movimento.tipo or '').lower() == 'entrada':
+            entradas.append(serializado)
+        else:
+            saidas.append(serializado)
+    return {'entradas': entradas, 'saidas': saidas}
+
+
+def obter_conferencia_formas(data_inicio: datetime, data_fim: datetime, contagem: dict) -> dict:
+    entradas = obter_extrato(data_inicio, data_fim, tipo='entrada')
+    saidas = obter_extrato(data_inicio, data_fim, tipo='saida')
+
+    esperados = {}
+    for movimento in entradas:
+        forma = movimento.forma_pagamento or 'não informado'
+        esperados[forma] = esperados.get(forma, 0.0) + float(movimento.valor or 0)
+
+    formas = ['Pix', 'Cartão', 'Dinheiro', 'Boleto', 'Não informado']
+    for forma in list(esperados.keys()) + list((contagem or {}).keys()):
+        if forma not in formas:
+            formas.append(forma)
+
+    comparativo = []
+    total_esperado = 0.0
+    total_contado = 0.0
+    for forma in formas:
+        esperado = float(esperados.get(forma, 0.0))
+        contado = float((contagem or {}).get(forma, 0.0) or 0.0)
+        diferenca = contado - esperado
+        comparativo.append({
+            'forma_pagamento': forma,
+            'valor_esperado': esperado,
+            'valor_contado': contado,
+            'diferenca': diferenca,
+        })
+        total_esperado += esperado
+        total_contado += contado
+
+    total_saidas = sum(float(movimento.valor or 0) for movimento in saidas)
+    return {
+        'comparativo': comparativo,
+        'total_esperado': total_esperado,
+        'total_contado': total_contado,
+        'diferenca_total': total_contado - total_esperado,
+        'total_saidas': total_saidas,
+        'saldo_estimado': total_esperado - total_saidas,
+    }

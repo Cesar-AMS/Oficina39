@@ -4,6 +4,7 @@
 
 from flask import Blueprint, request, jsonify
 from extensions import db
+from .auth_utils import require_profiles
 from repositories import saida_repository
 from services.auditoria_service import registrar_evento_auditoria
 from services.fluxo_service import criar_saida as criar_saida_service
@@ -30,6 +31,7 @@ def fluxo_periodo():
 # CRIAR NOVA SAÍDA
 # ===========================================
 @fluxo_bp.route('/saidas', methods=['POST'])
+@require_profiles('admin', 'gerente', 'operador')
 def criar_saida():
     try:
         saida = criar_saida_service(request.json or {})
@@ -56,6 +58,7 @@ def listar_saidas():
 # DELETAR SAÍDA
 # ===========================================
 @fluxo_bp.route('/saidas/<int:id>', methods=['DELETE'])
+@require_profiles('admin', 'gerente')
 def deletar_saida(id):
     try:
         saida = saida_repository.buscar_por_id(id)
@@ -82,6 +85,7 @@ def deletar_saida(id):
 
 
 @fluxo_bp.route('/fechamento-conferencia', methods=['POST'])
+@require_profiles('admin', 'gerente', 'operador')
 def fechamento_conferencia():
     """
     Compara valor esperado x valor contado por forma de pagamento no dia.

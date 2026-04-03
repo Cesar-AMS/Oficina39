@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 
 from extensions import db
+from .auth_utils import require_profiles
 from services.debito_service import listar_debitos_abertos, registrar_pagamentos
 
 
@@ -22,6 +23,7 @@ def listar_debitos():
 
 
 @debitos_bp.route('/<int:ordem_id>/pagamentos', methods=['POST'])
+@require_profiles('admin', 'gerente', 'operador')
 def receber_pagamentos(ordem_id):
     try:
         dados = request.json or {}

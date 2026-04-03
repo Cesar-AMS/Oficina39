@@ -7,6 +7,7 @@ from extensions import mail
 from models import EnvioRelatorio
 from extensions import db
 from datetime import datetime
+from services.comunicacao_service import enviar_email_imediato
 
 def enviar_relatorio_email(remetente, senha, destinatario, periodo, html, formato='html'):
     """
@@ -24,25 +25,17 @@ def enviar_relatorio_email(remetente, senha, destinatario, periodo, html, format
         tuple: (sucesso: bool, mensagem: str)
     """
     try:
-        # Configurar e-mail
-        mail.username = remetente
-        mail.password = senha
-        mail.sender = remetente
-        
-        # Recriar conexão com novas credenciais
-        mail.extract_config()
-        mail.connect()
-        
-        # Criar mensagem
-        msg = Message(
-            subject=f"Relatório Fluxo de Caixa - {periodo}",
-            sender=remetente,
-            recipients=[destinatario],
-            html=html
+        comunicacao = enviar_email_imediato(
+            destino=destinatario,
+            assunto=f"Relatório Fluxo de Caixa - {periodo}",
+            mensagem=html,
+            entidade_tipo='relatorio',
+            remetente=remetente,
+            senha=senha,
+            html=True,
         )
-        
-        # Enviar
-        mail.send(msg)
+        if comunicacao.status != 'enviado':
+            raise RuntimeError(comunicacao.erro or 'Falha ao enviar e-mail.')
         
         # Registrar sucesso
         registro = EnvioRelatorio(
@@ -90,10 +83,9 @@ def testar_conexao_email(remetente, senha):
         mail.username = remetente
         mail.password = senha
         mail.sender = remetente
-        
         mail.extract_config()
-        mail.connect()
-        mail.disconnect()
+        with mail.connect():
+            pass
         
         return True, "Conexão bem sucedida"
         

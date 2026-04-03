@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oficina 39 - Nova Ordem de Serviço</title>
 
     <!-- CSS GLOBAL -->
@@ -15,6 +16,7 @@
 
     <!-- CSS ESPECÍFICO DA PÁGINA -->
     <link rel="stylesheet" href="/static/css/pages/novaOS.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
 <body class="pagina-nova-os">
@@ -257,8 +259,9 @@
         <!-- BOTÕES -->
         <div class="button-group botoes-nova-os button-group-final">
             <button class="btn btn-cancelar btn-final" onclick="cancelar()">✕ Cancelar</button>
+            <button class="btn btn-salvar btn-final" id="btnSalvarOs" onclick="salvarOrdem()">💾 Salvar OS</button>
+            <button class="btn btn-salvar btn-final btn-imprimir" id="btnEnviarOrcamento" onclick="enviarOrcamento()">📄 Enviar Orçamento</button>
             <button class="btn btn-salvar btn-final btn-caixa" id="btnFinalizarCaixa" onclick="finalizarNoCaixa()">✅ Finalizar no Caixa</button>
-            <button class="btn btn-salvar btn-final btn-imprimir" id="btnSalvarImprimir" onclick="enviarOrcamentoWhatsapp()">Enviar Orçamento</button>
         </div>
 
     </div>
@@ -267,6 +270,7 @@
     <script src="/static/js/ui.js"></script>
     <script src="/static/js/tema.js"></script>
     <script src="/static/js/novaOS.js"></script>
+    <script src="/static/js/nova_ordem.js"></script>
 </body>
 
 </html>

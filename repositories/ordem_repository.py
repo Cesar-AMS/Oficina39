@@ -1,6 +1,8 @@
 from sqlalchemy import func, or_
 
-from models import Cliente, Ordem, OrdemAnexo, OrdemStatusLog, Profissional
+from models import Cliente, Ordem, Profissional
+from repositories.anexo_repository import anexo_repository
+from repositories.status_log_repository import status_log_repository
 from extensions import db
 
 
@@ -13,15 +15,15 @@ def buscar_por_id(ordem_id):
 
 
 def listar_logs_status(ordem_id):
-    return OrdemStatusLog.query.filter_by(ordem_id=ordem_id).order_by(OrdemStatusLog.data_evento.desc()).all()
+    return status_log_repository.listar_por_entidade('ordem', ordem_id, incluir_legado=True)
 
 
 def listar_anexos(ordem_id):
-    return OrdemAnexo.query.filter_by(ordem_id=ordem_id).order_by(OrdemAnexo.created_at.desc()).all()
+    return anexo_repository.listar_por_entidade('ordem', ordem_id, incluir_legado=True)
 
 
 def buscar_anexo(ordem_id, anexo_id):
-    return OrdemAnexo.query.filter_by(id=anexo_id, ordem_id=ordem_id).first()
+    return anexo_repository.obter_por_entidade('ordem', ordem_id, anexo_id, incluir_legado=True)
 
 
 def profissional_ativo_existe(nome_profissional):

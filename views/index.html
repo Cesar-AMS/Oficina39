@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oficina 39 - Início</title>
 
     <!-- CSS GLOBAL -->
@@ -13,6 +14,7 @@
 
     <!-- CSS ESPECÍFICO DA PÁGINA -->
     <link rel="stylesheet" href="/static/css/pages/index.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
 <body>
@@ -23,6 +25,7 @@
         <!-- =========================================== -->
         <div class="menu-lateral">
             <div class="menu-header">
+                <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false">☰</button>
                 <h2 class="menu-titulo">MENU PRINCIPAL</h2>
             </div>
 
@@ -98,6 +101,7 @@
         <!-- =========================================== -->
         <!-- ÁREA PRINCIPAL (IMAGEM)                     -->
         <!-- =========================================== -->
+        <div class="menu-overlay" id="menuOverlay"></div>
         <div class="area-principal">
             <div class="imagem-container">
                 <div class="logo-stage" id="indexLogoStage">
@@ -113,6 +117,7 @@
     <!-- SCRIPTS -->
     <script src="/static/js/index.js"></script>
     <script src="/static/js/tema.js"></script>
+    <script src="/static/js/layout.js"></script>
 </body>
 
 </html>

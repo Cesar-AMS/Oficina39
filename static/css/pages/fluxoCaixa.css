@@ -148,6 +148,69 @@
     margin-top: 12px;
 }
 
+.caixa-header-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+.caixa-resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 18px 0 16px;
+}
+
+.caixa-resumo-card {
+    padding: 18px 20px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+}
+
+.caixa-resumo-card strong {
+    display: block;
+    margin: 10px 0 8px;
+    font-size: 1.9rem;
+    color: var(--text-dark);
+}
+
+.caixa-resumo-card p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+.caixa-resumo-kicker {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.caixa-resumo-card-entrada {
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.08), var(--bg-card));
+}
+
+.caixa-resumo-card-saida {
+    background: linear-gradient(180deg, rgba(239, 68, 68, 0.08), var(--bg-card));
+}
+
+.caixa-resumo-card-saldo {
+    background: linear-gradient(180deg, rgba(26, 86, 219, 0.08), var(--bg-card));
+}
+
+.caixa-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
 .pdv-section {
     margin-top: 12px;
 }
@@ -1782,6 +1845,21 @@
 /* =========================================== */
 
 @media (max-width: 768px) {
+    .caixa-resumo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .caixa-header-actions,
+    .caixa-toolbar {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .caixa-header-actions .btn,
+    .caixa-toolbar .btn {
+        width: 100%;
+    }
+
     .btn-download {
         width: 100%;
     }

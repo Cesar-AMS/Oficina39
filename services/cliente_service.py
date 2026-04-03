@@ -5,6 +5,7 @@ from models import Cliente
 from repositories import cliente_repository
 from services.integration_service import consultar_cep, consultar_placa
 from services.validacao_service import ValidacaoService
+from services.webhook_service import disparar_evento_webhook, payload_cliente
 from utils.formatters import somente_digitos, texto_limpo
 
 
@@ -127,6 +128,7 @@ def create_client(data: dict):
     client = Cliente(**cleaned)
     db.session.add(client)
     db.session.commit()
+    disparar_evento_webhook('cliente.criado', payload_cliente(client))
     return client
 
 

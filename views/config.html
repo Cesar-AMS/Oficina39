@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oficina 39 - Configurações do Sistema</title>
 
     <link rel="stylesheet" href="/static/css/global.css">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="./static/css/components/forms.css">
     <link rel="stylesheet" href="./static/css/components/tables.css">
     <link rel="stylesheet" href="/static/css/pages/config.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body class="pagina-config">
     <div class="container config-container">
@@ -47,71 +49,94 @@
         </div>
 
         <section class="config-tab-panel active" id="configTabGeral">
-            <section class="info-box">
-                <h3>Aparência Global</h3>
-                <p>Use um único botão para alternar o tema em todo o sistema.</p>
-                <button id="btnTemaGlobal" class="btn btn-salvar btn-compact" onclick="alternarTemaGlobal()">Tema Global</button>
-            </section>
-
-            <section class="info-box">
-                <h3>Sistema de Envio Automático</h3>
-                <p>Configure os e-mails para envio automático de relatórios financeiros.</p>
-                <p><strong>Frequências:</strong> Diário (18h), Semanal (segunda às 8h), Mensal (dia 1 às 8h).</p>
-            </section>
-
-            <section class="form-section config-section" id="secao-config-email">
-                <h3 class="section-titulo">Configuração de E-mails</h3>
-                <div class="form-group">
-                    <label for="emailCliente">E-mail do Cliente (remetente) *</label>
-                    <input type="email" id="emailCliente" placeholder="contato@oficina.com.br" required>
-                </div>
-                <div class="form-group">
-                    <label for="senhaApp">Senha de App (16 dígitos) *</label>
-                    <input type="password" id="senhaApp" placeholder="abcdefghijklmnop" required>
-                    <small class="texto-ajuda">Gerada no Google com verificação em duas etapas.</small>
-                </div>
-                <div class="form-group">
-                    <label for="emailContador">E-mail do Contador (destinatário) *</label>
-                    <input type="email" id="emailContador" placeholder="contador@escritorio.com.br" required>
-                </div>
-                <div class="form-group">
-                    <label for="profissionalEnvioAuto">Profissional para envio automático ao contador</label>
-                    <select id="profissionalEnvioAuto" class="filtro-input">
-                        <option value="">Todos os profissionais</option>
-                    </select>
-                </div>
-                <div class="config-row">
-                    <div class="form-group">
-                        <label for="frequenciaEnvio">Frequência de envio</label>
-                        <select id="frequenciaEnvio">
-                            <option value="">Selecione...</option>
-                            <option value="diario">Diário (18h)</option>
-                            <option value="semanal">Semanal (segunda 8h)</option>
-                            <option value="mensal">Mensal (dia 1, 8h)</option>
-                        </select>
+            <div class="config-page-grid">
+                <section class="form-section config-section config-card-destaque">
+                    <div class="config-card-header">
+                        <div>
+                            <p class="config-card-eyebrow">Dados da empresa</p>
+                            <h3 class="section-titulo">Identidade operacional</h3>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="diaEnvio">Dia do mês (mensal)</label>
-                        <input type="number" id="diaEnvio" min="1" max="28" value="1">
+                    <div class="config-grid-2">
+                        <div class="info-box config-inline-box">
+                            <h3>Aparência Global</h3>
+                            <p>Use um único botão para alternar o tema em todo o sistema.</p>
+                            <button id="btnTemaGlobal" class="btn btn-salvar btn-compact" onclick="alternarTemaGlobal()">Tema Global</button>
+                        </div>
+                        <div class="info-box config-inline-box">
+                            <h3>Sistema de Envio Automático</h3>
+                            <p>Configure os e-mails para envio automático de relatórios financeiros.</p>
+                            <p><strong>Frequências:</strong> Diário (18h), Semanal (segunda às 8h), Mensal (dia 1 às 8h).</p>
+                        </div>
                     </div>
-                </div>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="envioAtivo" checked>
-                    <label for="envioAtivo">Ativar envio automático de relatórios</label>
-                </div>
-            </section>
+                </section>
 
-            <section class="form-section config-section" id="secao-whatsapp-orcamento">
-                <h3 class="section-titulo">WhatsApp para Orçamentos</h3>
-                <p class="texto-ajuda">Informe o número que deve abrir quando o usuário clicar em "Enviar Orçamento" na Nova OS.</p>
-                <div class="config-row">
-                    <div class="form-group">
-                        <label for="whatsappOrcamento">WhatsApp da oficina</label>
-                        <input type="text" id="whatsappOrcamento" placeholder="Ex: 5511992092341 ou (11) 99209-2341">
-                        <small class="texto-ajuda">Pode informar com ou sem máscara. O sistema usa apenas os números.</small>
+                <section class="form-section config-section" id="secao-config-email">
+                    <div class="config-card-header">
+                        <div>
+                            <p class="config-card-eyebrow">Email e automação</p>
+                            <h3 class="section-titulo">Configuração de E-mails</h3>
+                        </div>
                     </div>
-                </div>
-            </section>
+                    <div class="config-grid-2">
+                        <div class="form-group">
+                            <label for="emailCliente">E-mail do Cliente (remetente) *</label>
+                            <input type="email" id="emailCliente" placeholder="contato@oficina.com.br" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="senhaApp">Senha de App (16 dígitos) *</label>
+                            <input type="password" id="senhaApp" placeholder="abcdefghijklmnop" required>
+                            <small class="texto-ajuda">Gerada no Google com verificação em duas etapas.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="emailContador">E-mail do Contador (destinatário) *</label>
+                            <input type="email" id="emailContador" placeholder="contador@escritorio.com.br" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="profissionalEnvioAuto">Profissional para envio automático ao contador</label>
+                            <select id="profissionalEnvioAuto" class="filtro-input">
+                                <option value="">Todos os profissionais</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="config-row">
+                        <div class="form-group">
+                            <label for="frequenciaEnvio">Frequência de envio</label>
+                            <select id="frequenciaEnvio">
+                                <option value="">Selecione...</option>
+                                <option value="diario">Diário (18h)</option>
+                                <option value="semanal">Semanal (segunda 8h)</option>
+                                <option value="mensal">Mensal (dia 1, 8h)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="diaEnvio">Dia do mês (mensal)</label>
+                            <input type="number" id="diaEnvio" min="1" max="28" value="1">
+                        </div>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="envioAtivo" checked>
+                        <label for="envioAtivo">Ativar envio automático de relatórios</label>
+                    </div>
+                </section>
+
+                <section class="form-section config-section" id="secao-whatsapp-orcamento">
+                    <div class="config-card-header">
+                        <div>
+                            <p class="config-card-eyebrow">Comunicação</p>
+                            <h3 class="section-titulo">WhatsApp para Orçamentos</h3>
+                        </div>
+                    </div>
+                    <p class="texto-ajuda">Informe o número que deve abrir quando o usuário clicar em "Enviar Orçamento" na Nova OS.</p>
+                    <div class="config-row">
+                        <div class="form-group">
+                            <label for="whatsappOrcamento">WhatsApp da oficina</label>
+                            <input type="text" id="whatsappOrcamento" placeholder="Ex: 5511992092341 ou (11) 99209-2341">
+                            <small class="texto-ajuda">Pode informar com ou sem máscara. O sistema usa apenas os números.</small>
+                        </div>
+                    </div>
+                </section>
+            </div>
 
             <div class="button-group alinhar-esquerda config-footer-actions">
                 <button class="btn btn-salvar" onclick="salvarConfig()">Salvar Configurações</button>
@@ -120,7 +145,12 @@
 
         <section class="config-tab-panel" id="configTabPersonalizacao">
             <section class="form-section config-section" id="secao-personalizacao-index">
-                <h3 class="section-titulo">Personalização da Tela Inicial</h3>
+                <div class="config-card-header">
+                    <div>
+                        <p class="config-card-eyebrow">Branding</p>
+                        <h3 class="section-titulo">Personalização da Tela Inicial</h3>
+                    </div>
+                </div>
                 <p class="texto-ajuda">Defina a identidade visual e os dados da empresa para refletir na tela inicial e também na nota impressa ou enviada ao cliente.</p>
 
                 <div class="config-row">
@@ -294,61 +324,73 @@
         </section>
 
         <section class="config-tab-panel" id="configTabDados">
-            <section class="form-section config-section" id="secao-backup">
-                <h3 class="section-titulo">Backup e Exportação de Dados</h3>
-                <div class="config-row">
-                    <div class="form-group">
-                        <label for="tipoExportacao">Tipo de exportação</label>
-                        <select id="tipoExportacao">
-                            <option value="completo">Banco completo (.db)</option>
-                            <option value="clientes">Apenas clientes</option>
-                            <option value="ordens">Apenas ordens</option>
-                            <option value="financeiro">Apenas financeiro (entradas/saídas)</option>
-                        </select>
+            <div class="config-grid-2">
+                <section class="form-section config-section" id="secao-backup">
+                    <div class="config-card-header">
+                        <div>
+                            <p class="config-card-eyebrow">Backup</p>
+                            <h3 class="section-titulo">Backup e Exportação de Dados</h3>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="formatoExportacao">Formato</label>
-                        <select id="formatoExportacao">
-                            <option value="db">SQLite (.db)</option>
-                            <option value="csv">CSV</option>
-                            <option value="xlsx">Excel</option>
-                            <option value="json">JSON</option>
-                        </select>
+                    <div class="config-row">
+                        <div class="form-group">
+                            <label for="tipoExportacao">Tipo de exportação</label>
+                            <select id="tipoExportacao">
+                                <option value="completo">Banco completo (.db)</option>
+                                <option value="clientes">Apenas clientes</option>
+                                <option value="ordens">Apenas ordens</option>
+                                <option value="financeiro">Apenas financeiro (entradas/saídas)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="formatoExportacao">Formato</label>
+                            <select id="formatoExportacao">
+                                <option value="db">SQLite (.db)</option>
+                                <option value="csv">CSV</option>
+                                <option value="xlsx">Excel</option>
+                                <option value="json">JSON</option>
+                            </select>
+                        </div>
+                        <div class="form-group botao-exportar">
+                            <button class="btn btn-salvar" onclick="exportarDados()">Exportar</button>
+                        </div>
                     </div>
-                    <div class="form-group botao-exportar">
-                        <button class="btn btn-salvar" onclick="exportarDados()">Exportar</button>
-                    </div>
-                </div>
-                <p class="texto-aviso"><small>O backup completo (.db) contém todos os dados do sistema.</small></p>
-            </section>
+                    <p class="texto-aviso"><small>O backup completo (.db) contém todos os dados do sistema.</small></p>
+                </section>
 
-            <section class="form-section config-section" id="secao-importacao">
-                <h3 class="section-titulo">Importação de Dados</h3>
-                <div class="config-row">
-                    <div class="form-group">
-                        <label for="tipoImportacao">Tipo de importação</label>
-                        <select id="tipoImportacao">
-                            <option value="clientes">Importar clientes</option>
-                            <option value="ordens">Importar ordens</option>
-                            <option value="saidas">Importar saídas</option>
-                            <option value="completo">Importar tudo (restaurar backup)</option>
-                        </select>
+                <section class="form-section config-section" id="secao-importacao">
+                    <div class="config-card-header">
+                        <div>
+                            <p class="config-card-eyebrow">Importação</p>
+                            <h3 class="section-titulo">Importação de Dados</h3>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="formatoImportacao">Formato do arquivo</label>
-                        <select id="formatoImportacao">
-                            <option value="csv">CSV</option>
-                            <option value="xlsx">Excel</option>
-                            <option value="json">JSON</option>
-                        </select>
+                    <div class="config-row">
+                        <div class="form-group">
+                            <label for="tipoImportacao">Tipo de importação</label>
+                            <select id="tipoImportacao">
+                                <option value="clientes">Importar clientes</option>
+                                <option value="ordens">Importar ordens</option>
+                                <option value="saidas">Importar saídas</option>
+                                <option value="completo">Importar tudo (restaurar backup)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="formatoImportacao">Formato do arquivo</label>
+                            <select id="formatoImportacao">
+                                <option value="csv">CSV</option>
+                                <option value="xlsx">Excel</option>
+                                <option value="json">JSON</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="file-upload">
-                    <input type="file" id="arquivoImportar" accept=".csv,.xlsx,.json">
-                    <button class="btn btn-salvar botao-importar" onclick="importarDados()">Importar dados</button>
-                </div>
-                <div id="resultadoImportacao" class="resultado-mensagem"></div>
-            </section>
+                    <div class="file-upload">
+                        <input type="file" id="arquivoImportar" accept=".csv,.xlsx,.json">
+                        <button class="btn btn-salvar botao-importar" onclick="importarDados()">Importar dados</button>
+                    </div>
+                    <div id="resultadoImportacao" class="resultado-mensagem"></div>
+                </section>
+            </div>
         </section>
 
         <section class="config-tab-panel" id="configTabIntegracoes">

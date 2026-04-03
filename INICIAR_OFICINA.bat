@@ -7,6 +7,8 @@ cd /d "%~dp0"
 
 set "PYTHONW=.venv\Scripts\pythonw.exe"
 set "PYTHON=.venv\Scripts\python.exe"
+set "SETUP_BAT=%~dp0setup.bat"
+set "MIGRATE_BAT=%~dp0migrate.bat"
 set "APP=main.py"
 set "LEGACY_APP=desktop_app.py"
 set "WEB_APP=app.py"
@@ -23,6 +25,24 @@ if not exist "%APP%" (
         set "APP=%LEGACY_APP%"
     ) else (
         echo Arquivo main.py nao encontrado.
+        pause
+        exit /b 1
+    )
+)
+
+if exist "%SETUP_BAT%" (
+    call "%SETUP_BAT%" --quiet
+    if errorlevel 1 (
+        echo Falha ao preparar o ambiente.
+        pause
+        exit /b 1
+    )
+)
+
+if exist "%MIGRATE_BAT%" (
+    call "%MIGRATE_BAT%" --quiet
+    if errorlevel 1 (
+        echo Falha ao atualizar o banco de dados.
         pause
         exit /b 1
     )

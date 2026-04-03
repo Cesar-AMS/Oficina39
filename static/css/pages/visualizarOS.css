@@ -51,6 +51,19 @@
     display: flex;
     gap: 15px;
     align-items: center;
+    flex-wrap: wrap;
+}
+
+.status-chip-topo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-weight: 600;
 }
 
 /* =========================================== */
@@ -87,6 +100,55 @@
     padding: 20px;
     margin-bottom: 20px;
     border: 1px solid var(--border);
+}
+
+.info-card-resumo-topo {
+    display: grid;
+    gap: 16px;
+}
+
+.visualizar-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.visualizar-meta-item {
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+}
+
+.visualizar-meta-item span {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.visualizar-meta-item strong {
+    color: var(--text-dark);
+    font-size: 1rem;
+}
+
+.visualizar-layout-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.9fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.visualizar-coluna-principal,
+.visualizar-coluna-lateral {
+    display: grid;
+    gap: 20px;
+}
+
+.visualizar-card-stack {
+    margin-bottom: 0;
 }
 
 .info-card h3 {
@@ -517,8 +579,20 @@
 .timeline-item {
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 10px 12px;
+    padding: 10px 12px 10px 18px;
     background: var(--bg-hover);
+    position: relative;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 16px;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--primary);
 }
 
 .timeline-cabecalho {
@@ -542,4 +616,18 @@
 .timeline-vazio {
     color: var(--text-muted);
     font-style: italic;
+}
+
+@media (max-width: 900px) {
+    .visualizar-layout-grid,
+    .visualizar-meta-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .status-chip-topo {
+        width: 100%;
+        justify-content: center;
+    }
 }

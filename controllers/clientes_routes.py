@@ -2,9 +2,12 @@
 # controllers/clientes_routes.py - Controller de Clientes
 # ===========================================
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 from extensions import db
+from .auth_utils import require_auth
 from repositories import cliente_repository
+from services.anexo_service import excluir_anexo, listar_anexos, obter_anexo, resolver_caminho_absoluto, salvar_anexo
+from services.cliente_service import create_client
 from utils.formatters import texto_limpo
 
 clientes_bp = Blueprint('clientes', __name__, url_prefix='/api/clientes')
@@ -18,6 +21,78 @@ def listar_clientes():
         clientes = cliente_repository.listar_todos()
         return jsonify([c.to_dict() for c in clientes])
     except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+@clientes_bp.route('/<int:id>/anexos', methods=['GET'])
+def listar_anexos_cliente(id):
+    try:
+        cliente = cliente_repository.buscar_por_id(id)
+        if not cliente:
+            return jsonify({'erro': 'Cliente nao encontrado'}), 404
+        anexos = listar_anexos('cliente', id)
+        return jsonify([a.to_dict() for a in anexos])
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+@clientes_bp.route('/<int:id>/anexos', methods=['POST'])
+@require_auth
+def upload_anexo_cliente(id):
+    try:
+        cliente = cliente_repository.buscar_por_id(id)
+        if not cliente:
+            return jsonify({'erro': 'Cliente nao encontrado'}), 404
+        anexo = salvar_anexo(
+            entidade_tipo='cliente',
+            entidade_id=id,
+            arquivo=request.files.get('arquivo'),
+            descricao=request.form.get('descricao'),
+            categoria=request.form.get('categoria', 'documento'),
+        )
+        return jsonify(anexo.to_dict()), 201
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({'erro': str(e)}), 400
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({'erro': str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'erro': str(e)}), 500
+
+
+@clientes_bp.route('/<int:id>/anexos/<int:anexo_id>/download', methods=['GET'])
+def download_anexo_cliente(id, anexo_id):
+    try:
+        cliente = cliente_repository.buscar_por_id(id)
+        if not cliente:
+            return jsonify({'erro': 'Cliente nao encontrado'}), 404
+        anexo = obter_anexo('cliente', id, anexo_id)
+        if not anexo:
+            return jsonify({'erro': 'Anexo nao encontrado.'}), 404
+        caminho_abs = resolver_caminho_absoluto(anexo)
+        return send_file(caminho_abs, as_attachment=True, download_name=getattr(anexo, 'nome_arquivo', None) or getattr(anexo, 'nome_original', 'anexo'))
+    except FileNotFoundError as e:
+        return jsonify({'erro': str(e)}), 404
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+@clientes_bp.route('/<int:id>/anexos/<int:anexo_id>', methods=['DELETE'])
+@require_auth
+def excluir_anexo_cliente(id, anexo_id):
+    try:
+        cliente = cliente_repository.buscar_por_id(id)
+        if not cliente:
+            return jsonify({'erro': 'Cliente nao encontrado'}), 404
+        excluir_anexo('cliente', id, anexo_id)
+        return jsonify({'mensagem': 'Anexo removido com sucesso.'})
+    except LookupError as e:
+        db.session.rollback()
+        return jsonify({'erro': str(e)}), 404
+    except Exception as e:
+        db.session.rollback()
         return jsonify({'erro': str(e)}), 500
 
 # ===========================================
@@ -37,6 +112,7 @@ def buscar_cliente(id):
 # CRIAR NOVO CLIENTE
 # ===========================================
 @clientes_bp.route('/', methods=['POST'])
+@require_auth
 def criar_cliente():
     try:
         from models import Cliente
@@ -63,34 +139,7 @@ def criar_cliente():
         if cliente_repository.buscar_por_cpf(dados['cpf']):
             return jsonify({'erro': 'CPF já cadastrado'}), 400
         
-        cliente = Cliente(
-            nome_cliente=texto_limpo(dados['nome_cliente']),
-            cpf=texto_limpo(dados['cpf']),
-            
-            # ===== NOVOS CAMPOS =====
-            telefone=dados.get('telefone', ''),
-            email=dados.get('email', ''),
-            
-            endereco=dados.get('endereco', ''),
-            cidade=dados.get('cidade', ''),
-            estado=dados.get('estado', ''),
-            cep=dados.get('cep', ''),
-            
-            placa=dados.get('placa', ''),
-            fabricante=dados.get('fabricante', ''),
-            modelo=dados.get('modelo', ''),
-            ano=dados.get('ano', ''),
-            motor=dados.get('motor', ''),
-            combustivel=dados.get('combustivel', ''),
-            cor=dados.get('cor', ''),
-            tanque=dados.get('tanque', ''),
-            km=dados.get('km', 0),
-            direcao=dados.get('direcao', ''),
-            ar=dados.get('ar', '')
-        )
-        
-        db.session.add(cliente)
-        db.session.commit()
+        cliente = create_client(dados)
 
         # If we promoted from a draft, remove the draft to keep DB tidy
         if draft_id:
@@ -113,6 +162,7 @@ def criar_cliente():
 # ATUALIZAR CLIENTE
 # ===========================================
 @clientes_bp.route('/<int:id>', methods=['PUT'])
+@require_auth
 def atualizar_cliente(id):
     try:
         from models import Cliente
@@ -179,6 +229,7 @@ def atualizar_cliente(id):
 # DELETAR CLIENTE
 # ===========================================
 @clientes_bp.route('/<int:id>', methods=['DELETE'])
+@require_auth
 def deletar_cliente(id):
     try:
         cliente = cliente_repository.buscar_por_id(id)
@@ -214,6 +265,7 @@ def buscar_clientes():
 # SALVAR RASCUNHO / DADOS PARCIAIS (sem validações obrigatórias)
 # ===========================================
 @clientes_bp.route('/draft', methods=['POST'])
+@require_auth
 def salvar_rascunho():
     try:
         # Persistir rascunhos em tabela separada ClienteDraft

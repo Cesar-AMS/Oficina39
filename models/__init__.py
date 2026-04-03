@@ -18,9 +18,16 @@ from .config import ConfigContador
 from .envio import EnvioRelatorio
 from .profissional import Profissional
 from .ordem_status_log import OrdemStatusLog
+from .status_log import StatusLog
+from .anexo import Anexo
 from .ordem_anexo import OrdemAnexo
 from .auditoria_evento import AuditoriaEvento
 from .ordem_pagamento import OrdemPagamento
+from .comunicacao import CANAIS_COMUNICACAO, STATUS_COMUNICACAO, Comunicacao
+from .template_comunicacao import TemplateComunicacao
+from .api_key import ApiKey
+from .webhook import Webhook
+from .usuario import PERFIS_USUARIO, Usuario
 
 # Lista de todos os models para facilitar importação
 __all__ = [
@@ -39,9 +46,19 @@ __all__ = [
     'EnvioRelatorio',
     'Profissional',
     'OrdemStatusLog',
+    'StatusLog',
+    'Anexo',
     'OrdemAnexo',
     'AuditoriaEvento',
-    'OrdemPagamento'
+    'OrdemPagamento',
+    'Comunicacao',
+    'CANAIS_COMUNICACAO',
+    'STATUS_COMUNICACAO',
+    'TemplateComunicacao',
+    'ApiKey',
+    'Webhook',
+    'Usuario',
+    'PERFIS_USUARIO'
     ,'ClienteDraft'
 ]
 

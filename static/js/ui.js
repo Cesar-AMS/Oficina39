@@ -28,22 +28,23 @@
 
             .ui-toast {
                 pointer-events: auto;
-                border-radius: 10px;
-                padding: 12px 14px;
+                border-radius: 14px;
+                padding: 14px 16px;
                 color: #fff;
-                font-family: Arial, sans-serif;
+                font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                 font-size: 0.92rem;
-                line-height: 1.35;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+                line-height: 1.5;
+                box-shadow: 0 10px 28px rgba(15,23,42,0.18);
                 display: flex;
                 align-items: flex-start;
                 gap: 10px;
                 animation: uiToastIn 180ms ease-out;
+                border: 1px solid rgba(255,255,255,0.1);
             }
 
-            .ui-toast--success { background: #1f8f50; }
-            .ui-toast--error { background: #c0392b; }
-            .ui-toast--info { background: #2c3e50; }
+            .ui-toast--success { background: #10b981; }
+            .ui-toast--error { background: #ef4444; }
+            .ui-toast--info { background: #1a56db; }
 
             .ui-toast__msg {
                 flex: 1;
@@ -77,7 +78,7 @@
             .ui-confirm-overlay {
                 position: fixed;
                 inset: 0;
-                background: rgba(0, 0, 0, 0.45);
+                background: rgba(15, 23, 42, 0.5);
                 z-index: 100000;
                 display: flex;
                 align-items: center;
@@ -89,25 +90,26 @@
                 width: 100%;
                 max-width: 420px;
                 background: #fff;
-                border-radius: 12px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                padding: 16px;
-                font-family: Arial, sans-serif;
-                color: #222;
+                border-radius: 16px;
+                box-shadow: 0 20px 45px rgba(15,23,42,0.18);
+                padding: 24px;
+                font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                color: #1f2937;
                 animation: uiToastIn 150ms ease-out;
             }
 
             .ui-confirm-title {
-                font-size: 1rem;
+                font-size: 1.05rem;
                 font-weight: 700;
-                margin-bottom: 8px;
+                margin-bottom: 10px;
             }
 
             .ui-confirm-message {
-                font-size: 0.94rem;
-                line-height: 1.35;
-                margin-bottom: 14px;
+                font-size: 0.95rem;
+                line-height: 1.5;
+                margin-bottom: 18px;
                 white-space: pre-wrap;
+                color: #4b5563;
             }
 
             .ui-confirm-actions {
@@ -119,19 +121,22 @@
             .ui-confirm-btn {
                 border: none;
                 border-radius: 8px;
-                padding: 8px 12px;
+                padding: 10px 16px;
                 cursor: pointer;
-                font-size: 0.9rem;
+                font-size: 0.92rem;
+                font-weight: 600;
             }
 
             .ui-confirm-btn--cancel {
-                background: #0a3147;
-                color: #fff;
+                background: #ffffff;
+                color: #1f2937;
+                border: 1px solid #d1d5db;
             }
 
             .ui-confirm-btn--ok {
-                background: #0a3147;
+                background: #1a56db;
                 color: #fff;
+                border: 1px solid #1a56db;
             }
         `;
         document.head.appendChild(style);

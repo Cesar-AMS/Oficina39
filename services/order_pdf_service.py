@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import os
 from datetime import datetime
+from types import SimpleNamespace
 
 from extensions import db
 
@@ -33,6 +34,10 @@ def ensure_pdf_available() -> None:
 
 def suggested_order_pdf_name(order_id: int) -> str:
     return f"recibo_ordem_{order_id}.pdf"
+
+
+def suggested_preview_pdf_name() -> str:
+    return "orcamento_preliminar.pdf"
 
 
 def _project_root() -> str:
@@ -185,18 +190,143 @@ def _money(value) -> str:
     return f"R$ {float(value or 0):.2f}".replace(".", ",")
 
 
-def generate_order_pdf_bytes(order_id: int) -> bytes:
+def _coalesce_text(*values):
+    for value in values:
+        texto = str(value or "").strip()
+        if texto:
+            return texto
+    return ""
+
+
+def _normalizar_data_preview(valor):
+    if not valor:
+        return None
+    if isinstance(valor, datetime):
+        return valor
+    texto = str(valor).strip()
+    for formato in ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"):
+        try:
+            return datetime.strptime(texto[:19], formato)
+        except ValueError:
+            continue
+    return None
+
+
+def _montar_cliente_preview(dados: dict):
+    from models import Cliente
+
+    cliente = None
+    cliente_id = (dados or {}).get("cliente_id")
+    if cliente_id not in (None, ""):
+        try:
+            cliente = db.session.get(Cliente, int(cliente_id))
+        except Exception:
+            cliente = None
+
+    cliente_payload = (dados or {}).get("cliente") or {}
+    if cliente is None:
+        return SimpleNamespace(
+            id=cliente_payload.get("id"),
+            nome_cliente=_coalesce_text(cliente_payload.get("nome_cliente"), dados.get("cliente_nome")),
+            cpf=_coalesce_text(cliente_payload.get("cpf"), dados.get("cpf")),
+            telefone=_coalesce_text(cliente_payload.get("telefone"), dados.get("telefone")),
+            email=_coalesce_text(cliente_payload.get("email"), dados.get("email")),
+            endereco=_coalesce_text(cliente_payload.get("endereco"), dados.get("endereco")),
+            cidade=_coalesce_text(cliente_payload.get("cidade"), dados.get("cidade")),
+            estado=_coalesce_text(cliente_payload.get("estado"), dados.get("estado")),
+            cep=_coalesce_text(cliente_payload.get("cep"), dados.get("cep")),
+            placa=_coalesce_text(cliente_payload.get("placa"), dados.get("placa")),
+            fabricante=_coalesce_text(cliente_payload.get("fabricante"), dados.get("fabricante")),
+            modelo=_coalesce_text(cliente_payload.get("modelo"), dados.get("modelo")),
+            ano=_coalesce_text(cliente_payload.get("ano"), dados.get("ano")),
+            motor=_coalesce_text(cliente_payload.get("motor"), dados.get("motor")),
+            combustivel=_coalesce_text(cliente_payload.get("combustivel"), dados.get("combustivel")),
+            cor=_coalesce_text(cliente_payload.get("cor"), dados.get("cor")),
+            tanque=_coalesce_text(cliente_payload.get("tanque"), dados.get("tanque")),
+            km=int(cliente_payload.get("km") or dados.get("km") or 0),
+            direcao=_coalesce_text(cliente_payload.get("direcao"), dados.get("direcao")),
+            ar=_coalesce_text(cliente_payload.get("ar"), dados.get("ar")),
+        )
+    return cliente
+
+
+def _montar_itens_servico_preview(servicos: list[dict]):
+    itens = []
+    for idx, item in enumerate(servicos or [], start=1):
+        valor = float(item.get("valor_servico") or item.get("valor") or 0)
+        itens.append(SimpleNamespace(
+            id=idx,
+            codigo_servico=_coalesce_text(item.get("codigo_servico"), item.get("codigo")),
+            descricao_servico=_coalesce_text(item.get("descricao_servico"), item.get("descricao")),
+            valor_servico=valor,
+            nome_profissional=_coalesce_text(item.get("nome_profissional"), item.get("profissional")),
+        ))
+    return itens
+
+
+def _montar_itens_peca_preview(pecas: list[dict]):
+    itens = []
+    for idx, item in enumerate(pecas or [], start=1):
+        quantidade = float(item.get("quantidade") or 0)
+        valor_unitario = float(item.get("valor_unitario") or 0)
+        itens.append(SimpleNamespace(
+            id=idx,
+            codigo_peca=_coalesce_text(item.get("codigo_peca"), item.get("codigo")),
+            descricao_peca=_coalesce_text(item.get("descricao_peca"), item.get("descricao")),
+            quantidade=quantidade,
+            valor_unitario=valor_unitario,
+        ))
+    return itens
+
+
+def _montar_preview_order(dados: dict, client):
+    servicos = _montar_itens_servico_preview((dados or {}).get("servicos") or [])
+    pecas = _montar_itens_peca_preview((dados or {}).get("pecas") or [])
+    total_servicos = round(sum(float(item.valor_servico or 0) for item in servicos), 2)
+    total_pecas = round(sum(float(item.quantidade or 0) * float(item.valor_unitario or 0) for item in pecas), 2)
+    total_geral = round(total_servicos + total_pecas, 2)
+    desconto_percentual = float((dados or {}).get("desconto_percentual") or 0)
+    desconto_valor = float((dados or {}).get("desconto_valor") or 0)
+    if desconto_valor <= 0 and desconto_percentual > 0:
+        desconto_valor = round(total_geral * (desconto_percentual / 100), 2)
+    total_cobrado = round(max(0, total_geral - desconto_valor), 2)
+
+    return SimpleNamespace(
+        id=(dados or {}).get("id") or "PREVIEW",
+        cliente_id=getattr(client, "id", None),
+        cliente=client,
+        diagnostico=_coalesce_text((dados or {}).get("diagnostico")),
+        observacao_interna=_coalesce_text((dados or {}).get("observacao_interna")),
+        profissional_responsavel=_coalesce_text((dados or {}).get("profissional_responsavel")),
+        assinatura_cliente=_coalesce_text((dados or {}).get("assinatura_cliente")),
+        status=_coalesce_text((dados or {}).get("status")) or "Aguardando",
+        forma_pagamento=_coalesce_text((dados or {}).get("forma_pagamento")) or "Nao informado",
+        data_entrada=_normalizar_data_preview((dados or {}).get("data_entrada")) or datetime.now(),
+        data_emissao=_normalizar_data_preview((dados or {}).get("data_emissao")) or datetime.now(),
+        data_retirada=_normalizar_data_preview((dados or {}).get("data_retirada")),
+        data_conclusao=_normalizar_data_preview((dados or {}).get("data_conclusao")),
+        desconto_percentual=desconto_percentual,
+        desconto_valor=desconto_valor,
+        debito_vencimento=(dados or {}).get("debito_vencimento"),
+        debito_observacao=_coalesce_text((dados or {}).get("debito_observacao")),
+        total_servicos=total_servicos,
+        total_pecas=total_pecas,
+        total_geral=total_geral,
+        total_cobrado=total_cobrado,
+        total_pago=float((dados or {}).get("total_pago") or 0),
+        saldo_pendente=round(max(0, total_cobrado - float((dados or {}).get("total_pago") or 0)), 2),
+        status_financeiro=_coalesce_text((dados or {}).get("status_financeiro")) or (
+            "Quitado" if total_cobrado and float((dados or {}).get("total_pago") or 0) + 0.0001 >= total_cobrado
+            else ("Parcial" if float((dados or {}).get("total_pago") or 0) > 0 else "Em aberto")
+        ),
+        servicos=servicos,
+        pecas=pecas,
+        pagamentos=[],
+    )
+
+
+def _build_order_pdf_bytes(order, client, document_title: str | None = None) -> bytes:
     ensure_pdf_available()
-
-    from models import Cliente, Ordem
-
-    order = db.session.get(Ordem, order_id)
-    if not order:
-        raise LookupError("Ordem nao encontrada.")
-
-    client = db.session.get(Cliente, order.cliente_id)
-    if not client:
-        raise LookupError("Cliente da ordem nao encontrado.")
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -378,7 +508,8 @@ def generate_order_pdf_bytes(order_id: int) -> bytes:
     elements.append(separator)
     elements.append(Spacer(1, 2 * mm))
 
-    elements.append(Paragraph(f"ORDEM DE SERVICO #{order.id}", style_title))
+    resolved_title = (document_title or "").strip() or f"ORDEM DE SERVICO #{order.id}"
+    elements.append(Paragraph(resolved_title, style_title))
     elements.append(Spacer(1, 3 * mm))
 
     client_rows = [
@@ -552,6 +683,72 @@ def generate_order_pdf_bytes(order_id: int) -> bytes:
     doc.build(elements)
     buffer.seek(0)
     return buffer.getvalue()
+
+
+def generate_order_pdf_bytes(order_id: int) -> bytes:
+    from models import Cliente, Ordem
+
+    order = db.session.get(Ordem, order_id)
+    if not order:
+        raise LookupError("Ordem nao encontrada.")
+
+    client = db.session.get(Cliente, order.cliente_id)
+    if not client:
+        raise LookupError("Cliente da ordem nao encontrado.")
+
+    return _build_order_pdf_bytes(order, client)
+
+
+def generate_order_preview_pdf_bytes(dados: dict) -> bytes:
+    client = _montar_cliente_preview(dados or {})
+    if not _coalesce_text(getattr(client, "nome_cliente", "")):
+        raise ValueError("Cliente e obrigatorio para gerar a previa do PDF.")
+    order = _montar_preview_order(dados or {}, client)
+    if not order.servicos and not order.pecas:
+        raise ValueError("Informe ao menos um servico ou peca para gerar a previa.")
+    return _build_order_pdf_bytes(order, client, document_title="ORCAMENTO")
+
+
+def build_order_whatsapp_web_url(order_id: int) -> str:
+    from models import ConfigContador, Ordem
+
+    order = db.session.get(Ordem, order_id)
+    if not order:
+        raise LookupError("Ordem nao encontrada.")
+
+    client = order.cliente
+    config = ConfigContador.query.first()
+    numero = "".join(ch for ch in str(getattr(config, "whatsapp_orcamento", "") or "") if ch.isdigit())
+    if not numero:
+        raise ValueError("WhatsApp da oficina nao configurado.")
+
+    servicos = "\n".join(
+        f"- {item.descricao_servico}: {_money(item.valor_servico)}"
+        for item in (order.servicos or [])
+    ) or "- Nenhum servico"
+    pecas = "\n".join(
+        f"- {item.descricao_peca}: {_money(float(item.quantidade or 0) * float(item.valor_unitario or 0))}"
+        for item in (order.pecas or [])
+    ) or "- Nenhuma peca"
+    veiculo = " ".join(
+        parte for parte in [
+            getattr(client, "fabricante", "") if client else "",
+            getattr(client, "modelo", "") if client else "",
+        ] if str(parte or "").strip()
+    ).strip()
+    placa = getattr(client, "placa", "") if client else ""
+    mensagem = "\n\n".join([
+        f"Ola! Orcamento da OS #{order.id}",
+        f"Cliente: {getattr(client, 'nome_cliente', '---') if client else '---'}",
+        f"Telefone do cliente: {getattr(client, 'telefone', 'nao informado') if client else 'nao informado'}",
+        f"Veiculo: {(veiculo + (' - ' + placa if placa else '')).strip() or '---'}",
+        f"Profissional: {order.profissional_responsavel or '---'}",
+        f"Servicos:\n{servicos}",
+        f"Pecas:\n{pecas}",
+        f"Total: {_money(order.total_geral)}",
+    ])
+    from urllib.parse import quote
+    return f"https://web.whatsapp.com/send?phone={numero}&text={quote(mensagem)}"
 
 
 def save_order_pdf(order_id: int, destination_path: str) -> str:

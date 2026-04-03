@@ -1,70 +1,16 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta
+import warnings
 
 from extensions import db
-from models import OrdemPagamento, Saida
-from repositories import saida_repository
-from services.caixa_service import registrar_saida
-
-
-FORMAS_PAGAMENTO_FECHAMENTO = ['Pix', 'Cartão', 'Dinheiro', 'Boleto', 'Não informado']
-
-
-def _listar_pagamentos_periodo(data_inicio, data_fim):
-    return (
-        OrdemPagamento.query
-        .join(OrdemPagamento.ordem)
-        .filter(OrdemPagamento.data_pagamento >= data_inicio, OrdemPagamento.data_pagamento <= data_fim)
-        .order_by(OrdemPagamento.data_pagamento.desc(), OrdemPagamento.id.desc())
-        .all()
-    )
-
-
-def _veiculo_cliente(cliente):
-    if not cliente:
-        return ''
-    return f"{cliente.fabricante or ''} {cliente.modelo or ''}".strip()
-
-
-def _serializar_entrada_pagamento(pagamento):
-    ordem = pagamento.ordem
-    cliente = ordem.cliente if ordem else None
-    pagamento_anterior = max(0.0, float((ordem.total_pago or 0)) - float(pagamento.valor or 0)) if ordem else 0.0
-    origem = 'Recebimento de débito' if pagamento_anterior > 0.009 else 'Recebimento de OS'
-    return {
-        'id': pagamento.id,
-        'ordem_id': ordem.id if ordem else None,
-        'data': pagamento.data_pagamento.strftime('%d/%m/%Y'),
-        'hora': pagamento.data_pagamento.strftime('%H:%M') if pagamento.data_pagamento else '--:--',
-        'data_hora_iso': pagamento.data_pagamento.isoformat() if pagamento.data_pagamento else None,
-        'tipo': 'Entrada',
-        'origem': origem,
-        'cliente_nome': cliente.nome_cliente if cliente else '---',
-        'veiculo': _veiculo_cliente(cliente),
-        'placa': cliente.placa if cliente else '---',
-        'forma_pagamento': pagamento.forma_pagamento,
-        'observacao': pagamento.observacao,
-        'total': float(pagamento.valor or 0),
-        'total_pago': float(ordem.total_pago or 0) if ordem else 0,
-        'saldo_pendente': float(ordem.saldo_pendente or 0) if ordem else 0,
-        'status_financeiro': ordem.status_financeiro if ordem else '---',
-        'status': ordem.status if ordem else '---'
-    }
-
-
-def _serializar_saida(saida):
-    return {
-        'id': saida.id,
-        'data': saida.data.strftime('%d/%m/%Y') if saida.data else None,
-        'hora': saida.data.strftime('%H:%M') if saida.data else '--:--',
-        'data_hora_iso': saida.data.isoformat() if saida.data else None,
-        'tipo': 'Saída',
-        'origem': 'Saída manual',
-        'forma_pagamento': '---',
-        'observacao': saida.descricao,
-        'descricao': saida.descricao,
-        'categoria': saida.categoria or 'Outros',
-        'valor': float(saida.valor or 0)
-    }
+from models import Saida
+from services.caixa_service import (
+    obter_conferencia_formas,
+    obter_fluxo_serializado,
+    obter_saldo_atual,
+    registrar_saida,
+)
 
 
 def _normalizar_valor_positivo(valor):
@@ -81,22 +27,6 @@ def _categoria_caixa_para_saida(categoria_legado):
 
 def _parse_data_recebida(data_str):
     return datetime.strptime(data_str, '%Y-%m-%d') if data_str else datetime.now()
-
-
-def _agrupar_valores_por_forma(pagamentos_periodo):
-    esperados = {}
-    for pagamento in pagamentos_periodo:
-        forma = pagamento.forma_pagamento or 'Não informado'
-        esperados[forma] = esperados.get(forma, 0.0) + float(pagamento.valor or 0)
-    return esperados
-
-
-def _formas_para_comparativo(esperados, contagem):
-    formas = list(FORMAS_PAGAMENTO_FECHAMENTO)
-    for forma in list(esperados.keys()) + list(contagem.keys()):
-        if forma not in formas:
-            formas.append(forma)
-    return formas
 
 
 def periodo_por_data(data_str=None):
@@ -131,12 +61,22 @@ def resolver_intervalo_periodo(periodo):
 
 
 def obter_fluxo_periodo(periodo):
+    warnings.warn(
+        'fluxo_service.obter_fluxo_periodo está depreciado. Use caixa_service como fonte única.',
+        DeprecationWarning,
+        stacklevel=2,
+    )
     data_inicio, data_fim = resolver_intervalo_periodo(periodo)
-    pagamentos_periodo = _listar_pagamentos_periodo(data_inicio, data_fim)
-    entradas = [_serializar_entrada_pagamento(pagamento) for pagamento in pagamentos_periodo]
-    saidas = [_serializar_saida(saida) for saida in saida_repository.listar_por_periodo(data_inicio, data_fim)]
+    return obter_fluxo_serializado(data_inicio, data_fim)
 
-    return {'entradas': entradas, 'saidas': saidas}
+
+def obter_saldo(data_corte=None):
+    warnings.warn(
+        'fluxo_service.obter_saldo está depreciado. Use caixa_service.obter_saldo_atual().',
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return obter_saldo_atual(data_corte)
 
 
 def criar_saida(dados):
@@ -166,40 +106,17 @@ def criar_saida(dados):
 
 
 def fechamento_conferencia(dados):
+    warnings.warn(
+        'fluxo_service.fechamento_conferencia está depreciado. Use caixa_service para leituras de conferência.',
+        DeprecationWarning,
+        stacklevel=2,
+    )
     data_ref = (dados.get('data') or '').strip()
     contagem = dados.get('contagem') or {}
     if not isinstance(contagem, dict):
         raise TypeError('contagem deve ser um objeto.')
 
     data_inicio, data_fim = periodo_por_data(data_ref)
-    pagamentos_periodo = _listar_pagamentos_periodo(data_inicio, data_fim)
-    esperados = _agrupar_valores_por_forma(pagamentos_periodo)
-    formas = _formas_para_comparativo(esperados, contagem)
-
-    comparativo = []
-    total_esperado = 0.0
-    total_contado = 0.0
-    for forma in formas:
-        esperado = float(esperados.get(forma, 0.0))
-        contado = float(contagem.get(forma, 0.0) or 0.0)
-        diferenca = contado - esperado
-        comparativo.append({
-            'forma_pagamento': forma,
-            'valor_esperado': esperado,
-            'valor_contado': contado,
-            'diferenca': diferenca
-        })
-        total_esperado += esperado
-        total_contado += contado
-
-    total_saidas = saida_repository.somar_por_periodo(data_inicio, data_fim)
-
-    return {
-        'data': data_inicio.strftime('%Y-%m-%d'),
-        'comparativo': comparativo,
-        'total_esperado': total_esperado,
-        'total_contado': total_contado,
-        'diferenca_total': total_contado - total_esperado,
-        'total_saidas': total_saidas,
-        'saldo_estimado': total_esperado - total_saidas
-    }
+    resultado = obter_conferencia_formas(data_inicio, data_fim, contagem)
+    resultado['data'] = data_inicio.strftime('%Y-%m-%d')
+    return resultado

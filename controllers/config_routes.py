@@ -8,6 +8,7 @@ import os
 import logging
 import uuid
 from werkzeug.utils import secure_filename
+from .auth_utils import require_profiles
 from infrastructure.backup_service import criar_backup_database, status_backups
 from repositories import config_repository
 from services.config_service import (
@@ -29,6 +30,7 @@ def _arquivo_permitido(nome_arquivo):
 # ===========================================
 
 @config_bp.route('/contador', methods=['GET'])
+@require_profiles('admin', 'gerente')
 def get_config_contador():
     """Retorna as configurações atuais do contador"""
     try:
@@ -40,6 +42,7 @@ def get_config_contador():
         return jsonify({'erro': str(e)}), 500
 
 @config_bp.route('/contador', methods=['POST'])
+@require_profiles('admin', 'gerente')
 def save_config_contador():
     """Salva as configurações do contador"""
     try:
@@ -63,6 +66,7 @@ def save_config_contador():
 # ===========================================
 
 @config_bp.route('/enviar-relatorio-teste', methods=['POST'])
+@require_profiles('admin', 'gerente')
 def enviar_relatorio_teste():
     """Envia um relatório de teste por e-mail"""
     try:
@@ -80,6 +84,7 @@ def enviar_relatorio_teste():
 
 
 @config_bp.route('/branding/logo-upload', methods=['POST'])
+@require_profiles('admin', 'gerente')
 def upload_logo_branding():
     """Recebe a logo ou QR code de personalização."""
     try:
@@ -128,6 +133,7 @@ def upload_logo_branding():
 # ===========================================
 
 @config_bp.route('/envios-relatorio', methods=['GET'])
+@require_profiles('admin', 'gerente')
 def listar_envios():
     """Lista o histórico de envios de relatórios"""
     try:
@@ -139,6 +145,7 @@ def listar_envios():
 
 
 @config_bp.route('/backup/status', methods=['GET'])
+@require_profiles('admin', 'gerente')
 def backup_status():
     """Retorna status dos backups locais do banco."""
     try:
@@ -150,6 +157,7 @@ def backup_status():
 
 
 @config_bp.route('/backup/executar', methods=['POST'])
+@require_profiles('admin', 'gerente')
 def backup_executar():
     """Executa backup manual imediato com mesma política de retenção."""
     try:
@@ -168,6 +176,7 @@ def backup_executar():
 
 
 @config_bp.route('/auditoria-eventos', methods=['GET'])
+@require_profiles('admin', 'gerente')
 def listar_auditoria_eventos():
     """Lista eventos de auditoria operacional recentes."""
     try:

@@ -35,6 +35,8 @@ def create_app(testing: bool = False, start_scheduler: bool = True):
         pass
 
     # Configurações
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'oficina39-secret')
+    app.config['DEFAULT_ADMIN_PASSWORD'] = os.environ.get('DEFAULT_ADMIN_PASSWORD', 'admin123')
     # Permitir modo de teste com banco em memória para os testes automatizados
     if testing or os.environ.get('TESTING') == '1':
         app.config['TESTING'] = True
@@ -77,7 +79,9 @@ def create_app(testing: bool = False, start_scheduler: bool = True):
         import logging as _logging
         _logger = _logging.getLogger(__name__)
         _logger.debug("Importando models...")
-        from models import Cliente, Ordem, Servico, ItemServico, Peca, ItemPeca, Saida, MovimentoCaixa, ConfigContador, EnvioRelatorio, Profissional, OrdemStatusLog, OrdemAnexo, AuditoriaEvento
+        from models import Cliente, Ordem, Servico, ItemServico, Peca, ItemPeca, Saida, MovimentoCaixa, ConfigContador, EnvioRelatorio, Profissional, OrdemStatusLog, StatusLog, Anexo, OrdemAnexo, AuditoriaEvento, Comunicacao, TemplateComunicacao, ApiKey, Webhook, Usuario
+        from services.usuario_service import garantir_admin_padrao
+        from services.template_comunicacao_service import garantir_templates_padrao
         _logger.debug("Models importados com sucesso!")
         # Criar todas as tabelas
         db.create_all()
@@ -165,6 +169,15 @@ def create_app(testing: bool = False, start_scheduler: bool = True):
                     db.session.commit()
                     _logger.info(f"Coluna {nome_coluna} adicionada em config_contador")
 
+        if 'api_keys' in inspector.get_table_names():
+            colunas_api_keys = {c['name'] for c in inspector.get_columns('api_keys')}
+            if 'secret_token' not in colunas_api_keys:
+                db.session.execute(
+                    text("ALTER TABLE api_keys ADD COLUMN secret_token TEXT")
+                )
+                db.session.commit()
+                _logger.info("Coluna secret_token adicionada em api_keys")
+
         if 'pecas' in inspector.get_table_names():
             colunas_pecas = {c['name'] for c in inspector.get_columns('pecas')}
             if 'valor_custo' not in colunas_pecas:
@@ -219,11 +232,32 @@ def create_app(testing: bool = False, start_scheduler: bool = True):
             "CREATE INDEX IF NOT EXISTS idx_movimentos_caixa_categoria ON movimentos_caixa(categoria)",
             "CREATE INDEX IF NOT EXISTS idx_movimentos_caixa_data ON movimentos_caixa(data_movimento)",
             "CREATE INDEX IF NOT EXISTS idx_movimentos_caixa_ordem ON movimentos_caixa(ordem_id)",
-            "CREATE INDEX IF NOT EXISTS idx_movimentos_caixa_cliente ON movimentos_caixa(cliente_id)"
+            "CREATE INDEX IF NOT EXISTS idx_movimentos_caixa_cliente ON movimentos_caixa(cliente_id)",
+            "CREATE INDEX IF NOT EXISTS idx_status_logs_entidade ON status_logs(entidade_tipo, entidade_id)",
+            "CREATE INDEX IF NOT EXISTS idx_status_logs_data ON status_logs(created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_anexos_entidade ON anexos(entidade_tipo, entidade_id)",
+            "CREATE INDEX IF NOT EXISTS idx_anexos_categoria ON anexos(categoria)",
+            "CREATE INDEX IF NOT EXISTS idx_anexos_data ON anexos(created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_comunicacoes_canal ON comunicacoes(canal)",
+            "CREATE INDEX IF NOT EXISTS idx_comunicacoes_status ON comunicacoes(status)",
+            "CREATE INDEX IF NOT EXISTS idx_comunicacoes_entidade ON comunicacoes(entidade_tipo, entidade_id)",
+            "CREATE INDEX IF NOT EXISTS idx_comunicacoes_data ON comunicacoes(created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_templates_comunicacao_nome ON templates_comunicacao(nome)",
+            "CREATE INDEX IF NOT EXISTS idx_templates_comunicacao_canal ON templates_comunicacao(canal)",
+            "CREATE INDEX IF NOT EXISTS idx_api_keys_key ON api_keys(key)",
+            "CREATE INDEX IF NOT EXISTS idx_api_keys_ativa ON api_keys(ativa)",
+            "CREATE INDEX IF NOT EXISTS idx_api_keys_expira ON api_keys(expira_em)",
+            "CREATE INDEX IF NOT EXISTS idx_webhooks_ativo ON webhooks(ativo)",
+            "CREATE INDEX IF NOT EXISTS idx_webhooks_api_key ON webhooks(api_key_id)",
+            "CREATE INDEX IF NOT EXISTS idx_usuarios_email ON usuarios(email)",
+            "CREATE INDEX IF NOT EXISTS idx_usuarios_perfil ON usuarios(perfil)",
+            "CREATE INDEX IF NOT EXISTS idx_usuarios_ativo ON usuarios(ativo)"
         ]
         for sql in indices_sql:
             db.session.execute(text(sql))
         db.session.commit()
+        garantir_admin_padrao()
+        garantir_templates_padrao()
 
         # Verificar quais tabelas foram criadas
         tabelas = inspector.get_table_names()
