@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from extensions import db
 from models import OrdemPagamento, Saida
 from repositories import saida_repository
+from services.caixa_service import registrar_saida
 
 
 FORMAS_PAGAMENTO_FECHAMENTO = ['Pix', 'Cartão', 'Dinheiro', 'Boleto', 'Não informado']
@@ -71,6 +72,11 @@ def _normalizar_valor_positivo(valor):
     if valor_numerico <= 0:
         raise ValueError('Valor deve ser maior que zero')
     return valor_numerico
+
+
+def _categoria_caixa_para_saida(categoria_legado):
+    categoria = (categoria_legado or '').strip().lower()
+    return 'retirada' if categoria == 'retirada' else 'despesa'
 
 
 def _parse_data_recebida(data_str):
@@ -147,6 +153,14 @@ def criar_saida(dados):
         categoria=dados.get('categoria', 'Outros')
     )
     db.session.add(saida)
+    db.session.flush()
+    registrar_saida(
+        valor=valor,
+        categoria=_categoria_caixa_para_saida(saida.categoria),
+        descricao=saida.descricao,
+        data_movimento=saida.data,
+        commit=False,
+    )
     db.session.commit()
     return saida
 

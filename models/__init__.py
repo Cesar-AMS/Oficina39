@@ -5,9 +5,15 @@
 from .cliente import Cliente
 from .cliente_draft import ClienteDraft
 from .ordem import Ordem
-from .servico import ItemServico
-from .peca import ItemPeca
+from .servico import ItemServico, Servico
+from .peca import ItemPeca, Peca
 from .saida import Saida
+from .caixa import (
+    CATEGORIAS_MOVIMENTO_CAIXA,
+    FORMAS_MOVIMENTO_CAIXA,
+    MovimentoCaixa,
+    TIPOS_MOVIMENTO_CAIXA,
+)
 from .config import ConfigContador
 from .envio import EnvioRelatorio
 from .profissional import Profissional
@@ -20,9 +26,15 @@ from .ordem_pagamento import OrdemPagamento
 __all__ = [
     'Cliente',
     'Ordem',
+    'Servico',
     'ItemServico',
+    'Peca',
     'ItemPeca',
     'Saida',
+    'TIPOS_MOVIMENTO_CAIXA',
+    'CATEGORIAS_MOVIMENTO_CAIXA',
+    'FORMAS_MOVIMENTO_CAIXA',
+    'MovimentoCaixa',
     'ConfigContador',
     'EnvioRelatorio',
     'Profissional',

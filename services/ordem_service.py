@@ -1,8 +1,10 @@
 from datetime import datetime
+import warnings
 
 from extensions import db
 from repositories import cliente_repository, ordem_repository
 from services.auditoria_service import registrar_evento_auditoria
+from services import peca_service, servico_service
 
 STATUS_CONCLUIDOS = {'Concluído', 'Garantia'}
 FORMAS_PAGAMENTO_VALIDAS = {
@@ -61,25 +63,12 @@ def registrar_log_status(ordem, request_ctx, status_anterior, status_novo, forma
 
 
 def _recalcular_totais_manualmente(ordem):
-    ordem.total_servicos = sum(float(s.valor_servico or 0) for s in ordem.servicos)
-    ordem.total_pecas = sum(float((p.quantidade or 0) * (p.valor_unitario or 0)) for p in ordem.pecas)
+    ordem.total_servicos = servico_service.calcular_total_servicos(ordem.servicos)
+    ordem.total_pecas = peca_service.calcular_total_pecas(ordem.pecas)
     ordem.total_geral = ordem.total_servicos + ordem.total_pecas
 
-
-def _calcular_valor_venda_peca(dados_peca):
-    valor_unitario = float(dados_peca.get('valor_unitario') or 0)
-    valor_custo = float(dados_peca.get('valor_custo') or 0)
-    percentual_lucro = float(dados_peca.get('percentual_lucro') or 0)
-
-    if valor_unitario > 0:
-        return valor_unitario, valor_custo, percentual_lucro
-
-    valor_unitario = valor_custo * (1 + (percentual_lucro / 100))
-    return valor_unitario, valor_custo, percentual_lucro
-
-
 def criar_ordem(dados, request_ctx):
-    from models import ItemPeca, ItemServico, Ordem
+    from models import Ordem
 
     cliente_id = dados.get('cliente_id')
     if not cliente_id:
@@ -107,28 +96,8 @@ def criar_ordem(dados, request_ctx):
     db.session.add(ordem)
     db.session.flush()
 
-    for servico in dados.get('servicos', []):
-        if servico.get('descricao_servico'):
-            db.session.add(ItemServico(
-                ordem_id=ordem.id,
-                codigo_servico=servico.get('codigo_servico', ''),
-                descricao_servico=servico['descricao_servico'],
-                nome_profissional=(servico.get('nome_profissional') or ordem.profissional_responsavel or '').strip(),
-                valor_servico=servico.get('valor_servico', 0)
-            ))
-
-    for peca in dados.get('pecas', []):
-        if peca.get('descricao_peca'):
-            valor_unitario, valor_custo, percentual_lucro = _calcular_valor_venda_peca(peca)
-            db.session.add(ItemPeca(
-                ordem_id=ordem.id,
-                codigo_peca=peca.get('codigo_peca', ''),
-                descricao_peca=peca['descricao_peca'],
-                quantidade=peca.get('quantidade', 1),
-                valor_custo=valor_custo,
-                percentual_lucro=percentual_lucro,
-                valor_unitario=valor_unitario
-            ))
+    servico_service.anexar_servicos_em_ordem(ordem, dados.get('servicos', []))
+    peca_service.anexar_pecas_em_ordem(ordem, dados.get('pecas', []))
 
     db.session.flush()
     _recalcular_totais_manualmente(ordem)
@@ -138,8 +107,6 @@ def criar_ordem(dados, request_ctx):
 
 
 def atualizar_ordem(ordem, dados, request_ctx):
-    from models import ItemPeca, ItemServico
-
     if ordem.status in STATUS_CONCLUIDOS and not bool(dados.get('forcar_edicao')):
         raise ValueError('Ordem concluída está bloqueada para edição. Reabra a ordem para alterar.')
 
@@ -179,33 +146,12 @@ def atualizar_ordem(ordem, dados, request_ctx):
         ordem.forma_pagamento = normalizar_forma_pagamento(dados.get('forma_pagamento'))
 
     if 'servicos' in dados:
-        ItemServico.query.filter_by(ordem_id=ordem.id).delete()
-        for servico in dados['servicos']:
-            if servico.get('descricao_servico'):
-                db.session.add(ItemServico(
-                    ordem_id=ordem.id,
-                    codigo_servico=servico.get('codigo_servico', ''),
-                    descricao_servico=servico['descricao_servico'],
-                    nome_profissional=(servico.get('nome_profissional') or ordem.profissional_responsavel or '').strip(),
-                    valor_servico=servico.get('valor_servico', 0)
-                ))
+        servico_service.substituir_servicos_da_ordem(ordem, dados['servicos'])
     elif 'profissional_responsavel' in dados:
-        ItemServico.query.filter_by(ordem_id=ordem.id).update({'nome_profissional': ordem.profissional_responsavel})
+        servico_service.atualizar_profissional_dos_servicos(ordem)
 
     if 'pecas' in dados:
-        ItemPeca.query.filter_by(ordem_id=ordem.id).delete()
-        for peca in dados['pecas']:
-            if peca.get('descricao_peca'):
-                valor_unitario, valor_custo, percentual_lucro = _calcular_valor_venda_peca(peca)
-                db.session.add(ItemPeca(
-                    ordem_id=ordem.id,
-                    codigo_peca=peca.get('codigo_peca', ''),
-                    descricao_peca=peca['descricao_peca'],
-                    quantidade=peca.get('quantidade', 1),
-                    valor_custo=valor_custo,
-                    percentual_lucro=percentual_lucro,
-                    valor_unitario=valor_unitario
-                ))
+        peca_service.substituir_pecas_da_ordem(ordem, dados['pecas'])
 
     db.session.flush()
     _recalcular_totais_manualmente(ordem)
@@ -311,7 +257,7 @@ def reabrir_ordem(ordem, request_ctx):
 
 
 def duplicar_ordem(origem, request_ctx):
-    from models import ItemPeca, ItemServico, Ordem
+    from models import Ordem
 
     nova = Ordem(
         cliente_id=origem.cliente_id,
@@ -325,28 +271,77 @@ def duplicar_ordem(origem, request_ctx):
     db.session.add(nova)
     db.session.flush()
 
-    for s in origem.servicos:
-        db.session.add(ItemServico(
-            ordem_id=nova.id,
-            codigo_servico=s.codigo_servico,
-            descricao_servico=s.descricao_servico,
-            nome_profissional=s.nome_profissional or nova.profissional_responsavel or '',
-            valor_servico=s.valor_servico or 0
-        ))
-
-    for p in origem.pecas:
-        db.session.add(ItemPeca(
-            ordem_id=nova.id,
-            codigo_peca=p.codigo_peca,
-            descricao_peca=p.descricao_peca,
-            quantidade=p.quantidade or 0,
-            valor_custo=p.valor_custo or 0,
-            percentual_lucro=p.percentual_lucro or 0,
-            valor_unitario=p.valor_unitario or 0
-        ))
+    servico_service.duplicar_servicos_da_ordem(origem, nova)
+    peca_service.duplicar_pecas_da_ordem(origem, nova)
 
     db.session.flush()
     _recalcular_totais_manualmente(nova)
     registrar_log_status(nova, request_ctx, None, nova.status, observacao=f'Duplicada da OS #{origem.id}')
     db.session.commit()
     return nova
+
+
+def _adicionar_servico_os_impl(ordem_id, servico_id, nome_profissional=None, valor_servico=None):
+    ordem = ordem_repository.buscar_por_id(ordem_id)
+    if not ordem:
+        raise LookupError('Ordem nao encontrada.')
+    if ordem.status in STATUS_CONCLUIDOS:
+        raise ValueError('Nao e possivel adicionar servico em ordem concluida.')
+
+    servico_service.adicionar_servico_em_ordem(
+        ordem=ordem,
+        servico_id=servico_id,
+        nome_profissional=nome_profissional,
+        valor_servico=valor_servico,
+    )
+    db.session.flush()
+    _recalcular_totais_manualmente(ordem)
+    db.session.commit()
+    return ordem
+
+
+def adicionar_servico_os(ordem_id, servico_id, nome_profissional=None, valor_servico=None):
+    warnings.warn(
+        'adicionar_servico_os esta depreciado. Use servico_service diretamente.',
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return _adicionar_servico_os_impl(
+        ordem_id=ordem_id,
+        servico_id=servico_id,
+        nome_profissional=nome_profissional,
+        valor_servico=valor_servico,
+    )
+
+
+def _adicionar_peca_os_impl(ordem_id, peca_id, quantidade=1, valor_unitario=None):
+    ordem = ordem_repository.buscar_por_id(ordem_id)
+    if not ordem:
+        raise LookupError('Ordem nao encontrada.')
+    if ordem.status in STATUS_CONCLUIDOS:
+        raise ValueError('Nao e possivel adicionar peca em ordem concluida.')
+
+    peca_service.adicionar_peca_em_ordem(
+        ordem=ordem,
+        peca_id=peca_id,
+        quantidade=quantidade,
+        valor_unitario=valor_unitario,
+    )
+    db.session.flush()
+    _recalcular_totais_manualmente(ordem)
+    db.session.commit()
+    return ordem
+
+
+def adicionar_peca_os(ordem_id, peca_id, quantidade=1, valor_unitario=None):
+    warnings.warn(
+        'adicionar_peca_os esta depreciado. Use peca_service diretamente.',
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return _adicionar_peca_os_impl(
+        ordem_id=ordem_id,
+        peca_id=peca_id,
+        quantidade=quantidade,
+        valor_unitario=valor_unitario,
+    )

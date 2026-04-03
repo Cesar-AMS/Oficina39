@@ -4,6 +4,7 @@ from extensions import db
 from models import OrdemPagamento
 from repositories import debito_repository, ordem_repository
 from services.auditoria_service import registrar_evento_auditoria
+from services.caixa_service import registrar_entrada
 from services.ordem_service import STATUS_CONCLUIDOS, normalizar_forma_pagamento, registrar_log_status
 
 
@@ -28,6 +29,7 @@ def _validar_e_anexar_pagamentos(ordem, pagamentos):
 
     total_pagamento = 0.0
     formas_utilizadas = []
+    pagamentos_criados = []
     for item in pagamentos:
         valor = float(item.get('valor') or 0)
         forma = normalizar_forma_pagamento(item.get('forma_pagamento'))
@@ -38,19 +40,32 @@ def _validar_e_anexar_pagamentos(ordem, pagamentos):
         if not forma or forma not in FORMAS_PAGAMENTO_MULTIPLAS:
             raise ValueError('Forma de pagamento inválida.')
 
-        db.session.add(OrdemPagamento(
+        pagamento = OrdemPagamento(
             ordem_id=ordem.id,
             valor=valor,
             forma_pagamento=forma,
             observacao=observacao
-        ))
+        )
+        db.session.add(pagamento)
         total_pagamento += valor
         formas_utilizadas.append(forma)
+        pagamentos_criados.append(pagamento)
 
     if total_pagamento - saldo_antes > 0.009:
         raise ValueError('O total informado ultrapassa o saldo pendente da ordem.')
 
     db.session.flush()
+    for pagamento in pagamentos_criados:
+        registrar_entrada(
+            valor=float(pagamento.valor or 0),
+            categoria='pagamento_os',
+            descricao=f'Pagamento da OS {ordem.id}',
+            forma_pagamento=pagamento.forma_pagamento,
+            ordem_id=ordem.id,
+            cliente_id=ordem.cliente_id,
+            data_movimento=pagamento.data_pagamento,
+            commit=False,
+        )
     return saldo_antes, formas_utilizadas, total_pagamento
 
 

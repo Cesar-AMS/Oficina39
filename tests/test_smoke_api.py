@@ -6,7 +6,7 @@ from datetime import datetime
 
 from app import create_app
 from extensions import db
-from models import Cliente, Profissional
+from models import Cliente, MovimentoCaixa, Profissional
 
 
 class SmokeApiTest(unittest.TestCase):
@@ -57,6 +57,93 @@ class SmokeApiTest(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIsInstance(resp.get_json(), list)
 
+    def test_api_servicos_crud(self):
+        nome_base = f"Servico Teste {datetime.now().strftime('%H%M%S%f')}"
+
+        criar = self.client.post("/api/servicos/", json={
+            "nome": nome_base,
+            "categoria": "Mecanica",
+            "descricao": "Servico criado no smoke test",
+            "valor_padrao": 45.9
+        })
+        self.assertEqual(criar.status_code, 201)
+        criado = criar.get_json()
+        self.assertEqual(criado["nome"], nome_base)
+
+        listar = self.client.get("/api/servicos/?nome=Servico Teste")
+        self.assertEqual(listar.status_code, 200)
+        dados_listagem = listar.get_json()
+        self.assertIsInstance(dados_listagem, dict)
+        self.assertIn("itens", dados_listagem)
+        self.assertTrue(any(item["id"] == criado["id"] for item in dados_listagem["itens"]))
+
+        obter = self.client.get(f"/api/servicos/{criado['id']}")
+        self.assertEqual(obter.status_code, 200)
+        self.assertEqual(obter.get_json()["id"], criado["id"])
+
+        atualizar = self.client.put(f"/api/servicos/{criado['id']}", json={
+            "categoria": "Eletrica",
+            "valor_padrao": 55.5
+        })
+        self.assertEqual(atualizar.status_code, 200)
+        self.assertEqual(atualizar.get_json()["categoria"], "Eletrica")
+
+        excluir = self.client.delete(f"/api/servicos/{criado['id']}")
+        self.assertEqual(excluir.status_code, 200)
+
+    def test_api_pecas_crud_e_estoque(self):
+        codigo_base = f"P{datetime.now().strftime('%H%M%S%f')}"
+        nome_base = f"Peca Teste {datetime.now().strftime('%H%M%S%f')}"
+
+        criar = self.client.post("/api/pecas/", json={
+            "codigo": codigo_base,
+            "nome": nome_base,
+            "categoria": "Motor",
+            "descricao": "Peca criada no smoke test",
+            "estoque_atual": 10,
+            "valor_custo": 15.5,
+            "percentual_lucro": 20,
+            "valor_unitario": 18.6
+        })
+        self.assertEqual(criar.status_code, 201)
+        criada = criar.get_json()
+        self.assertEqual(criada["codigo"], codigo_base)
+
+        listar = self.client.get("/api/pecas/?nome=Peca Teste")
+        self.assertEqual(listar.status_code, 200)
+        dados_listagem = listar.get_json()
+        self.assertIsInstance(dados_listagem, dict)
+        self.assertIn("itens", dados_listagem)
+        self.assertTrue(any(item["id"] == criada["id"] for item in dados_listagem["itens"]))
+
+        obter = self.client.get(f"/api/pecas/{criada['id']}")
+        self.assertEqual(obter.status_code, 200)
+        self.assertEqual(obter.get_json()["id"], criada["id"])
+
+        baixar = self.client.patch(f"/api/pecas/{criada['id']}/estoque", json={
+            "operacao": "baixar",
+            "quantidade": 3
+        })
+        self.assertEqual(baixar.status_code, 200)
+        self.assertEqual(baixar.get_json()["estoque_atual"], 7.0)
+
+        repor = self.client.patch(f"/api/pecas/{criada['id']}/estoque", json={
+            "operacao": "repor",
+            "quantidade": 5
+        })
+        self.assertEqual(repor.status_code, 200)
+        self.assertEqual(repor.get_json()["estoque_atual"], 12.0)
+
+        atualizar = self.client.put(f"/api/pecas/{criada['id']}", json={
+            "categoria": "Eletrica",
+            "valor_unitario": 21.0
+        })
+        self.assertEqual(atualizar.status_code, 200)
+        self.assertEqual(atualizar.get_json()["categoria"], "Eletrica")
+
+        excluir = self.client.delete(f"/api/pecas/{criada['id']}")
+        self.assertEqual(excluir.status_code, 200)
+
     def test_api_ordens_busca_cliente_ou_cpf(self):
         resp = self.client.get("/api/ordens/busca?cliente=teste")
         self.assertEqual(resp.status_code, 200)
@@ -98,6 +185,15 @@ class SmokeApiTest(unittest.TestCase):
         self.assertIsInstance(dados_criacao, dict)
         self.assertEqual(dados_criacao["descricao"], descricao)
 
+        with self.app.app_context():
+            movimento = MovimentoCaixa.query.filter_by(
+                tipo='saida',
+                categoria='despesa',
+                descricao=descricao,
+            ).order_by(MovimentoCaixa.id.desc()).first()
+            self.assertIsNotNone(movimento)
+            self.assertEqual(float(movimento.valor or 0), 12.34)
+
         excluir = self.client.delete(f"/api/fluxo/saidas/{dados_criacao['id']}")
         self.assertEqual(excluir.status_code, 200)
 
@@ -138,6 +234,15 @@ class SmokeApiTest(unittest.TestCase):
         self.assertEqual(dados["total_pago"], 150.0)
         self.assertEqual(dados["saldo_pendente"], 120.0)
         self.assertEqual(dados["status_financeiro"], "Parcial")
+
+        with self.app.app_context():
+            movimentos = MovimentoCaixa.query.filter_by(
+                tipo='entrada',
+                categoria='pagamento_os',
+                ordem_id=ordem['id'],
+            ).all()
+            self.assertEqual(len(movimentos), 2)
+            self.assertAlmostEqual(sum(float(item.valor or 0) for item in movimentos), 150.0, places=2)
 
 
 if __name__ == "__main__":
