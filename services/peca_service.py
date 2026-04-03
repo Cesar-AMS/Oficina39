@@ -13,6 +13,16 @@ def _normalizar_texto(valor):
 
 def _normalizar_float(valor, campo: str, padrao: float = 0.0) -> float:
     try:
+        if isinstance(valor, str):
+            texto = valor.strip().replace('R$', '').replace('r$', '').replace(' ', '')
+            if ',' in texto and '.' in texto:
+                if texto.rfind(',') > texto.rfind('.'):
+                    texto = texto.replace('.', '').replace(',', '.')
+                else:
+                    texto = texto.replace(',', '')
+            elif ',' in texto:
+                texto = texto.replace('.', '').replace(',', '.')
+            valor = texto
         return float(valor if valor not in (None, '') else padrao)
     except (TypeError, ValueError):
         raise ValueError(f'{campo} invalido.')

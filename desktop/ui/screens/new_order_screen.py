@@ -50,7 +50,6 @@ class NewOrderScreen(QWidget):
         self._professional_combo = QComboBox()
         self._status_value = QLabel(self._metadata.get("status_inicial", "Aguardando"))
         self._diagnostic_edit = QPlainTextEdit()
-        self._signature_edit = QPlainTextEdit()
         self._services_table = QTableWidget(0, 4)
         self._parts_table = QTableWidget(0, 8)
         self._total_services_label = QLabel("R$ 0,00")
@@ -210,13 +209,9 @@ class NewOrderScreen(QWidget):
 
         self._diagnostic_edit.setPlaceholderText("Descreva o diagnostico da ordem")
         self._diagnostic_edit.setFixedHeight(90)
-        self._signature_edit.setPlaceholderText("Assinatura do cliente (opcional)")
-        self._signature_edit.setFixedHeight(56)
-
         layout.addRow("Profissional responsavel:", self._professional_combo)
         layout.addRow("Status inicial:", self._status_value)
         layout.addRow("Diagnostico:", self._diagnostic_edit)
-        layout.addRow("Assinatura do cliente:", self._signature_edit)
         return box
 
     def _build_services_section(self) -> QWidget:
@@ -324,7 +319,6 @@ class NewOrderScreen(QWidget):
         self._apply_client()
         self._professional_combo.setCurrentIndex(0)
         self._diagnostic_edit.clear()
-        self._signature_edit.clear()
         self._services_table.setRowCount(0)
         self._parts_table.setRowCount(0)
         self._add_service_row()
@@ -464,7 +458,6 @@ class NewOrderScreen(QWidget):
             "cliente_id": int(self._selected_client["id"]),
             "diagnostico": self._diagnostic_edit.toPlainText().strip(),
             "profissional_responsavel": professional,
-            "assinatura_cliente": self._signature_edit.toPlainText().strip(),
             "servicos": services,
             "pecas": parts,
         }

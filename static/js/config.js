@@ -64,6 +64,43 @@ function getEl(id) {
     return document.getElementById(id);
 }
 
+function elementoVisivelParaEnter(el) {
+    if (!el || el.disabled || el.hidden) return false;
+    const style = window.getComputedStyle(el);
+    return style.display !== 'none' && style.visibility !== 'hidden';
+}
+
+function focarProximoCampoConfig(atual) {
+    const campos = Array.from(document.querySelectorAll(
+        '.config-tab-panel input:not([type="hidden"]):not([type="file"]), .config-tab-panel select, .config-tab-panel textarea, .config-tab-panel button'
+    )).filter((el) => elementoVisivelParaEnter(el) && !el.readOnly);
+    const indice = campos.indexOf(atual);
+    if (indice === -1) return false;
+    for (let i = indice + 1; i < campos.length; i += 1) {
+        const proximo = campos[i];
+        if (!elementoVisivelParaEnter(proximo) || proximo.readOnly) continue;
+        proximo.focus();
+        if (typeof proximo.select === 'function' && proximo.tagName === 'INPUT') {
+            proximo.select();
+        }
+        return true;
+    }
+    return false;
+}
+
+function configurarEnterConfiguracoes() {
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        const alvo = e.target;
+        if (!(alvo instanceof HTMLElement)) return;
+        if (alvo.tagName === 'TEXTAREA' || alvo.tagName === 'BUTTON') return;
+        if (alvo.matches('input, select')) {
+            e.preventDefault();
+            focarProximoCampoConfig(alvo);
+        }
+    });
+}
+
 function reorganizarSecaoPersonalizacao() {
     const secao = getEl('secao-personalizacao-index');
     if (!secao) return;
@@ -694,6 +731,7 @@ async function carregarHistorico() {
 document.addEventListener('DOMContentLoaded', () => {
     reorganizarSecaoPersonalizacao();
     alternarAbaConfig('geral');
+    configurarEnterConfiguracoes();
     carregarConfig();
     carregarHistorico();
     carregarProfissionaisCadastrados();

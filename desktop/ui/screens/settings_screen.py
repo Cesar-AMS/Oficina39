@@ -179,8 +179,8 @@ class SettingsScreen(QWidget):
         company_form.setHorizontalSpacing(16)
         company_form.setVerticalSpacing(10)
         for label, key in [
-            ("Nome de exibicao do sistema", "nome_exibicao_sistema"),
-            ("Nome da empresa", "empresa_nome"),
+            ("Nome de exibicao do sistema", "empresa_nome"),
+            ("Nome da empresa", "nome_exibicao_sistema"),
             ("E-mail da empresa", "empresa_email"),
             ("Telefone da empresa", "empresa_telefone"),
             ("Endereco da empresa", "empresa_endereco"),

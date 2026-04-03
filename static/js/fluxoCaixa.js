@@ -135,6 +135,100 @@ function formatarCampoMonetario(id) {
     campo.value = valor ? valor.toFixed(2).replace('.', ',') : '';
 }
 
+function elementoVisivelParaEnter(el) {
+    if (!el || el.disabled || el.hidden) return false;
+    const style = window.getComputedStyle(el);
+    return style.display !== 'none' && style.visibility !== 'hidden';
+}
+
+function focarProximoCampo(listaIds, idAtual) {
+    const atual = listaIds.indexOf(idAtual);
+    if (atual === -1) return false;
+    for (let i = atual + 1; i < listaIds.length; i += 1) {
+        const proximo = document.getElementById(listaIds[i]);
+        if (elementoVisivelParaEnter(proximo)) {
+            proximo.focus();
+            if (typeof proximo.select === 'function' && proximo.tagName === 'INPUT') {
+                proximo.select();
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+function configurarEnterPdv() {
+    const ordemIds = [
+        'pdvDescontoPercentual',
+        'pdvFormaPagamento',
+        'pdvValorForma',
+        'pdvObservacaoForma',
+        'pdvDebitoVencimento',
+        'pdvDebitoObservacao',
+    ];
+
+    ordemIds.forEach((id) => {
+        const campo = document.getElementById(id);
+        if (!campo) return;
+        campo.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+
+            if (id === 'pdvDescontoPercentual') {
+                formatarCampoMonetario('pdvDescontoPercentual');
+                atualizarResumoOperacaoPdv();
+                focarProximoCampo(ordemIds, id);
+                return;
+            }
+
+            if (id === 'pdvObservacaoForma') {
+                adicionarFormaPagamentoPdv();
+                document.getElementById('pdvFormaPagamento')?.focus();
+                return;
+            }
+
+            if (id === 'pdvDebitoObservacao') {
+                try {
+                    validarEtapaPagamentoPdv();
+                    irParaProximaEtapaPdv('resumo');
+                } catch (error) {
+                    alertErro(error.message);
+                }
+                return;
+            }
+
+            if (id === 'pdvValorForma') {
+                formatarCampoMonetario('pdvValorForma');
+            }
+
+            focarProximoCampo(ordemIds, id);
+        });
+    });
+}
+
+function configurarEnterModalSaida() {
+    const ordemIds = ['saidaDescricao', 'saidaValor', 'saidaData', 'saidaCategoria'];
+    ordemIds.forEach((id) => {
+        const campo = document.getElementById(id);
+        if (!campo) return;
+        campo.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+
+            if (id === 'saidaCategoria') {
+                salvarSaida();
+                return;
+            }
+
+            if (id === 'saidaValor') {
+                formatarCampoMonetario('saidaValor');
+            }
+
+            focarProximoCampo(ordemIds, id);
+        });
+    });
+}
+
 function arredondarMoeda(valor) {
     return Math.round((Number(valor || 0) + Number.EPSILON) * 100) / 100;
 }
@@ -798,6 +892,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     document.getElementById('pdvDebitoVencimento')?.addEventListener('change', atualizarResumoOperacaoPdv);
     document.getElementById('pdvDebitoObservacao')?.addEventListener('input', atualizarResumoOperacaoPdv);
+    configurarEnterPdv();
+    configurarEnterModalSaida();
 });
 
 window.alternarAbaPdv = alternarAbaPdv;

@@ -3,6 +3,7 @@ os.environ['TESTING'] = '1'
 
 import unittest
 from datetime import datetime
+from uuid import uuid4
 
 from app import create_app
 from extensions import db
@@ -29,9 +30,10 @@ class OrcamentoPreviewTest(unittest.TestCase):
     def _cliente_id(self):
         with self.app.app_context():
             sufixo = datetime.now().strftime('%H%M%S%f')
+            cpf = str(10**10 + (uuid4().int % 9_000_000_000))[:11]
             cliente = Cliente(
                 nome_cliente=f"Cliente Preview {sufixo}",
-                cpf=f"52998{sufixo[:6]}",
+                cpf=cpf,
                 telefone="11999998888",
                 email=f"preview{sufixo}@teste.local",
             )
@@ -87,6 +89,21 @@ class OrcamentoPreviewTest(unittest.TestCase):
             "diagnostico": "Orcamento completo",
             "servicos": [{"descricao_servico": "Servico A", "valor_servico": 100}],
             "pecas": [{"descricao_peca": "Peca A", "quantidade": 2, "valor_unitario": 15}],
+        }, headers=self._auth_headers())
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.mimetype, "application/pdf")
+        self.assertTrue(resp.data.startswith(b"%PDF"))
+
+    def test_preview_aceita_valores_monetarios_no_padrao_brasileiro(self):
+        cliente_id = self._cliente_id()
+        profissional = self._profissional_nome()
+        resp = self.client.post("/api/orcamento/preview", json={
+            "cliente_id": cliente_id,
+            "profissional_responsavel": profissional,
+            "diagnostico": "Valores com virgula",
+            "servicos": [{"descricao_servico": "Servico A", "valor_servico": "57,75"}],
+            "pecas": [{"descricao_peca": "Peca A", "quantidade": "2", "valor_unitario": "12,50"}],
         }, headers=self._auth_headers())
 
         self.assertEqual(resp.status_code, 200)

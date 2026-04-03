@@ -12,7 +12,7 @@ except Exception:
     pd = None
 from datetime import datetime
 from extensions import db
-from models import Cliente, Ordem, Saida
+from models import Cliente, Ordem, Saida, ItemServico, ItemPeca
 
 class ExportService:
     """Serviço para exportação de dados em vários formatos"""
@@ -184,19 +184,86 @@ class ExportService:
         """Escreve dados de ordens no Excel"""
         dados_ordens = []
         for o in Ordem.query.all():
+            cliente = o.cliente
+            servicos = list(o.servicos or [])
+            pecas = list(o.pecas or [])
             dados_ordens.append({
                 'ID_OS': o.id,
                 'CLIENTE_ID': o.cliente_id,
+                'CLIENTE': cliente.nome_cliente if cliente else '',
+                'CPF': cliente.cpf if cliente else '',
+                'TELEFONE': cliente.telefone if cliente else '',
+                'PLACA': cliente.placa if cliente else '',
+                'VEICULO': ' '.join(filter(None, [
+                    cliente.fabricante if cliente else '',
+                    cliente.modelo if cliente else '',
+                    str(cliente.ano) if cliente and cliente.ano else ''
+                ])).strip(),
                 'STATUS': o.status,
+                'PROFISSIONAL': o.profissional_responsavel,
                 'DATA_ENTRADA': o.data_entrada,
+                'DATA_CONCLUSAO': o.data_conclusao,
+                'FORMA_PAGAMENTO': o.forma_pagamento,
+                'DIAGNOSTICO': o.diagnostico,
+                'OBSERVACAO_INTERNA': o.observacao_interna,
+                'QTD_SERVICOS': len(servicos),
+                'SERVICOS_EXECUTADOS': ' | '.join(
+                    filter(None, [s.descricao_servico for s in servicos])
+                ),
+                'QTD_PECAS': len(pecas),
+                'PECAS_UTILIZADAS': ' | '.join(
+                    filter(None, [p.descricao_peca for p in pecas])
+                ),
                 'TOTAL_SERVICOS': o.total_servicos,
                 'TOTAL_PECAS': o.total_pecas,
-                'TOTAL_GERAL': o.total_geral
+                'TOTAL_GERAL': o.total_geral,
+                'TOTAL_PAGO': o.total_pago,
+                'TOTAL_COBRADO': o.total_cobrado,
+                'SALDO_PENDENTE': o.saldo_pendente,
+                'STATUS_FINANCEIRO': o.status_financeiro
             })
         if pd is None:
             raise RuntimeError('pandas não instalado. Não é possível gerar Excel.')
         df_ordens = pd.DataFrame(dados_ordens)
         df_ordens.to_excel(writer, sheet_name='Ordens', index=False)
+
+        dados_servicos = []
+        for servico in ItemServico.query.join(Ordem).order_by(Ordem.id.asc(), ItemServico.id.asc()).all():
+            ordem = servico.ordem
+            cliente = ordem.cliente if ordem else None
+            dados_servicos.append({
+                'ID_OS': ordem.id if ordem else None,
+                'CLIENTE': cliente.nome_cliente if cliente else '',
+                'STATUS_OS': ordem.status if ordem else '',
+                'PROFISSIONAL_OS': ordem.profissional_responsavel if ordem else '',
+                'CODIGO_SERVICO': servico.codigo_servico,
+                'DESCRICAO_SERVICO': servico.descricao_servico,
+                'PROFISSIONAL_SERVICO': servico.nome_profissional,
+                'VALOR_SERVICO': servico.valor_servico,
+                'DATA_ENTRADA_OS': ordem.data_entrada if ordem else None,
+            })
+        df_servicos = pd.DataFrame(dados_servicos)
+        df_servicos.to_excel(writer, sheet_name='Servicos_OS', index=False)
+
+        dados_pecas = []
+        for peca in ItemPeca.query.join(Ordem).order_by(Ordem.id.asc(), ItemPeca.id.asc()).all():
+            ordem = peca.ordem
+            cliente = ordem.cliente if ordem else None
+            dados_pecas.append({
+                'ID_OS': ordem.id if ordem else None,
+                'CLIENTE': cliente.nome_cliente if cliente else '',
+                'STATUS_OS': ordem.status if ordem else '',
+                'CODIGO_PECA': peca.codigo_peca,
+                'DESCRICAO_PECA': peca.descricao_peca,
+                'QUANTIDADE': peca.quantidade,
+                'VALOR_CUSTO': peca.valor_custo,
+                'PERCENTUAL_LUCRO': peca.percentual_lucro,
+                'VALOR_UNITARIO': peca.valor_unitario,
+                'TOTAL_PECA': peca.total,
+                'DATA_ENTRADA_OS': ordem.data_entrada if ordem else None,
+            })
+        df_pecas = pd.DataFrame(dados_pecas)
+        df_pecas.to_excel(writer, sheet_name='Pecas_OS', index=False)
     
     @staticmethod
     def _escrever_saidas_excel(writer):

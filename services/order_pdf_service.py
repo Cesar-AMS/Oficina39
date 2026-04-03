@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import os
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from types import SimpleNamespace
 
 from extensions import db
@@ -186,8 +187,45 @@ def _widths(total_width, proportions):
     return [(total_width * value) / total for value in proportions]
 
 
+def _parse_decimal(value) -> Decimal:
+    if value in (None, ""):
+        return Decimal("0")
+    if isinstance(value, Decimal):
+        return value
+    if isinstance(value, (int, float)):
+        return Decimal(str(value))
+
+    text = str(value).strip()
+    if not text:
+        return Decimal("0")
+
+    cleaned = (
+        text.replace("R$", "")
+        .replace("r$", "")
+        .replace(" ", "")
+    )
+
+    if "," in cleaned and "." in cleaned:
+        if cleaned.rfind(",") > cleaned.rfind("."):
+            cleaned = cleaned.replace(".", "").replace(",", ".")
+        else:
+            cleaned = cleaned.replace(",", "")
+    elif "," in cleaned:
+        cleaned = cleaned.replace(".", "").replace(",", ".")
+
+    try:
+        return Decimal(cleaned)
+    except InvalidOperation:
+        return Decimal("0")
+
+
+def _parse_float(value) -> float:
+    return float(_parse_decimal(value))
+
+
 def _money(value) -> str:
-    return f"R$ {float(value or 0):.2f}".replace(".", ",")
+    amount = _parse_decimal(value).quantize(Decimal("0.01"))
+    return f"R$ {amount:.2f}".replace(".", ",")
 
 
 def _coalesce_text(*values):
@@ -253,7 +291,7 @@ def _montar_cliente_preview(dados: dict):
 def _montar_itens_servico_preview(servicos: list[dict]):
     itens = []
     for idx, item in enumerate(servicos or [], start=1):
-        valor = float(item.get("valor_servico") or item.get("valor") or 0)
+        valor = _parse_float(item.get("valor_servico") or item.get("valor") or 0)
         itens.append(SimpleNamespace(
             id=idx,
             codigo_servico=_coalesce_text(item.get("codigo_servico"), item.get("codigo")),
@@ -267,8 +305,8 @@ def _montar_itens_servico_preview(servicos: list[dict]):
 def _montar_itens_peca_preview(pecas: list[dict]):
     itens = []
     for idx, item in enumerate(pecas or [], start=1):
-        quantidade = float(item.get("quantidade") or 0)
-        valor_unitario = float(item.get("valor_unitario") or 0)
+        quantidade = _parse_float(item.get("quantidade") or 0)
+        valor_unitario = _parse_float(item.get("valor_unitario") or 0)
         itens.append(SimpleNamespace(
             id=idx,
             codigo_peca=_coalesce_text(item.get("codigo_peca"), item.get("codigo")),
@@ -285,11 +323,12 @@ def _montar_preview_order(dados: dict, client):
     total_servicos = round(sum(float(item.valor_servico or 0) for item in servicos), 2)
     total_pecas = round(sum(float(item.quantidade or 0) * float(item.valor_unitario or 0) for item in pecas), 2)
     total_geral = round(total_servicos + total_pecas, 2)
-    desconto_percentual = float((dados or {}).get("desconto_percentual") or 0)
-    desconto_valor = float((dados or {}).get("desconto_valor") or 0)
+    desconto_percentual = _parse_float((dados or {}).get("desconto_percentual") or 0)
+    desconto_valor = _parse_float((dados or {}).get("desconto_valor") or 0)
     if desconto_valor <= 0 and desconto_percentual > 0:
         desconto_valor = round(total_geral * (desconto_percentual / 100), 2)
     total_cobrado = round(max(0, total_geral - desconto_valor), 2)
+    total_pago = _parse_float((dados or {}).get("total_pago") or 0)
 
     return SimpleNamespace(
         id=(dados or {}).get("id") or "PREVIEW",
@@ -313,11 +352,11 @@ def _montar_preview_order(dados: dict, client):
         total_pecas=total_pecas,
         total_geral=total_geral,
         total_cobrado=total_cobrado,
-        total_pago=float((dados or {}).get("total_pago") or 0),
-        saldo_pendente=round(max(0, total_cobrado - float((dados or {}).get("total_pago") or 0)), 2),
+        total_pago=total_pago,
+        saldo_pendente=round(max(0, total_cobrado - total_pago), 2),
         status_financeiro=_coalesce_text((dados or {}).get("status_financeiro")) or (
-            "Quitado" if total_cobrado and float((dados or {}).get("total_pago") or 0) + 0.0001 >= total_cobrado
-            else ("Parcial" if float((dados or {}).get("total_pago") or 0) > 0 else "Em aberto")
+            "Quitado" if total_cobrado and total_pago + 0.0001 >= total_cobrado
+            else ("Parcial" if total_pago > 0 else "Em aberto")
         ),
         servicos=servicos,
         pecas=pecas,
@@ -341,37 +380,38 @@ def _build_order_pdf_bytes(order, client, document_title: str | None = None) -> 
     elements = []
     styles = getSampleStyleSheet()
 
-    logo_size = 34 * mm
-    qr_size = 24 * mm
+    logo_size = 30 * mm
+    qr_size = 23 * mm
     qr_gap = 4 * mm
 
     style_company = ParagraphStyle(
         "Company",
         parent=styles["Normal"],
-        fontSize=19,
+        fontSize=20,
         textColor=colors.HexColor("#0a3147"),
         fontName="Helvetica-Bold",
-        alignment=0,
-        leading=22,
-        spaceAfter=4,
+        alignment=1,
+        leading=23,
+        spaceAfter=5,
     )
     style_company_data = ParagraphStyle(
         "CompanyData",
         parent=styles["Normal"],
         fontSize=10,
         textColor=colors.HexColor("#444444"),
-        alignment=0,
-        leading=13,
+        alignment=1,
+        leading=14,
     )
     style_title = ParagraphStyle(
         "Title",
         parent=styles["Normal"],
-        fontSize=16,
+        fontSize=17,
         textColor=colors.HexColor("#c44536"),
         fontName="Helvetica-Bold",
         alignment=1,
-        spaceAfter=8,
-        spaceBefore=5,
+        leading=20,
+        spaceAfter=10,
+        spaceBefore=7,
     )
     style_section = ParagraphStyle(
         "Section",
@@ -437,26 +477,33 @@ def _build_order_pdf_bytes(order, client, document_title: str | None = None) -> 
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("LEFTPADDING", (0, 0), (-1, -1), 0),
             ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-            ("TOPPADDING", (0, 0), (-1, -1), -3),
+            ("TOPPADDING", (0, 0), (-1, -1), -1),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ]))
     else:
         logo_block = Paragraph("OF39", ParagraphStyle("LogoFallback", fontSize=18))
 
     company_name = Paragraph(branding["empresa_nome"], style_company)
-    company_data = Paragraph(
-        f"<b>Contato:</b> {branding['empresa_telefone']}<br/>"
-        f"<b>E-mail:</b> {branding['empresa_email']}<br/>"
-        f"<b>Endereco:</b> {branding['empresa_endereco']}",
-        style_company_data,
+    company_lines = []
+    if branding["empresa_endereco"]:
+        company_lines.append(branding["empresa_endereco"])
+    contact_line = " | ".join(
+        part for part in [
+            f"Tel: {branding['empresa_telefone']}" if branding["empresa_telefone"] else "",
+            f"E-mail: {branding['empresa_email']}" if branding["empresa_email"] else "",
+        ] if part
     )
-    company_block = Table([[company_name], [company_data]], hAlign="LEFT")
+    if contact_line:
+        company_lines.append(contact_line)
+    company_data = Paragraph("<br/>".join(company_lines) or "&nbsp;", style_company_data)
+    company_block = Table([[company_name], [company_data]], hAlign="CENTER")
     company_block.setStyle(TableStyle([
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
         ("RIGHTPADDING", (0, 0), (-1, -1), 0),
         ("TOPPADDING", (0, 0), (-1, -1), 0),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
     ]))
 
     qr_images = []
@@ -479,21 +526,23 @@ def _build_order_pdf_bytes(order, client, document_title: str | None = None) -> 
 
     qr_width = (len(qr_images) * qr_size) + (max(0, len(qr_images) - 1) * qr_gap)
     qr_width = qr_width if qr_width > 0 else 28 * mm
-    logo_width = logo_size + 2 * mm
-    company_width = max(70 * mm, content_width - logo_width - qr_width)
+    logo_width = 47 * mm
+    company_width = max(77 * mm, content_width - logo_width - qr_width)
 
     header = Table([[logo_block, company_block, qr_table]], colWidths=[logo_width, company_width, qr_width], hAlign="LEFT")
     header.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("ALIGN", (0, 0), (0, -1), "LEFT"),
-        ("ALIGN", (1, 0), (1, -1), "LEFT"),
+        ("ALIGN", (1, 0), (1, -1), "CENTER"),
         ("ALIGN", (2, 0), (2, -1), "RIGHT"),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
         ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-        ("TOPPADDING", (0, 0), (-1, -1), 0),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-        ("LEFTPADDING", (1, 0), (1, -1), 4),
-        ("LEFTPADDING", (2, 0), (2, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 1),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("RIGHTPADDING", (0, 0), (0, -1), 14),
+        ("LEFTPADDING", (1, 0), (1, -1), 12),
+        ("RIGHTPADDING", (1, 0), (1, -1), 12),
+        ("LEFTPADDING", (2, 0), (2, -1), 8),
     ]))
     elements.append(header)
 
@@ -506,11 +555,11 @@ def _build_order_pdf_bytes(order, client, document_title: str | None = None) -> 
         ("RIGHTPADDING", (0, 0), (-1, -1), 0),
     ]))
     elements.append(separator)
-    elements.append(Spacer(1, 2 * mm))
+    elements.append(Spacer(1, 4 * mm))
 
     resolved_title = (document_title or "").strip() or f"ORDEM DE SERVICO #{order.id}"
     elements.append(Paragraph(resolved_title, style_title))
-    elements.append(Spacer(1, 3 * mm))
+    elements.append(Spacer(1, 5 * mm))
 
     client_rows = [
         [Paragraph("Cliente:", style_label), Paragraph(client.nome_cliente or "---", style_normal)],

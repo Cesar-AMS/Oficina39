@@ -28,14 +28,104 @@ function formatarValor(valor) {
     return 'R$ ' + (valor || 0).toFixed(2).replace('.', ',');
 }
 
+function formatarDecimalCampo(valor, casas = 2) {
+    const numero = parseDecimalBr(valor);
+    return numero.toLocaleString('pt-BR', {
+        minimumFractionDigits: casas,
+        maximumFractionDigits: casas
+    });
+}
+
+function parseDecimalBr(valor) {
+    if (valor === null || valor === undefined) return 0;
+    if (typeof valor === 'number') return Number.isFinite(valor) ? valor : 0;
+
+    let texto = String(valor).trim();
+    if (!texto) return 0;
+
+    texto = texto.replace(/\s+/g, '').replace('R$', '').replace('r$', '');
+
+    if (texto.includes(',') && texto.includes('.')) {
+        if (texto.lastIndexOf(',') > texto.lastIndexOf('.')) {
+            texto = texto.replace(/\./g, '').replace(',', '.');
+        } else {
+            texto = texto.replace(/,/g, '');
+        }
+    } else if (texto.includes(',')) {
+        texto = texto.replace(/\./g, '').replace(',', '.');
+    }
+
+    const numero = Number(texto);
+    return Number.isFinite(numero) ? numero : 0;
+}
+
 function formatarStatusExibicao(status) {
     return status === 'Concluído' ? 'Finalizado' : (status || '---');
 }
 
 function calcularValorVendaPeca(valorCusto, percentualLucro) {
-    const custo = parseFloat(valorCusto) || 0;
-    const lucro = parseFloat(percentualLucro) || 0;
+    const custo = parseDecimalBr(valorCusto);
+    const lucro = parseDecimalBr(percentualLucro);
     return custo * (1 + (lucro / 100));
+}
+
+function aplicarMascaraDecimalAoSair(input, casas = 2) {
+    if (!input) return;
+    input.addEventListener('blur', () => {
+        input.value = formatarDecimalCampo(input.value, casas);
+    });
+}
+
+function elementoVisivelParaEnter(el) {
+    if (!el || el.disabled || el.hidden || el.readOnly) return false;
+    const style = window.getComputedStyle(el);
+    return style.display !== 'none' && style.visibility !== 'hidden';
+}
+
+function focarProximoCampoPagina(atual) {
+    const campos = Array.from(document.querySelectorAll(
+        'input:not([type="hidden"]), select, textarea, button'
+    )).filter((el) => elementoVisivelParaEnter(el));
+    const indice = campos.indexOf(atual);
+    if (indice === -1) return false;
+    for (let i = indice + 1; i < campos.length; i += 1) {
+        const proximo = campos[i];
+        if (!elementoVisivelParaEnter(proximo)) continue;
+        proximo.focus();
+        if (typeof proximo.select === 'function' && proximo.tagName === 'INPUT') {
+            proximo.select();
+        }
+        return true;
+    }
+    return false;
+}
+
+function configurarEnterNovaOs() {
+    document.addEventListener('keydown', function(e) {
+        if (e.key !== 'Enter') return;
+        const alvo = e.target;
+        if (!(alvo instanceof HTMLElement)) return;
+        if (alvo.tagName === 'TEXTAREA') return;
+        if (alvo.tagName === 'BUTTON') return;
+
+        if (alvo.id === 'buscaCliente') {
+            e.preventDefault();
+            buscarCliente();
+            return;
+        }
+
+        if (alvo.matches('.valor-servico, .qtd-peca, .valor-custo-peca, .lucro-peca')) {
+            e.preventDefault();
+            alvo.blur();
+            focarProximoCampoPagina(alvo);
+            return;
+        }
+
+        if (alvo.matches('input, select')) {
+            e.preventDefault();
+            focarProximoCampoPagina(alvo);
+        }
+    });
 }
 
 function normalizarWhatsapp(valor) {
@@ -174,7 +264,7 @@ window.calcularTotais = function() {
     // Calcular serviços
     let totalServicos = 0;
     document.querySelectorAll('#corpo-servicos .valor-servico').forEach(input => {
-        let valor = parseFloat(input.value);
+        let valor = parseDecimalBr(input.value);
         if (!isNaN(valor) && valor > 0) {
             totalServicos += valor;
         }
@@ -183,8 +273,7 @@ window.calcularTotais = function() {
     // Calcular peças
     let totalPecas = 0;
     document.querySelectorAll('#corpo-pecas .total-peca').forEach(span => {
-        let valorTexto = span.textContent.replace('R$ ', '').replace(',', '.');
-        let valor = parseFloat(valorTexto);
+        let valor = parseDecimalBr(span.textContent);
         if (!isNaN(valor) && valor > 0) {
             totalPecas += valor;
         }
@@ -206,15 +295,15 @@ window.calcularTotais = function() {
 
 window.calcularTotalPeca = function(elemento) {
     const linha = elemento.closest('tr');
-    const qtd = parseFloat(linha.querySelector('.qtd-peca').value) || 0;
-    const valorCusto = parseFloat(linha.querySelector('.valor-custo-peca').value) || 0;
-    const percentualLucro = parseFloat(linha.querySelector('.lucro-peca').value) || 0;
+    const qtd = parseDecimalBr(linha.querySelector('.qtd-peca').value);
+    const valorCusto = parseDecimalBr(linha.querySelector('.valor-custo-peca').value);
+    const percentualLucro = parseDecimalBr(linha.querySelector('.lucro-peca').value);
     const valorVenda = calcularValorVendaPeca(valorCusto, percentualLucro);
     const total = qtd * valorVenda;
 
     const valorUnitarioCampo = linha.querySelector('.valor-unitario-peca');
     if (valorUnitarioCampo) {
-        valorUnitarioCampo.value = valorVenda.toFixed(2);
+        valorUnitarioCampo.value = formatarDecimalCampo(valorVenda);
     }
     linha.querySelector('.total-peca').textContent = formatarValor(total);
     window.calcularTotais();
@@ -230,6 +319,7 @@ function adicionarEventosServico(linha) {
         valorInput.addEventListener('input', window.calcularTotais);
         valorInput.addEventListener('change', window.calcularTotais);
         valorInput.addEventListener('keyup', window.calcularTotais);
+        aplicarMascaraDecimalAoSair(valorInput);
     }
 }
 
@@ -246,18 +336,21 @@ function adicionarEventosPeca(linha) {
         qtdInput.addEventListener('input', function() { window.calcularTotalPeca(this); });
         qtdInput.addEventListener('change', function() { window.calcularTotalPeca(this); });
         qtdInput.addEventListener('keyup', function() { window.calcularTotalPeca(this); });
+        aplicarMascaraDecimalAoSair(qtdInput);
     }
 
     if (valorCustoInput) {
         valorCustoInput.addEventListener('input', function() { window.calcularTotalPeca(this); });
         valorCustoInput.addEventListener('change', function() { window.calcularTotalPeca(this); });
         valorCustoInput.addEventListener('keyup', function() { window.calcularTotalPeca(this); });
+        aplicarMascaraDecimalAoSair(valorCustoInput);
     }
 
     if (lucroInput) {
         lucroInput.addEventListener('input', function() { window.calcularTotalPeca(this); });
         lucroInput.addEventListener('change', function() { window.calcularTotalPeca(this); });
         lucroInput.addEventListener('keyup', function() { window.calcularTotalPeca(this); });
+        aplicarMascaraDecimalAoSair(lucroInput);
     }
 
     linha.querySelectorAll('input[type="number"]').forEach((input) => {
@@ -287,7 +380,7 @@ window.adicionarServico = function() {
     novaLinha.innerHTML = `
         <td><input type="text" class="codigo-servico" value="${codigo}" readonly style="width:60px"></td>
         <td><input type="text" class="descricao-servico" placeholder="Descrição do serviço" style="width:100%"></td>
-        <td><input type="number" class="valor-servico" placeholder="0,00" step="0.01" style="width:100%"></td>
+        <td><input type="text" inputmode="decimal" class="valor-servico" placeholder="0,00" style="width:100%"></td>
         <td><button type="button" class="btn-remover" onclick="window.removerServico(this)">Excluir</button></td>
     `;
     tbody.appendChild(novaLinha);
@@ -328,10 +421,10 @@ window.adicionarPeca = function() {
     novaLinha.innerHTML = `
         <td><input type="text" class="codigo-peca" value="${codigoServico}.${contadorPecas}" readonly style="width:80px"></td>
         <td><input type="text" class="descricao-peca" placeholder="Descrição da peça" style="width:100%"></td>
-        <td><input type="number" class="qtd-peca" placeholder="Qtd" step="0.01" value="1" style="width:80px"></td>
-        <td><input type="number" class="valor-custo-peca" placeholder="Custo" step="0.01" style="width:110px"></td>
-        <td><input type="number" class="lucro-peca" placeholder="%" step="0.01" value="0" style="width:85px"></td>
-        <td><input type="number" class="valor-unitario-peca" placeholder="Venda" step="0.01" style="width:110px" readonly></td>
+        <td><input type="text" inputmode="decimal" class="qtd-peca" placeholder="Qtd" value="1,00" style="width:80px"></td>
+        <td><input type="text" inputmode="decimal" class="valor-custo-peca" placeholder="Custo" style="width:110px"></td>
+        <td><input type="text" inputmode="decimal" class="lucro-peca" placeholder="%" value="0" style="width:85px"></td>
+        <td><input type="text" inputmode="decimal" class="valor-unitario-peca" placeholder="Venda" style="width:110px" readonly></td>
         <td><span class="total-peca">R$ 0,00</span></td>
         <td><button type="button" class="btn-remover" onclick="window.removerPeca(this)">Excluir</button></td>
     `;
@@ -440,7 +533,7 @@ function coletarDadosOrdem() {
             servicos.push({
                 codigo_servico: linha.querySelector('.codigo-servico')?.value || '',
                 descricao_servico: descricao,
-                valor_servico: parseFloat(linha.querySelector('.valor-servico')?.value) || 0
+                valor_servico: parseDecimalBr(linha.querySelector('.valor-servico')?.value)
             });
         }
     });
@@ -453,10 +546,10 @@ function coletarDadosOrdem() {
             pecas.push({
                 codigo_peca: linha.querySelector('.codigo-peca')?.value || '',
                 descricao_peca: descricao,
-                quantidade: parseFloat(linha.querySelector('.qtd-peca')?.value) || 0,
-                valor_custo: parseFloat(linha.querySelector('.valor-custo-peca')?.value) || 0,
-                percentual_lucro: parseFloat(linha.querySelector('.lucro-peca')?.value) || 0,
-                valor_unitario: parseFloat(linha.querySelector('.valor-unitario-peca')?.value) || 0
+                quantidade: parseDecimalBr(linha.querySelector('.qtd-peca')?.value),
+                valor_custo: parseDecimalBr(linha.querySelector('.valor-custo-peca')?.value),
+                percentual_lucro: parseDecimalBr(linha.querySelector('.lucro-peca')?.value),
+                valor_unitario: parseDecimalBr(linha.querySelector('.valor-unitario-peca')?.value)
             });
         }
     });
@@ -470,7 +563,6 @@ function coletarDadosOrdem() {
         cliente_id: clienteSelecionado.id,
         diagnostico: document.getElementById('diagnostico')?.value || '',
         profissional_responsavel: profissionalResponsavel,
-        assinatura_cliente: document.getElementById('assinatura_cliente')?.value || '',
         servicos: servicos,
         pecas: pecas
     };
@@ -619,8 +711,7 @@ function limparFormularioNovaOrdem() {
     const idsCamposClienteVeiculo = [
         'buscaCliente', 'nome_cliente', 'cpf', 'endereco', 'cidade', 'estado', 'cep',
         'telefone', 'email', 'placa', 'fabricante', 'modelo', 'ano', 'motor',
-        'combustivel', 'cor', 'tanque', 'km', 'direcao', 'ar', 'diagnostico',
-        'assinatura_cliente'
+        'combustivel', 'cor', 'tanque', 'km', 'direcao', 'ar', 'diagnostico'
     ];
     idsCamposClienteVeiculo.forEach((id) => {
         const el = document.getElementById(id);
@@ -665,6 +756,7 @@ document.addEventListener('DOMContentLoaded', function() {
     carregarProfissionais();
     carregarWhatsappOrcamento();
     verificarCamposExistentes();
+    configurarEnterNovaOs();
 
     const buscaInput = document.getElementById('buscaCliente');
     if (buscaInput) {

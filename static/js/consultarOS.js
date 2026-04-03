@@ -426,7 +426,7 @@ function carregarTabela(lista) {
                 </td>
                 <td>${valorFormatado}</td>
                 <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
-                <td class="acao-buttons">${botoesAcao}</td>
+                <td class="acao-buttons table-actions">${botoesAcao}</td>
             </tr>
         `;
     });

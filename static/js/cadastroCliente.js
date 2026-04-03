@@ -82,6 +82,44 @@ function executarAoPressionarEnter(campo, callback) {
     });
 }
 
+function elementoVisivelParaEnter(el) {
+    if (!el || el.disabled || el.hidden) return false;
+    const style = window.getComputedStyle(el);
+    return style.display !== 'none' && style.visibility !== 'hidden';
+}
+
+function focarProximoCampoCadastro(atual) {
+    const campos = Array.from(document.querySelectorAll(
+        '.step-content input:not([type="hidden"]), .step-content select, .step-content textarea, .step-content button'
+    )).filter((el) => elementoVisivelParaEnter(el) && !el.readOnly);
+    const indice = campos.indexOf(atual);
+    if (indice === -1) return false;
+    for (let i = indice + 1; i < campos.length; i += 1) {
+        const proximo = campos[i];
+        if (!elementoVisivelParaEnter(proximo) || proximo.readOnly) continue;
+        proximo.focus();
+        if (typeof proximo.select === 'function' && proximo.tagName === 'INPUT') {
+            proximo.select();
+        }
+        return true;
+    }
+    return false;
+}
+
+function configurarEnterCadastroCliente() {
+    document.addEventListener('keydown', function(e) {
+        if (e.key !== 'Enter') return;
+        const alvo = e.target;
+        if (!(alvo instanceof HTMLElement)) return;
+        if (alvo.tagName === 'TEXTAREA' || alvo.tagName === 'BUTTON') return;
+        if (alvo.id === 'placa' || alvo.id === 'cep') return;
+        if (alvo.matches('input, select')) {
+            e.preventDefault();
+            focarProximoCampoCadastro(alvo);
+        }
+    });
+}
+
 async function buscarCep() {
     const cepInput = document.getElementById('cep');
     const enderecoInput = document.getElementById('endereco');
@@ -414,6 +452,7 @@ function limparFormularioCadastro() {
 
 document.addEventListener('DOMContentLoaded', function() {
     carregarClienteEdicao();
+    configurarEnterCadastroCliente();
 
     const campoCPF = document.getElementById('cpf');
     if (campoCPF) {
