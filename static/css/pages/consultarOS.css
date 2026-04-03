@@ -116,6 +116,7 @@
 .tabela-orcens td {
     padding: 12px 15px;
     text-align: left;
+    vertical-align: middle;
 }
 
 .tabela-orcens td:nth-child(5) {
@@ -273,15 +274,16 @@
 .table-actions button {
     width: auto;
     min-width: 104px;
-    min-height: 28px;
+    min-height: 32px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     font-size: 0.74rem;
-    padding: 4px 8px;
-    line-height: 1.1;
+    padding: 5px 8px;
+    line-height: 1.25;
     white-space: nowrap;
+    overflow: visible;
 }
 
 .tabela-orcens .acao-buttons .status-garantia,

@@ -135,6 +135,15 @@ function formatarCampoMonetario(id) {
     campo.value = valor ? valor.toFixed(2).replace('.', ',') : '';
 }
 
+function aplicarMascaraMonetariaAoSair(id, callback = null) {
+    const campo = document.getElementById(id);
+    if (!campo) return;
+    campo.addEventListener('blur', () => {
+        formatarCampoMonetario(id);
+        if (typeof callback === 'function') callback();
+    });
+}
+
 function elementoVisivelParaEnter(el) {
     if (!el || el.disabled || el.hidden) return false;
     const style = window.getComputedStyle(el);
@@ -812,7 +821,7 @@ function calcularExpressao() {
 
 async function salvarSaida() {
     const descricao = (document.getElementById('saidaDescricao')?.value || '').trim();
-    const valor = (document.getElementById('saidaValor')?.value || '').replace(',', '.');
+    const valor = document.getElementById('saidaValor')?.value || '';
     const data = document.getElementById('saidaData')?.value || new Date().toISOString().split('T')[0];
     const categoria = document.getElementById('saidaCategoria')?.value || 'Outros';
 
@@ -820,7 +829,7 @@ async function salvarSaida() {
         alertErro('Descrição é obrigatória.');
         return;
     }
-    const valorNumerico = parseFloat(valor);
+    const valorNumerico = lerValorMonetario(valor);
     if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
         alertErro('Valor inválido.');
         return;
@@ -866,17 +875,14 @@ document.addEventListener('DOMContentLoaded', function() {
     atualizarModoRecebimentoUiPdv();
     carregarWhatsappPdv();
     carregarCaixaDia();
-    document.getElementById('pdvValorForma')?.addEventListener('blur', () => formatarCampoMonetario('pdvValorForma'));
+    aplicarMascaraMonetariaAoSair('pdvValorForma');
     document.getElementById('pdvValorForma')?.addEventListener('wheel', (e) => {
         e.preventDefault();
         e.target.blur();
     }, { passive: false });
     document.getElementById('pdvDescontoPercentual')?.addEventListener('input', atualizarResumoOperacaoPdv);
     document.getElementById('pdvDescontoPercentual')?.addEventListener('change', atualizarResumoOperacaoPdv);
-    document.getElementById('pdvDescontoPercentual')?.addEventListener('blur', () => {
-        formatarCampoMonetario('pdvDescontoPercentual');
-        atualizarResumoOperacaoPdv();
-    });
+    aplicarMascaraMonetariaAoSair('pdvDescontoPercentual', atualizarResumoOperacaoPdv);
     document.getElementById('pdvDescontoPercentual')?.addEventListener('wheel', (e) => {
         e.preventDefault();
         e.target.blur();
@@ -890,6 +896,7 @@ document.addEventListener('DOMContentLoaded', function() {
             campoValor.value = restante.toFixed(2).replace('.', ',');
         }
     });
+    aplicarMascaraMonetariaAoSair('saidaValor');
     document.getElementById('pdvDebitoVencimento')?.addEventListener('change', atualizarResumoOperacaoPdv);
     document.getElementById('pdvDebitoObservacao')?.addEventListener('input', atualizarResumoOperacaoPdv);
     configurarEnterPdv();

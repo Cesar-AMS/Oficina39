@@ -49,6 +49,20 @@ echo Oficina 39 - Inicializacao do Desktop
 echo ==========================================
 echo.
 
+if /I "%MODO%"=="verificar" (
+    echo [0/3] Encerrando instancias antigas...
+) else if /I "%MODO%"=="debug" (
+    echo Encerrando instancias antigas...
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+    "$base = (Resolve-Path '.').Path; " ^
+    "$procs = Get-CimInstance Win32_Process | Where-Object { " ^
+    "($_.Name -in @('python.exe','pythonw.exe')) -and $_.CommandLine -and " ^
+    "(($_.CommandLine -like ('*' + $base + '*main.py*')) -or ($_.CommandLine -like ('*' + $base + '*desktop_app.py*')))" ^
+    "}; " ^
+    "foreach ($p in $procs) { try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop } catch {} }" >nul 2>nul
+
 if exist "%SETUP_BAT%" (
     if /I "%MODO%"=="verificar" echo [1/3] Verificando dependencias...
     call "%SETUP_BAT%" --quiet

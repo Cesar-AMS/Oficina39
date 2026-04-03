@@ -228,6 +228,18 @@ def _money(value) -> str:
     return f"R$ {amount:.2f}".replace(".", ",")
 
 
+def _decimal_text(value, casas: str = "0.01") -> str:
+    amount = _parse_decimal(value).quantize(Decimal(casas))
+    return f"{amount:.2f}".replace(".", ",")
+
+
+def _quantity_text(value) -> str:
+    amount = _parse_decimal(value).quantize(Decimal("0.01"))
+    if amount == amount.to_integral():
+        return str(int(amount))
+    return f"{amount:.2f}".replace(".", ",")
+
+
 def _coalesce_text(*values):
     for value in values:
         texto = str(value or "").strip()
@@ -306,12 +318,12 @@ def _montar_itens_peca_preview(pecas: list[dict]):
     itens = []
     for idx, item in enumerate(pecas or [], start=1):
         quantidade = _parse_float(item.get("quantidade") or 0)
-        valor_unitario = _parse_float(item.get("valor_unitario") or 0)
+        valor_unitario = round(_parse_float(item.get("valor_unitario") or 0), 2)
         itens.append(SimpleNamespace(
             id=idx,
             codigo_peca=_coalesce_text(item.get("codigo_peca"), item.get("codigo")),
             descricao_peca=_coalesce_text(item.get("descricao_peca"), item.get("descricao")),
-            quantidade=quantidade,
+            quantidade=round(quantidade, 2),
             valor_unitario=valor_unitario,
         ))
     return itens
@@ -618,7 +630,7 @@ def _build_order_pdf_bytes(order, client, document_title: str | None = None) -> 
             data.append([
                 part.codigo_peca or "---",
                 part.descricao_peca or "---",
-                str(part.quantidade),
+                _quantity_text(part.quantidade),
                 _money(part.valor_unitario),
                 _money(total),
             ])

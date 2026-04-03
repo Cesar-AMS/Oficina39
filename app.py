@@ -2,7 +2,7 @@
 # app.py - Arquivo Principal do Sistema
 # ===========================================
 
-from flask import Flask
+from flask import Flask, request
 from extensions import db, mail, scheduler
 from controllers import blueprints
 import os
@@ -304,13 +304,20 @@ def create_app(testing: bool = False, start_scheduler: bool = True):
             _logger2.info("Job de backup diario agendado (02:30)")
 
     # Forçar exibição de erros no terminal por padrão, nível ajustável via env
-    if os.environ.get('OFICINA39_USE_WEBVIEW') == '1':
-        @app.after_request
-        def desabilitar_cache_desktop(response):
+    @app.after_request
+    def desabilitar_cache_ui(response):
+        caminho = (request.path or '').lower()
+        mimetype = (response.mimetype or '').lower()
+        deve_desabilitar = (
+            caminho.startswith('/static/')
+            or caminho.endswith('.html')
+            or mimetype in {'text/html', 'text/css', 'application/javascript', 'text/javascript'}
+        )
+        if deve_desabilitar:
             response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
             response.headers['Pragma'] = 'no-cache'
             response.headers['Expires'] = '0'
-            return response
+        return response
 
     import logging
     log_level = os.environ.get('LOG_LEVEL', 'DEBUG').upper()

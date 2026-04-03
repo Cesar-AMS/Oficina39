@@ -25,10 +25,56 @@ function formatarValor(valor) {
     return 'R$ ' + valor.toFixed(2).replace('.', ',');
 }
 
+function parseDecimalBr(valor) {
+    if (valor === null || valor === undefined) return 0;
+    if (typeof valor === 'number') return Number.isFinite(valor) ? valor : 0;
+
+    let texto = String(valor).trim();
+    if (!texto) return 0;
+
+    texto = texto.replace(/\s+/g, '').replace('R$', '').replace('r$', '');
+
+    if (texto.includes(',') && texto.includes('.')) {
+        texto = texto.replace(/\./g, '').replace(',', '.');
+    } else if (texto.includes(',')) {
+        texto = texto.replace(',', '.');
+    }
+
+    const numero = Number(texto);
+    return Number.isFinite(numero) ? numero : 0;
+}
+
+function arredondarDecimal(valor, casas = 2) {
+    const fator = 10 ** casas;
+    return Math.round((Number(valor || 0) + Number.EPSILON) * fator) / fator;
+}
+
+function formatarDecimalCampo(valor, casas = 2) {
+    const numero = parseDecimalBr(valor);
+    return numero.toLocaleString('pt-BR', {
+        minimumFractionDigits: casas,
+        maximumFractionDigits: casas
+    });
+}
+
+function formatarQuantidadeCampo(valor) {
+    const numero = parseDecimalBr(valor);
+    if (Number.isInteger(numero)) {
+        return numero.toLocaleString('pt-BR', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+    }
+    return numero.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
+}
+
 function calcularValorVendaPeca(valorCusto, percentualLucro) {
-    const custo = parseFloat(valorCusto) || 0;
-    const lucro = parseFloat(percentualLucro) || 0;
-    return custo * (1 + (lucro / 100));
+    const custo = parseDecimalBr(valorCusto);
+    const lucro = parseDecimalBr(percentualLucro);
+    return arredondarDecimal(custo * (1 + (lucro / 100)));
 }
 
 function formatarData(data) {
@@ -82,6 +128,47 @@ function configurarEnterEditarOs() {
             focarProximoCampoEdicao(alvo);
         }
     });
+}
+
+function aplicarMascaraDecimalAoSair(input, casas = 2, callback = null) {
+    if (!input) return;
+    input.addEventListener('blur', () => {
+        input.value = formatarDecimalCampo(input.value, casas);
+        if (typeof callback === 'function') callback(input);
+    });
+}
+
+function aplicarMascaraQuantidadeAoSair(input, callback = null) {
+    if (!input) return;
+    input.addEventListener('blur', () => {
+        input.value = formatarQuantidadeCampo(input.value);
+        if (typeof callback === 'function') callback(input);
+    });
+}
+
+function adicionarEventosServico(linha) {
+    const valorInput = linha.querySelector('.valor-servico');
+    if (valorInput) {
+        aplicarMascaraDecimalAoSair(valorInput, 2, () => calcularTotais());
+    }
+}
+
+function adicionarEventosPeca(linha) {
+    const qtdInput = linha.querySelector('.qtd-peca');
+    const valorCustoInput = linha.querySelector('.valor-custo-peca');
+    const lucroInput = linha.querySelector('.lucro-peca');
+
+    if (qtdInput) {
+        aplicarMascaraQuantidadeAoSair(qtdInput, (input) => calcularTotalPeca(input));
+    }
+
+    if (valorCustoInput) {
+        aplicarMascaraDecimalAoSair(valorCustoInput, 2, (input) => calcularTotalPeca(input));
+    }
+
+    if (lucroInput) {
+        aplicarMascaraDecimalAoSair(lucroInput, 2, (input) => calcularTotalPeca(input));
+    }
 }
 
 // ===========================================
@@ -199,10 +286,11 @@ function adicionarServico(dados = null) {
     novaLinha.innerHTML = `
         <td><input type="text" class="codigo-servico" value="${codigo}" style="width: 60px;"></td>
         <td><input type="text" class="descricao-servico" value="${descricao.replace(/"/g, '&quot;')}" placeholder="Descrição" style="width: 100%;"></td>
-        <td><input type="number" class="valor-servico" value="${valor}" placeholder="0,00" step="0.01" onchange="calcularTotais()" style="width: 100%;"></td>
+        <td><input type="text" inputmode="decimal" class="valor-servico" value="${formatarDecimalCampo(valor)}" placeholder="0,00" onchange="calcularTotais()" style="width: 100%;"></td>
         <td><button type="button" class="btn-remover" onclick="removerServico(${contadorServicos})">Excluir</button></td>
     `;
     tbody.appendChild(novaLinha);
+    adicionarEventosServico(novaLinha);
 }
 
 async function removerServico(id) {
@@ -240,21 +328,15 @@ function adicionarPeca(dados = null) {
     novaLinha.innerHTML = `
         <td><input type="text" class="codigo-peca" value="${codigo}" style="width: 80px;"></td>
         <td><input type="text" class="descricao-peca" value="${descricao.replace(/"/g, '&quot;')}" placeholder="Descrição" style="width: 100%;"></td>
-        <td><input type="number" class="qtd-peca" value="${quantidade}" step="0.01" onchange="calcularTotalPeca(this)" style="width: 80px;"></td>
-        <td><input type="number" class="valor-custo-peca" value="${valorCusto}" step="0.01" onchange="calcularTotalPeca(this)" style="width: 100px;"></td>
-        <td><input type="number" class="lucro-peca" value="${lucro}" step="0.01" onchange="calcularTotalPeca(this)" style="width: 80px;"></td>
-        <td><input type="number" class="valor-unitario-peca" value="${valor}" step="0.01" readonly style="width: 100px;"></td>
-        <td><span class="total-peca">${formatarValor(quantidade * valor)}</span></td>
+        <td><input type="text" inputmode="decimal" class="qtd-peca" value="${formatarQuantidadeCampo(quantidade)}" onchange="calcularTotalPeca(this)" style="width: 80px;"></td>
+        <td><input type="text" inputmode="decimal" class="valor-custo-peca" value="${formatarDecimalCampo(valorCusto)}" onchange="calcularTotalPeca(this)" style="width: 100px;"></td>
+        <td><input type="text" inputmode="decimal" class="lucro-peca" value="${formatarDecimalCampo(lucro)}" onchange="calcularTotalPeca(this)" style="width: 80px;"></td>
+        <td><input type="text" inputmode="decimal" class="valor-unitario-peca" value="${formatarDecimalCampo(valor)}" readonly style="width: 100px;"></td>
+        <td><span class="total-peca">${formatarValor(arredondarDecimal(parseDecimalBr(quantidade) * parseDecimalBr(valor)))}</span></td>
         <td><button type="button" class="btn-remover" onclick="removerPeca(${contadorPecas})">Excluir</button></td>
     `;
     tbody.appendChild(novaLinha);
-
-    novaLinha.querySelectorAll('input[type="number"]').forEach((input) => {
-        input.addEventListener('wheel', function(e) {
-            e.preventDefault();
-            input.blur();
-        }, { passive: false });
-    });
+    adicionarEventosPeca(novaLinha);
 }
 
 async function removerPeca(id) {
@@ -268,13 +350,13 @@ async function removerPeca(id) {
 
 function calcularTotalPeca(elemento) {
     const linha = elemento.closest('tr');
-    const qtd = parseFloat(linha.querySelector('.qtd-peca').value) || 0;
-    const valorCusto = parseFloat(linha.querySelector('.valor-custo-peca').value) || 0;
-    const percentualLucro = parseFloat(linha.querySelector('.lucro-peca').value) || 0;
+    const qtd = parseDecimalBr(linha.querySelector('.qtd-peca').value);
+    const valorCusto = parseDecimalBr(linha.querySelector('.valor-custo-peca').value);
+    const percentualLucro = parseDecimalBr(linha.querySelector('.lucro-peca').value);
     const valor = calcularValorVendaPeca(valorCusto, percentualLucro);
-    const total = qtd * valor;
+    const total = arredondarDecimal(qtd * valor);
     
-    linha.querySelector('.valor-unitario-peca').value = valor.toFixed(2);
+    linha.querySelector('.valor-unitario-peca').value = formatarDecimalCampo(valor);
     linha.querySelector('.total-peca').textContent = formatarValor(total);
     calcularTotais();
 }
@@ -286,13 +368,12 @@ function calcularTotalPeca(elemento) {
 function calcularTotais() {
     let totalServicos = 0;
     document.querySelectorAll('.valor-servico').forEach(input => {
-        totalServicos += parseFloat(input.value) || 0;
+        totalServicos += parseDecimalBr(input.value);
     });
     
     let totalPecas = 0;
     document.querySelectorAll('.total-peca').forEach(span => {
-        const valorTexto = span.textContent.replace('R$ ', '').replace(',', '.');
-        totalPecas += parseFloat(valorTexto) || 0;
+        totalPecas += parseDecimalBr(span.textContent);
     });
     
     document.getElementById('total-servicos').textContent = formatarValor(totalServicos);
@@ -333,7 +414,7 @@ function coletarDados() {
     document.querySelectorAll('#corpo-servicos tr').forEach(linha => {
         const codigo = linha.querySelector('.codigo-servico')?.value;
         const descricao = linha.querySelector('.descricao-servico')?.value;
-        const valor = parseFloat(linha.querySelector('.valor-servico')?.value) || 0;
+        const valor = parseDecimalBr(linha.querySelector('.valor-servico')?.value);
         
         if (descricao && descricao.trim() !== '') {
             servicos.push({
@@ -349,16 +430,16 @@ function coletarDados() {
     document.querySelectorAll('#corpo-pecas tr').forEach(linha => {
         const codigo = linha.querySelector('.codigo-peca')?.value;
         const descricao = linha.querySelector('.descricao-peca')?.value;
-        const quantidade = parseFloat(linha.querySelector('.qtd-peca')?.value) || 0;
-        const valor = parseFloat(linha.querySelector('.valor-unitario-peca')?.value) || 0;
+        const quantidade = parseDecimalBr(linha.querySelector('.qtd-peca')?.value);
+        const valor = parseDecimalBr(linha.querySelector('.valor-unitario-peca')?.value);
         
         if (descricao && descricao.trim() !== '') {
             pecas.push({
                 codigo_peca: codigo,
                 descricao_peca: descricao,
                 quantidade: quantidade,
-                valor_custo: parseFloat(linha.querySelector('.valor-custo-peca')?.value) || 0,
-                percentual_lucro: parseFloat(linha.querySelector('.lucro-peca')?.value) || 0,
+                valor_custo: parseDecimalBr(linha.querySelector('.valor-custo-peca')?.value),
+                percentual_lucro: parseDecimalBr(linha.querySelector('.lucro-peca')?.value),
                 valor_unitario: valor
             });
         }

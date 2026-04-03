@@ -28,11 +28,30 @@ function formatarValor(valor) {
     return 'R$ ' + (valor || 0).toFixed(2).replace('.', ',');
 }
 
+function arredondarDecimal(valor, casas = 2) {
+    const fator = 10 ** casas;
+    return Math.round((Number(valor || 0) + Number.EPSILON) * fator) / fator;
+}
+
 function formatarDecimalCampo(valor, casas = 2) {
     const numero = parseDecimalBr(valor);
     return numero.toLocaleString('pt-BR', {
         minimumFractionDigits: casas,
         maximumFractionDigits: casas
+    });
+}
+
+function formatarQuantidadeCampo(valor) {
+    const numero = parseDecimalBr(valor);
+    if (Number.isInteger(numero)) {
+        return numero.toLocaleString('pt-BR', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+    }
+    return numero.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
     });
 }
 
@@ -66,13 +85,22 @@ function formatarStatusExibicao(status) {
 function calcularValorVendaPeca(valorCusto, percentualLucro) {
     const custo = parseDecimalBr(valorCusto);
     const lucro = parseDecimalBr(percentualLucro);
-    return custo * (1 + (lucro / 100));
+    return arredondarDecimal(custo * (1 + (lucro / 100)));
 }
 
-function aplicarMascaraDecimalAoSair(input, casas = 2) {
+function aplicarMascaraDecimalAoSair(input, casas = 2, callback = null) {
     if (!input) return;
     input.addEventListener('blur', () => {
         input.value = formatarDecimalCampo(input.value, casas);
+        if (typeof callback === 'function') callback(input);
+    });
+}
+
+function aplicarMascaraQuantidadeAoSair(input, callback = null) {
+    if (!input) return;
+    input.addEventListener('blur', () => {
+        input.value = formatarQuantidadeCampo(input.value);
+        if (typeof callback === 'function') callback(input);
     });
 }
 
@@ -299,7 +327,7 @@ window.calcularTotalPeca = function(elemento) {
     const valorCusto = parseDecimalBr(linha.querySelector('.valor-custo-peca').value);
     const percentualLucro = parseDecimalBr(linha.querySelector('.lucro-peca').value);
     const valorVenda = calcularValorVendaPeca(valorCusto, percentualLucro);
-    const total = qtd * valorVenda;
+    const total = arredondarDecimal(qtd * valorVenda);
 
     const valorUnitarioCampo = linha.querySelector('.valor-unitario-peca');
     if (valorUnitarioCampo) {
@@ -319,7 +347,7 @@ function adicionarEventosServico(linha) {
         valorInput.addEventListener('input', window.calcularTotais);
         valorInput.addEventListener('change', window.calcularTotais);
         valorInput.addEventListener('keyup', window.calcularTotais);
-        aplicarMascaraDecimalAoSair(valorInput);
+        aplicarMascaraDecimalAoSair(valorInput, 2, () => window.calcularTotais());
     }
 }
 
@@ -336,21 +364,21 @@ function adicionarEventosPeca(linha) {
         qtdInput.addEventListener('input', function() { window.calcularTotalPeca(this); });
         qtdInput.addEventListener('change', function() { window.calcularTotalPeca(this); });
         qtdInput.addEventListener('keyup', function() { window.calcularTotalPeca(this); });
-        aplicarMascaraDecimalAoSair(qtdInput);
+        aplicarMascaraQuantidadeAoSair(qtdInput, (input) => window.calcularTotalPeca(input));
     }
 
     if (valorCustoInput) {
         valorCustoInput.addEventListener('input', function() { window.calcularTotalPeca(this); });
         valorCustoInput.addEventListener('change', function() { window.calcularTotalPeca(this); });
         valorCustoInput.addEventListener('keyup', function() { window.calcularTotalPeca(this); });
-        aplicarMascaraDecimalAoSair(valorCustoInput);
+        aplicarMascaraDecimalAoSair(valorCustoInput, 2, (input) => window.calcularTotalPeca(input));
     }
 
     if (lucroInput) {
         lucroInput.addEventListener('input', function() { window.calcularTotalPeca(this); });
         lucroInput.addEventListener('change', function() { window.calcularTotalPeca(this); });
         lucroInput.addEventListener('keyup', function() { window.calcularTotalPeca(this); });
-        aplicarMascaraDecimalAoSair(lucroInput);
+        aplicarMascaraDecimalAoSair(lucroInput, 2, (input) => window.calcularTotalPeca(input));
     }
 
     linha.querySelectorAll('input[type="number"]').forEach((input) => {
@@ -421,7 +449,7 @@ window.adicionarPeca = function() {
     novaLinha.innerHTML = `
         <td><input type="text" class="codigo-peca" value="${codigoServico}.${contadorPecas}" readonly style="width:80px"></td>
         <td><input type="text" class="descricao-peca" placeholder="Descrição da peça" style="width:100%"></td>
-        <td><input type="text" inputmode="decimal" class="qtd-peca" placeholder="Qtd" value="1,00" style="width:80px"></td>
+        <td><input type="text" inputmode="decimal" class="qtd-peca" placeholder="Qtd" value="1" style="width:80px"></td>
         <td><input type="text" inputmode="decimal" class="valor-custo-peca" placeholder="Custo" style="width:110px"></td>
         <td><input type="text" inputmode="decimal" class="lucro-peca" placeholder="%" value="0" style="width:85px"></td>
         <td><input type="text" inputmode="decimal" class="valor-unitario-peca" placeholder="Venda" style="width:110px" readonly></td>
